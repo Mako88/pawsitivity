@@ -1,0 +1,77 @@
+Pets Table:
+	ID
+    Name
+    Breed
+    Age
+	Weight
+	Vaccines (Path to file)
+	Notes
+	Info
+	Picture (Path to file)
+	DogOfMonth (UNIX timestamp of last time this pet was "Dog of the Month")
+	GroomTime
+	BathTime
+	TwoPeople (1 or 0 to say if this dog requires 2 people)
+	PreferredGroomer (The ID of the preferred groomer for this pet)
+	Status (A number to indicate the current status - "bathing", "grooming", etc.)
+	OwnedBy (The ID of the owner)
+	
+Owners Table:
+	ID
+	FirstName
+	LastName
+	Phone
+	Address1
+	Address2
+	City
+	State
+	Zip
+	Country
+	Email
+	SpouseName
+	SpousePhone
+	Emergency (Emergency contact name)
+	EmergencyPhone
+	AuthorizedPickup (Name of someone authorized to pickup)
+	APPhone (Phone number of authorized pickup)
+	ReferredBy
+	
+Scheduling Table:
+	ID
+	PetID (-1 for groomer being off)
+	StartTime - UNIX timestamp
+	TotalTime (GroomTime + BathTime + Adjustment based on services chosen)
+	GroomerID
+	Recurring
+	RecInterval (a number representing how many weeks between recurrences)
+	EndDate (a unix timestamp of the end of recurring. If -1, then recur indefinitely)
+	Package (which package 1 - basic bath, 2 - basic spa, 3 - sig bath, 4 - sig spa)
+	Services (array of selected services)
+	
+Users Table:
+	ID
+	Name (Filled from FirstName, LastName when the user is an owner)
+	Email
+	Password (Hashed)
+	Access (Number showing access level: 1 - client, 2 - groomer, 3 - non-groomer)
+	MaxDogs (For employees - the maximum number of dogs they can bathe or groom in a day)
+	Missed (For clients, set to 1 if a client has missed an appointment. If 1, the client must call before being allowed to schedule)
+	Visited (Set to 0 until a client visits and resets their password, then set to 1)
+	Seniority (A number to choose one groomer over another when scheduling)
+	
+Services Table:
+	ID
+	Name
+	Price
+	Time (Amount of time the service takes in minutes)
+	Signature (0 or 1 indicating if this is a signature service)
+	
+Breeds Table:
+	ID
+	Name
+	Group
+	GroomTime
+	BathTime
+	GroomPrice
+	BathPrice
+	SigUpCharge (A percentage that the GroomPrice and BathPrice are raised by for the signature version. I.E. "1.06")

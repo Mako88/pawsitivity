@@ -1,0 +1,9 @@
+How much time to add for each service and is it based on breed/group? (should there be price1, price2, time1, time2, etc. fields for each breed/group)?
+
+How much base time for each breed?
+
+Is the signature up charge per breed, per group, or across the board? And is it different for a bath vs a spa?
+
+Do we still need MaxDogs or is it all time based?
+
+How long should we store scheduled pets before deleting them?
