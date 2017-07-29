@@ -1,0 +1,44 @@
+Pets Table:
+	ID
+	Name
+	Breed
+	Age
+	Weight
+	Vaccine?
+	Release Form?
+	Groomer Notes
+	Specific Info
+	Picture
+	Time for Grooming
+	Time for Bathing
+	
+Previous Visits Table:
+	Pet ID
+	Date
+	Service Received
+	Price
+	
+Owners Table:
+	ID
+	First Name
+	Last Name
+	Phone
+	Address Line 1
+	Address Line 2
+	City
+	State
+	Zip
+	Country
+	Email
+	Spouse Name
+	Spouse Phone
+	Emergency Contact
+	EC Phone
+	Authorized Pickup
+	AP Phone
+	Reffered By
+	
+Calendar Table:
+	http://stackoverflow.com/questions/5183630/calendar-recurring-repeating-events-best-storage-method
+	
+	
