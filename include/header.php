@@ -3,6 +3,8 @@
 define('DIRECT', true);
 include 'config.php';
 
+date_default_timezone_set("UTC");
+
 // Create the main database object
 $host = constant('DB_HOST');
 $db = constant('DB_NAME');
@@ -17,7 +19,11 @@ $opt = [
     PDO::ATTR_EMULATE_PREPARES   => false,
 ];
 
-$database = new PDO($dsn, $user, $pass, $opt);
+try {
+    $database = new PDO($dsn, $user, $pass, $opt);
+} catch (PDOException $e) {
+    echo 'Connection failed: ' . $e->getMessage();
+}
 
 // Start the session and set us to logged out by default
 session_start();

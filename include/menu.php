@@ -11,7 +11,6 @@ if(!defined('DIRECT')) die(); // Don't allow this file to be called directly
         <li><a href="viewclient.php">View Clients</a></li>
         <li><a href="newuser.php">New User</a></li>
         <li><a href="calendar.php">View Calendar</a></li>
-        <li><a href="schedule.php">Schedule Client</a></li>
         <?php } ?>
     </ul>
     <?php if($_SESSION['authenticated'] > 1) { ?>

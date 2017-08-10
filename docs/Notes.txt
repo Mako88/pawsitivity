@@ -46,7 +46,7 @@ Add new service link to top of services page (Do I need this? It's in the menu)
 
 Add breed page to add/remove breeds and set prices?
 
-Allow setting a groomer as "off" for certain time periods (use )
+Add ability to set a groomer as off using scheduleing table
 
 Add breed or group table
 
@@ -57,3 +57,5 @@ Check if a dog requires two people - if so, make sure two people's time slots ar
 Convert available times to local time from GMT (Databse stored in GMT, displayed local). Also deal with daylight savings...
 
 Add seniority of groomers and if multiple groomers are available, pick most senior when scheduling. (Also add ability to edit this).
+
+Give error if setup hasn't been run yet

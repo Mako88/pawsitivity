@@ -19,6 +19,8 @@ if($_SESSION['authenticated'] < 2) {
 
 <?php
     
+include "include/menu.php";
+    
 if(!empty($_GET['id'])) {
     $id = $_GET['id'];
     $stmt = $database->prepare("SELECT Vaccines, Picture FROM Pets WHERE ID = :ID");

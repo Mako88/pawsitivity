@@ -12,19 +12,39 @@ include "include/header.php";
     <h2>Initial Setup</h2>
 <?php
 // Check that setup hasn't already been run
-$stmt = $database->query("SHOW TABLES LIKE 'Users'");
+$stmt = $database->query("SHOW TABLES LIKE 'Services'");
 $exists = $stmt->fetch();
 
 if($exists) {
     echo "<p>Setup has already been run!</p>";
     die();
 }
+    
+function createDatabase($sql) {
+    
+    global $database;
+    
+    $result = $database->exec($sql);
+    
+    if($result == false) {
+        $err = $database->errorInfo();
+        if ($err[0] === '00000' || $err[0] === '01000') {
+            return true;
+        }
+    }
+    else {
+        return false;
+    }
+}
 
 // If we've submitted the form, create the database and the Admin user.
 if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['email'])) {
+    
     echo "<p>Creating Database...<br />";
     
-    $sql = "
+    $sql = array();
+    
+    $sql[0] = "
         CREATE TABLE IF NOT EXISTS Pets(
             ID INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             Name TEXT NOT NULL,
@@ -44,7 +64,7 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
             OwnedBy INT(11),
             FULLTEXT (Name)
     ); ALTER TABLE Pets AUTO_INCREMENT=230;";
-    $sql1 = "
+    $sql[1] = "
         CREATE TABLE IF NOT EXISTS Owners(
             ID INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             FirstName TEXT,
@@ -66,7 +86,7 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
             ReferredBy TEXT,
             FULLTEXT (FirstName, LastName)
     ); ALTER TABLE Owners AUTO_INCREMENT=120;";
-    $sql2 = "
+    $sql[2] = "
         CREATE TABLE IF NOT EXISTS Scheduling(
             ID INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             PetID INT(11),
@@ -77,9 +97,9 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
             RecInterval INT(2),
             EndDate INT(11) UNSIGNED,
             Package INT(1),
-            Services JSON
+            Services TEXT
     )";
-    $sql3 = "
+    $sql[3] = "
         CREATE TABLE IF NOT EXISTS Users(
             ID VARCHAR(255) PRIMARY KEY,
             Name TEXT,
@@ -92,7 +112,7 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
             Seniority INT(1)
 
     )";
-    $sql4 = "
+    $sql[4] = "
         CREATE TABLE IF NOT EXISTS Services(
             ID INT(2) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             Name TEXT,
@@ -101,11 +121,13 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
             Signature INT(1)
 
     )";
-    $database->exec($sql);
-    $database->exec($sql1);
-    $database->exec($sql2);
-    $database->exec($sql3);
-    $database->exec($sql4);
+    
+    foreach($sql as $s) {
+        if(!createDatabase($s)) {
+            echo "<p>An error occured: " . print_r($database->errorInfo(), true);
+            die();
+        }
+    }
 
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 

@@ -12,7 +12,7 @@ define('DB_NAME', 'pawsitivity');
 define('DB_USER', 'pawsitivity');
 
 // Database password
-define('DB_PASSWORD', 'pawsitivity');
+define('DB_PASSWORD', 'password');
 
 // Database charset
 define('DB_CHARSET', 'utf8');

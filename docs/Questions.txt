@@ -7,3 +7,5 @@ Is the signature up charge per breed, per group, or across the board? And is it 
 Do we still need MaxDogs or is it all time based?
 
 How long should we store scheduled pets before deleting them?
+
+Should partial days be supported, or will a groomer either be there all day or be off all day?
