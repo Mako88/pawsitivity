@@ -1,61 +1,83 @@
-Look into fax-to-pdf
+Database:
+	Split event out into grooming time and bathing time
+	Add breeds table
+	Update services table based on the layout file
+	Change MaxDogs in users table to Tier
+	Create Tiers table
+	Add DateCreated to Owners table
+	
 
-Add bath/groom tracking using Status field
+schedule.php:
+	Don't allow users to schedule if Missed field is 1, tell them to call.
+	Check if a dog requires two people - if so, make sure two people's time slots are open for scheduling
+	Change "none" to "any" for preferred groomer
+	Split schedule out into grooming time and bathing time
+	When "any" is selected to schedule, use groomer with fewest scheduled dogs THEN most senior (Only show slots for one groomer)
+	Auto set breaks from 1:00-1:30
+	After 1:30 add a 15 minute cushion every 3 dogs
+	Fix wrong order of slots display
+	
+	
+search.php:
+	Add menu
+	Add advanced search to show all that haven't been dog of the month
+	Make "Owned By" link in search go to client page
 
-Add dog of the month tracking using DogOfMonth field
+	
+newpet.php/viewpet.php:
+	Add dropdowns for Group/Breed and auto-set BathTime and GroomTime based on breed
+	Add "Scheduling" section to show when it's been scheduled and will be scheduled (Seperate into "Previous Visits" and "Future Visits")
+	Change time to "clicker" in 15 minute intervals on newpet page (don't allow base editing)
+	Change default dog of the month date
+	
 
-Figure out text/email reminders with scheduling
+editevent.php:
+	Allow manually adding/deleting/editing scheduled times by employees
 
-Don't allow users to schedule if Missed field is 1, tell them to call.
 
-Add dropdowns for breed and auto-set BathTime and GroomTime based on breed
+services.php:
+	Allow editing services
+	Add new service link to top of services page
+	Add description to service
+	
+	
+newclient.php/viewclient.php:
+	Allow resetting the "missed" field on client pages
+	Add new client link to top of view client page
+	Add date created for each client
+	
 
-Validate all forms with Jquery
+newbreed.php/editbreed.php:
+	Add breed page to add/remove breeds and set prices
+	Set time for each service on the edit/add breed page
+	Don't show signature services, since they're a flat rate set globally
+	
 
-Make "Owned By" link in search go to client page
+employeeschedule.php:
+	Add employee scheduling page
+	
 
-Add preferred groomer to scheduling page
+globalsettings.php:
+	Add Global Settings page
+	Set timezone based on spa location
+	Automatically remove events 1.5 years old
+	Signature upcharge (set price for signature spa/bath)
+	Signature services price
+	Set times for P/S/M/L/XL for each grooming tier
+	
 
-Add delete option to all edit pages
+newuser.php:
+	Allow editing seniority when creating a groomer
+	Select tier when creating/editing groomer
 
-Scheduling format:
-
-	1. Welcome, would you like to Schedule or view status?
-	2. Which pet are you scheduling (list pets)?
-	3. What services would you like (copy of pricing page - has to be before date/time because services take different times)
-	4. What date would you like to schedule (Show calendar with available days in green) [for employess show busy days in yellow]
-	5. What time would you like to schedule (Either one dropdown with ranges, or two dropdowns - one drop-off time and one pickup time)?
-	6. Summary and confirm (Also make recurring - "every ___ week(s) for ____ weeks/months/permanently")
-	7. Recurring conflict resolution - If recurring has two or fewer conflicts, list the dates and allow selection of different times. If more, call
-
-Add "Scheduling" section to search page and view pet page (to show when it's scheduled)
-
-Allow manually adding/deleting/editing scheduled times by employees
-
-Add "Previous Visits" page with links on the view pet page
-
-Allow editing services
-
-Allow resetting the "missed" field on client pages
-
-Add calendar page that shows current schedule
-
-Add new client link to top of view client page (Do I need this? It's in the menu)
-
-Add new service link to top of services page (Do I need this? It's in the menu)
-
-Add breed page to add/remove breeds and set prices?
-
-Add ability to set a groomer as off using scheduleing table
-
-Add breed or group table
-
-Automatically remove events X years old
-
-Check if a dog requires two people - if so, make sure two people's time slots are open for scheduling
-
-Convert available times to local time from GMT (Databse stored in GMT, displayed local). Also deal with daylight savings...
-
-Add seniority of groomers and if multiple groomers are available, pick most senior when scheduling. (Also add ability to edit this).
-
-Give error if setup hasn't been run yet
+	
+Misc:
+	Look into fax-to-pdf
+	Add bath/groom tracking using Status field
+	Add dog of the month tracking using DogOfMonth field
+	Validate all forms with Jquery
+	Add delete option to all edit pages
+	Give error if setup hasn't been run yet/redirect to setup page
+	Add "new service" to the menu
+	Find timeclock software (with the ability to print/email reports)
+	Figure out text/email reminders with scheduling

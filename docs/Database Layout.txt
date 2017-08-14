@@ -35,6 +35,7 @@ Owners Table:
 	AuthorizedPickup (Name of someone authorized to pickup)
 	APPhone (Phone number of authorized pickup)
 	ReferredBy
+	DateCreated
 	
 Scheduling Table:
 	ID
@@ -53,8 +54,8 @@ Users Table:
 	Name (Filled from FirstName, LastName when the user is an owner)
 	Email
 	Password (Hashed)
-	Access (Number showing access level: 1 - client, 2 - groomer, 3 - non-groomer)
-	MaxDogs (For employees - the maximum number of dogs they can bathe or groom in a day)
+	Access (Number showing access level: 1 - client, 2 - groomer, 3 - bather, 4 - employee, 5 - admin)
+	Tier (For groomers: 1 - gold, 2 - platinum, 3 - diamond)
 	Missed (For clients, set to 1 if a client has missed an appointment. If 1, the client must call before being allowed to schedule)
 	Visited (Set to 0 until a client visits and resets their password, then set to 1)
 	Seniority (A number to choose one groomer over another when scheduling)
@@ -62,16 +63,26 @@ Users Table:
 Services Table:
 	ID
 	Name
-	Price
-	Time (Amount of time the service takes in minutes)
+	Description
 	Signature (0 or 1 indicating if this is a signature service)
 	
 Breeds Table:
 	ID
 	Name
 	Group
+	Size (P/S/M/L/XL)
 	GroomTime
 	BathTime
 	GroomPrice
 	BathPrice
-	SigUpCharge (A percentage that the GroomPrice and BathPrice are raised by for the signature version. I.E. "1.06")
+	ServicePrices (Array of service IDs and Prices for this breed)
+	ServiceTimes (Array of service IDs and Times [in minutes] for this breed)
+	
+Tiers Table:
+	ID
+	Name
+	TimeP (Time in minutes [positive or negative] to add for petite dogs)
+	TimeS (Small dogs)
+	TimeM (Medium dogs)
+	TimeL (Large dogs)
+	TimeXL (Extra Large dogs)
