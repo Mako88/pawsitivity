@@ -1,12 +1,3 @@
-Database:
-	Split event out into grooming time and bathing time
-	Add breeds table
-	Update services table based on the layout file
-	Change MaxDogs in users table to Tier
-	Create Tiers table
-	Add DateCreated to Owners table
-	
-
 schedule.php:
 	Don't allow users to schedule if Missed field is 1, tell them to call.
 	Check if a dog requires two people - if so, make sure two people's time slots are open for scheduling

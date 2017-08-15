@@ -55,7 +55,7 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
             Notes TEXT,
             Info TEXT,
             Picture TEXT,
-            DogOfMonth INT(32),
+            DogOfMonth TEXT,
             GroomTime INT(32),
             BathTime INT(32),
             TwoPeople INT(1),
@@ -84,6 +84,7 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
             AuthorizedPickup TEXT,
             APPhone TEXT,
             ReferredBy TEXT,
+            DateCreated TEXT,
             FULLTEXT (FirstName, LastName)
     ); ALTER TABLE Owners AUTO_INCREMENT=120;";
     $sql[2] = "
@@ -91,7 +92,8 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
             ID INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             PetID INT(11),
             StartTime INT(11) UNSIGNED,
-            TotalTime INT(11),
+            GroomTime INT(11),
+            BathTime INT(11),
             GroomerID VARCHAR(255),
             Recurring INT(1),
             RecInterval INT(2),
@@ -106,20 +108,39 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
             Email TEXT,
             Password TEXT,
             Access INT(1),
-            MaxDogs INT(2),
+            Tier INT(2),
             Missed Int(1),
             Visited INT(1),
             Seniority INT(1)
 
     )";
     $sql[4] = "
+        CREATE TABLE IF NOT EXISTS Breeds(
+            ID INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            Name TEXT,
+            Group INT(1),
+            Size VARCHAR(1),
+            GroomTime INT(11),
+            BathTime INT(11),
+            GroomPrice Int(11),
+            BathPrice Int(11),
+
+    )";
+    $sql[5] = "
+        CREATE TABLE IF NOT EXISTS Tiers(
+            ID INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            Name TEXT,
+            Time TEXT
+
+    )";
+    $sql[6] = "
         CREATE TABLE IF NOT EXISTS Services(
             ID INT(2) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             Name TEXT,
-            Price INT(2),
-            Time INT(2),
-            Signature INT(1)
-
+            Description TEXT,
+            Type INT(1),
+            Time TEXT,
+            Price TEXT
     )";
     
     foreach($sql as $s) {

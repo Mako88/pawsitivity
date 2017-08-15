@@ -1,8 +1,8 @@
 Pets Table:
 	ID
-    Name
-    Breed
-    Age
+    	Name
+    	Breed
+    	Age
 	Weight
 	Vaccines (Path to file)
 	Notes
@@ -41,7 +41,8 @@ Scheduling Table:
 	ID
 	PetID (-1 for groomer being off)
 	StartTime - UNIX timestamp
-	TotalTime (GroomTime + BathTime + Adjustment based on services chosen)
+	GroomTime
+	BathTime
 	GroomerID
 	Recurring
 	RecInterval (a number representing how many weeks between recurrences)
@@ -64,25 +65,34 @@ Services Table:
 	ID
 	Name
 	Description
-	Signature (0 or 1 indicating if this is a signature service)
+	Type (0 - Signature service (no time added), 1 - Bath service (time is added to bathing), 2 - Groom Service)
+	Time (Array of times with size indexes)
+	Price (Array of prices with size indexes)
 	
 Breeds Table:
 	ID
 	Name
-	Group
+	Group (A number corresponding to a group)
+		0 - Toy Breeds
+		1 - Designer Breeds
+		2 - Terriers
+		3 - Non-Sporting
+		4 - Sporting
+		5 - Hound Group
+		6 - Herding Group
+		7 - Working Group
 	Size (P/S/M/L/XL)
 	GroomTime
 	BathTime
 	GroomPrice
 	BathPrice
-	ServicePrices (Array of service IDs and Prices for this breed)
-	ServiceTimes (Array of service IDs and Times [in minutes] for this breed)
 	
 Tiers Table:
 	ID
 	Name
-	TimeP (Time in minutes [positive or negative] to add for petite dogs)
-	TimeS (Small dogs)
-	TimeM (Medium dogs)
-	TimeL (Large dogs)
-	TimeXL (Extra Large dogs)
+	Time (Array of amount of minutes [positive or negative] to add with size indexes):
+		Time['P'] - Petite Dogs
+		Time['S'] - Small
+		Time['M'] - Medium
+		Time['L'] - Large
+		Time['XL'] - Extra Large
