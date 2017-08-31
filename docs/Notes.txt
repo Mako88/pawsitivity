@@ -1,7 +1,6 @@
 schedule.php:
 	Don't allow users to schedule if Missed field is 1, tell them to call.
 	Check if a dog requires two people - if so, make sure two people's time slots are open for scheduling
-	Change "none" to "any" for preferred groomer
 	Split schedule out into grooming time and bathing time
 	When "any" is selected to schedule, use groomer with fewest scheduled dogs THEN most senior (Only show slots for one groomer)
 	Auto set breaks from 1:00-1:30
@@ -10,7 +9,6 @@ schedule.php:
 	
 	
 search.php:
-	Add menu
 	Add advanced search to show all that haven't been dog of the month
 	Make "Owned By" link in search go to client page
 
@@ -18,9 +16,8 @@ search.php:
 newpet.php/viewpet.php:
 	Add dropdowns for Group/Breed and auto-set BathTime and GroomTime based on breed
 	Add "Scheduling" section to show when it's been scheduled and will be scheduled (Seperate into "Previous Visits" and "Future Visits")
-	Change time to "clicker" in 15 minute intervals on newpet page (don't allow base editing)
-	Change default dog of the month date
-	
+	Change time to "clicker" in 15 minute intervals on newpet page (don't allow base editing)	
+
 
 editevent.php:
 	Allow manually adding/deleting/editing scheduled times by employees
@@ -28,13 +25,11 @@ editevent.php:
 
 services.php:
 	Allow editing services
-	Add new service link to top of services page
 	Add description to service
 	
 	
 newclient.php/viewclient.php:
 	Allow resetting the "missed" field on client pages
-	Add new client link to top of view client page
 	Add date created for each client
 	
 
@@ -65,10 +60,8 @@ newuser.php:
 Misc:
 	Look into fax-to-pdf
 	Add bath/groom tracking using Status field
-	Add dog of the month tracking using DogOfMonth field
 	Validate all forms with Jquery
 	Add delete option to all edit pages
 	Give error if setup hasn't been run yet/redirect to setup page
-	Add "new service" to the menu
 	Find timeclock software (with the ability to print/email reports)
 	Figure out text/email reminders with scheduling

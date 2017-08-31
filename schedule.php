@@ -13,7 +13,8 @@ if($_SESSION['authenticated'] < 1) {
 <html lang="en">
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script src="js/moment.js"></script>
+    <script src="js/moment.min.js"></script>
+    <script src="js/moment-timezone.min.js"></script>
     <script src="js/pikaday.js"></script>
     <script src="js/pikaday.jquery.js"></script>
     <link rel="stylesheet" type="text/css" href="css/pikaday.css" />
@@ -214,19 +215,81 @@ if($_SESSION['authenticated'] < 1) {
             
             var events = <?php echo json_encode($events); ?>;
             var time = <?php echo $time; ?>;
-            var groomers = <?php echo json_encode($groomers); ?>;
+            var temp = <?php echo json_encode($groomers); ?>;
+            var groomers = Array();
+            
+            for(var i = 0; i < temp.length; i++) {
+                id = temp[i]['ID'].toString();
+                groomers[id] = temp[i];
+                groomers[id]['count'] = 0;
+            }
             
             var timeslots = Array();
             
             var selectedinfo = Array();
             
+            
+            
             var offset = new Date().getTimezoneOffset()*-60;
+            
+            
+            // Function that given a day returns the ID of the
+            // groomer with the fewest scheduled dogs that day. If two
+            // groomers tie, it will return the most senior.
+            function pickgroomer(today) {
+                
+                var today = moment.tz(today, "America/New_York");
+                
+                var id;
+                var groomer;
+    
+                for(var i = 0; i < events.length; i++) {
+
+                    if(events[i]['PetID'] == -1) {
+                        continue;
+                    }
+
+                    var event = moment.tz(events[i]['StartTime'] * 1000, "America/New_York");
+
+                    if(events[i]['Recurring'] == 1 && (events[i]['EndDate'] != null ? today.isSameOrBefore(moment.tz(events[i]['EndDate'] * 1000, "America/New_York"), "day") : 1)) {
+                        while(event.isSameOrBefore(today, "day")) {
+                            event.add(events[i]['RecInterval'], 'weeks'); // Add the number of weeks as an interval
+                            if(event.isSame(today, "day")) {
+                                break;
+                            }
+                        }
+                    }
+
+                    if(event.isSame(today, "day")) {
+                        id = events[i]['GroomerID'].toString();
+                        groomers[id]['count']++;
+                    }
+                }
+                
+                for(key in groomers) {
+                    groomer = key;
+                    break;
+                }
+                
+                groomers.forEach(function(curgroomer) {
+                    if(curgroomer['count'] < groomer['count']) {
+                        groomer = curgroomer;
+                    }
+                    else if(curgroomer['count'] == groomer['count']) {
+                        if(curgroomer['Seniority'] < groomer['Seniority']) {
+                            groomer = curgroomer;
+                        }
+                    }
+                });
+                
+                return groomer['ID'];
+                
+            }
             
             // Function that given a day and a groomer ID returns an array
             // of minutes which that groomer has available that day, or
             // false if there are none.
             function getavailable(id, today) {
-                var numdogs = 0;
                 
                 var todayminutes = Array();
 
@@ -269,7 +332,7 @@ if($_SESSION['authenticated'] < 1) {
                     }
                     
                     // Creating a date from a UTC timestamp, returns a local date. Subtract the offset
-                    // To counteract this.
+                    // to counteract this.
                     var eventstart = new Date((events[i]['StartTime'] - offset) * 1000);
 
 
@@ -283,18 +346,6 @@ if($_SESSION['authenticated'] < 1) {
                     }
 
                     if(eventstart.toDateString() === today.toDateString()) {
-
-                        // Disable days when groomer is off
-                        if(events[i]['PetID'] == -1) {
-                                return false;
-                        }
-
-                        // If groomer already has MaxDogs, disable today
-                        numdogs++;
-                        if(numdogs >= id['MaxDogs']) {
-                            return false;
-                        }
-
                         // Remove scheduled events' times from today's minutes array
                         var startminutes = (eventstart.getHours() * 60) + (eventstart.getMinutes());
                         var endminutes = events[i]['TotalTime'] + startminutes - 1;
@@ -371,6 +422,8 @@ if($_SESSION['authenticated'] < 1) {
                     
                     var index = today.getTime();
                     timeslots[index] = Array();
+                    
+                    var groomer = pickgroomer(today);
                     
                     for(var i = 0; i < groomers.length; i++) {
                         var minutes = getavailable(groomers[i]['ID'], today);
@@ -517,7 +570,7 @@ if($_SESSION['authenticated'] < 1) {
                 }
 
                 echo '<label for="groomer">Preferred Groomer: </label><select id="groomer" name="groomer">';
-                echo '<option value="NULL">None</option>';
+                echo '<option value="NULL">Any</option>';
                 foreach($groomers as $groomer) {
                     echo '<option value="' . $groomer['ID'] . '" ' . (($groomer['ID'] == $pet['PreferredGroomer']) ? 'selected' : '' ) . '>' . $groomer['Name'] . '</option>';
                 }

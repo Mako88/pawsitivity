@@ -28,6 +28,7 @@ function find_key_value($array, $key, $val)
 <title>Search</title>
 </head>
 <body>
+<?php include "include/menu.php"; ?>
 <form action="search.php" method="post">
     <input type="text" name="search" id="search" placeholder="Search...">
     <input type="submit" value="Go">

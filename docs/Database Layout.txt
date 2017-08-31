@@ -1,8 +1,8 @@
 Pets Table:
 	ID
-    	Name
-    	Breed
-    	Age
+    Name
+    Breed
+    Age
 	Weight
 	Vaccines (Path to file)
 	Notes

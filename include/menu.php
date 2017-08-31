@@ -7,9 +7,10 @@ if(!defined('DIRECT')) die(); // Don't allow this file to be called directly
     <ul>
         <li><a href="index.php">Home</a></li>
         <?php if($_SESSION['authenticated'] > 1) { ?>
-        <li><a href="newclient.php">New Client</a></li>
-        <li><a href="viewclient.php">View Clients</a></li>
         <li><a href="newuser.php">New User</a></li>
+        <li><a href="newclient.php">New Client</a></li>
+        <li><a href="newservice.php">New Service</a></li>
+        <li><a href="viewclient.php">View Clients</a></li>
         <li><a href="calendar.php">View Calendar</a></li>
         <?php } ?>
     </ul>

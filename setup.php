@@ -94,6 +94,7 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
             StartTime INT(11) UNSIGNED,
             GroomTime INT(11),
             BathTime INT(11),
+            TotalTime INT(11),
             GroomerID VARCHAR(255),
             Recurring INT(1),
             RecInterval INT(2),
@@ -109,7 +110,7 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
             Password TEXT,
             Access INT(1),
             Tier INT(2),
-            Missed Int(1),
+            Missed INT(1),
             Visited INT(1),
             Seniority INT(1)
 
@@ -118,20 +119,18 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
         CREATE TABLE IF NOT EXISTS Breeds(
             ID INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             Name TEXT,
-            Group INT(1),
+            BreedGroup INT(1),
             Size VARCHAR(1),
             GroomTime INT(11),
             BathTime INT(11),
-            GroomPrice Int(11),
-            BathPrice Int(11),
-
+            GroomPrice INT(11),
+            BathPrice INT(11)
     )";
     $sql[5] = "
         CREATE TABLE IF NOT EXISTS Tiers(
             ID INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             Name TEXT,
             Time TEXT
-
     )";
     $sql[6] = "
         CREATE TABLE IF NOT EXISTS Services(
