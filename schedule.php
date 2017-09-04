@@ -207,7 +207,7 @@ if($_SESSION['authenticated'] < 1) {
         <label for="datepicker">Please pick a day to schedule your pet: </label>
         <input type="text" id="datepicker" name="date" /><br />
         <label for="slot">Please pick a time slot: </label>
-        <select id="slot" name="slot"><option value="NULL">Please select a day</option></select><br />
+        <select id="slot" name="slot"><option value="NULL" selected disabled>Please select a day...</option></select><br />
         <input type="submit" value="Next" />
     </form>
     <script>

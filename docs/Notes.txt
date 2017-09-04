@@ -6,6 +6,7 @@ schedule.php:
 	Auto set breaks from 1:00-1:30
 	After 1:30 add a 15 minute cushion every 3 dogs
 	Fix wrong order of slots display
+    https://stackoverflow.com/questions/19279138/how-can-i-detect-if-a-particular-timezone-is-in-dst-using-javascript
 	
 	
 search.php:
@@ -25,7 +26,6 @@ editevent.php:
 
 services.php:
 	Allow editing services
-	Add description to service
 	
 	
 newclient.php/viewclient.php:
@@ -34,27 +34,15 @@ newclient.php/viewclient.php:
 	
 
 newbreed.php/editbreed.php:
-	Add breed page to add/remove breeds and set prices
-	Set time for each service on the edit/add breed page
-	Don't show signature services, since they're a flat rate set globally
-	
+	Add breed page to add/remove breeds and set prices/times
+    
 
 employeeschedule.php:
 	Add employee scheduling page
 	
 
-globalsettings.php:
-	Add Global Settings page
-	Set timezone based on spa location
-	Automatically remove events 1.5 years old
-	Signature upcharge (set price for signature spa/bath)
-	Signature services price
-	Set times for P/S/M/L/XL for each grooming tier
-	
-
 newuser.php:
-	Allow editing seniority when creating a groomer
-	Select tier when creating/editing groomer
+	Add viewuser.php to allow editing a user
 
 	
 Misc:
@@ -63,5 +51,8 @@ Misc:
 	Validate all forms with Jquery
 	Add delete option to all edit pages
 	Give error if setup hasn't been run yet/redirect to setup page
+    Redirect to global settings page after setup
 	Find timeclock software (with the ability to print/email reports)
 	Figure out text/email reminders with scheduling
+    Automatically remove events the age from global settings
+    

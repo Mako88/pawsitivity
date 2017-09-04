@@ -56,7 +56,7 @@ Users Table:
 	Email
 	Password (Hashed)
 	Access (Number showing access level: 1 - client, 2 - groomer, 3 - bather, 4 - employee, 5 - admin)
-	Tier (For groomers: 1 - gold, 2 - platinum, 3 - diamond)
+	Tier (For groomers: 0 - gold, 1 - platinum, 2 - diamond)
 	Missed (For clients, set to 1 if a client has missed an appointment. If 1, the client must call before being allowed to schedule)
 	Visited (Set to 0 until a client visits and resets their password, then set to 1)
 	Seniority (A number to choose one groomer over another when scheduling)
@@ -87,12 +87,13 @@ Breeds Table:
 	GroomPrice
 	BathPrice
 	
-Tiers Table:
-	ID
-	Name
-	Time (Array of amount of minutes [positive or negative] to add with size indexes):
-		Time['P'] - Petite Dogs
-		Time['S'] - Small
-		Time['M'] - Medium
-		Time['L'] - Large
-		Time['XL'] - Extra Large
+        
+Globals Table:
+    Timezone
+    EventsAge (A number of months to keep an event before deleting it)
+    SigUpcharge (The amount to increase the spa/bath when signature)
+    SigPrice (The price of each signature service)
+    Tiers (2D array with tier times)
+        Tiers[0]['P'] - Petite dog time for gold tier
+        Tiers[0]['S'] - Small dog time for gold tier
+        Tiers[1]['XL'] - Extra Large dog time for Platinum tier

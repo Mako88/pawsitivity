@@ -127,10 +127,13 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
             BathPrice INT(11)
     )";
     $sql[5] = "
-        CREATE TABLE IF NOT EXISTS Tiers(
-            ID INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-            Name TEXT,
-            Time TEXT
+        CREATE TABLE IF NOT EXISTS Globals(
+            OneRow enum('only') NOT NULL UNIQUE DEFAULT 'only',
+            TimeZone TEXT,
+            EventsAge INT(2),
+            SigUpcharge INT(2),
+            SigPrice DECIMAL(5,2),
+            Tiers TEXT
     )";
     $sql[6] = "
         CREATE TABLE IF NOT EXISTS Services(

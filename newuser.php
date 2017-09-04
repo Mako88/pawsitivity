@@ -24,14 +24,15 @@ if($_SESSION['authenticated'] < 2) {
 if(!empty($_POST['username']) && !empty($_POST['name']) && !empty($_POST['password']) && !empty($_POST['email']) && !empty($_POST['level'])) {
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
-    $zero = 0;
-    $stmt = $database->prepare('INSERT INTO Users (ID, Name, Email, Password, Access, MaxDogs, Visited) VALUES (:ID, :Name, :Email, :Password, :Access, :MaxDogs, 1)');
+    $stmt = $database->prepare('INSERT INTO Users (ID, Name, Email, Password, Access, Tier, Visited, Seniority) VALUES (:ID, :Name, :Email, :Password, :Access, :Tier, 1, :Seniority)');
     $stmt->bindValue(':ID', $_POST['username']);
     $stmt->bindValue(':Name', $_POST['name']);
     $stmt->bindValue(':Email', $_POST['email']);
     $stmt->bindValue(':Password', $password);
     $stmt->bindValue(':Access', $_POST['level']);
-    (is_numeric($_POST['maxdogs'])) ? $stmt->bindValue(':MaxDogs', $_POST['maxdogs']) : $stmt->bindValue(':MaxDogs', $zero);
+    $stmt->bindValue(':Tier', $_POST['tier']);
+    $stmt->bindValue(':Access', $_POST['level']);
+    (is_numeric($_POST['seniority'])) ? $stmt->bindValue(':Seniority', $_POST['seniority']) : $stmt->bindValue(':Seniority', NULL);
     $stmt->execute();
     echo "<p>User added!</p>";
 }
@@ -47,7 +48,13 @@ else {
             <option value="2">Groomer</option>
             <option value="3">Non-Groomer</option>
         </select><br />
-        <label for="maxdogs">Maximum Number of Dogs Per Day: </label><input type="text" name="maxdogs" /><br />
+        <label for="tier">Groomer Tier: </label>
+        <select name="tier">
+            <option value="0">Gold</option>
+            <option value="1">Platinum</option>
+            <option value="2">Diamond</option>
+        </select><br />
+        <label for="seniority">Seniority: </label><input type="seniority" name="seniority" /><br />
         <input type="submit" name="submit" value="Create User">
     </form>
 
