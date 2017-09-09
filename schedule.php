@@ -28,9 +28,11 @@ if($_SESSION['authenticated'] < 1) {
     include 'include/menu.php';
     
     if(!empty($_POST['confirm'])) {
-        $stmt = $database->prepare('INSERT INTO Scheduling (PetID, StartTime, TotalTime, GroomerID, Recurring, RecInterval, EndDate, Package, Services) VALUES (:PetID, :StartTime, :TotalTime, :GroomerID, :Recurring, :RecInterval, :EndDate, :Package, :Services)');
+        $stmt = $database->prepare('INSERT INTO Scheduling (PetID, StartTime, GroomTime, BathTime, TotalTime, GroomerID, Recurring, RecInterval, EndDate, Package, Services) VALUES (:PetID, :StartTime, :GroomTime, :BathTime, :TotalTime, :GroomerID, :Recurring, :RecInterval, :EndDate, :Package, :Services)');
         $stmt->bindValue(':PetID', $_SESSION['info']['pet']);
         $stmt->bindValue(':StartTime', $_SESSION['info']['timestamp']);
+        $stmt->bindValue(':GroomTime', $_SESSION['info']['GroomTime']);
+        $stmt->bindValue(':BathTime', $_SESSION['info']['BathTime']);
         $stmt->bindValue(':TotalTime', $_SESSION['info']['TotalTime']);
         $stmt->bindValue(':GroomerID', $_SESSION['info']['groomer']);
         $stmt->bindValue(':Recurring', $_SESSION['info']['Recurring']);
@@ -154,7 +156,7 @@ if($_SESSION['authenticated'] < 1) {
             $stmt->execute();
             $events = $stmt->fetchAll();
             if(!empty($events)) {
-                $stmt = $database->prepare("SELECT ID, MaxDogs, Seniority FROM Users WHERE ID = :ID");
+                $stmt = $database->prepare("SELECT ID, Seniority FROM Users WHERE ID = :ID");
                 $stmt->bindValue(':ID', $_POST['groomer']);
                 $stmt->execute();
                 $groomers = $stmt->fetchAll();
@@ -162,46 +164,56 @@ if($_SESSION['authenticated'] < 1) {
             else {
                 $stmt = $database->query("SELECT * FROM Scheduling");
                 $events = $stmt->fetchAll();
-                $stmt = $database->query("SELECT ID, MaxDogs, Seniority FROM Users WHERE Access = 2");
+                $stmt = $database->query("SELECT ID, Seniority FROM Users WHERE Access = 2");
                 $groomers = $stmt->fetchAll();
             }
         }
         else {
             $stmt = $database->query("SELECT * FROM Scheduling");
             $events = $stmt->fetchAll();
-            $stmt = $database->query("SELECT ID, MaxDogs, Seniority FROM Users WHERE Access = 2");
+            $stmt = $database->query("SELECT ID, Seniority FROM Users WHERE Access = 2");
             $groomers = $stmt->fetchAll();
         }
         
         // Calculate time for current pet
-        if($_SESSION['info']['package'] == 1 || $_SESSION['info']['package'] == 3) {
-            $time = $_SESSION['info']['BathTime'];
-        }
-        else {
-            $time = $_SESSION['info']['BathTime'] + $_SESSION['info']['GroomTime'];
-        }
+        $totaltime = 0;
+        $bathtime = $_SESSION['info']['BathTime'];
+        $groomtime = 0;
         
-        $servicetime = 0;
+        if($_SESSION['info']['package'] == 2 || $_SESSION['info']['package'] == 4) {
+             $groomtime = $_SESSION['info']['GroomTime'];
+        }       
         
         if(!empty($_SESSION['info']['services'])) {
         
             foreach($_SESSION['info']['services'] as $service) {
-                $stmt = $database->prepare("SELECT Time FROM Services WHERE ID = :ID");
+                $stmt = $database->prepare("SELECT Time, Type FROM Services WHERE ID = :ID");
                 $stmt->bindValue(':ID', $service);
                 $stmt->execute();
-                $result = $stmt->fetch(PDO::FETCH_NUM);
-                $servicetime += $result[0];
+                $result = $stmt->fetch();
+                $servicetime = json_decode($result['Time'], true);
+                
+                switch($result['Type']) {
+                    case 1: // Bath
+                        $bathtime += $servicetime[$_SESSION['info']['Size']];
+                        break;
+                    case 2: // Groom
+                        $groomtime += $servicetime[$_SESSION['info']['Size']];
+                        break;
+                }
             }
-
-            $time += $servicetime;
         }
         
-        if(empty($time)) {
+        $totaltime = $bathtime + $groomtime;
+        
+        if(empty($totaltime)) {
             echo "<p>We're sorry, but the total time is zero.</p>";
             goto finish;
         }
         
-        $_SESSION['info']['TotalTime'] = ceil($time/15)*15;
+        $_SESSION['info']['TotalTime'] = ceil($totaltime/15)*15;
+        $_SESSION['info']['BathTime'] = ceil($bathtime/15)*15;
+        $_SESSION['info']['GroomTime'] = ceil($groomtime/15)*15;
 ?>
     <form action="schedule.php" method="post" id="day">
         <label for="datepicker">Please pick a day to schedule your pet: </label>
@@ -214,34 +226,30 @@ if($_SESSION['authenticated'] < 1) {
         $(function() {
             
             var events = <?php echo json_encode($events); ?>;
-            var time = <?php echo $time; ?>;
-            var temp = <?php echo json_encode($groomers); ?>;
-            var groomers = Array();
-            
-            for(var i = 0; i < temp.length; i++) {
-                id = temp[i]['ID'].toString();
-                groomers[id] = temp[i];
-                groomers[id]['count'] = 0;
-            }
+            var time = <?php echo $totaltime; ?>;
+            var groomers = <?php echo json_encode($groomers); ?>;
             
             var timeslots = Array();
-            
+            var offset;
             var selectedinfo = Array();
             
             
+            var nowInEasternTime = moment().tz("America/New_York");
             
-            var offset = new Date().getTimezoneOffset()*-60;
+            if(nowInEasternTime.isDST()) {
+                offset = -240;
+            }
+            else {
+                offset = -300;
+            }
             
             
-            // Function that given a day returns the ID of the
-            // groomer with the fewest scheduled dogs that day. If two
-            // groomers tie, it will return the most senior.
-            function pickgroomer(today) {
-                
-                var today = moment.tz(today, "America/New_York");
+            // Function that given a day and array of groomers
+            // returns the ID of the groomer with the fewest scheduled
+            // dogs that day. If two groomers tie, it will return the most senior.
+            function pickgroomer(today, groomers) {
                 
                 var id;
-                var groomer;
     
                 for(var i = 0; i < events.length; i++) {
 
@@ -261,26 +269,32 @@ if($_SESSION['authenticated'] < 1) {
                     }
 
                     if(event.isSame(today, "day")) {
-                        id = events[i]['GroomerID'].toString();
-                        groomers[id]['count']++;
-                    }
-                }
-                
-                for(key in groomers) {
-                    groomer = key;
-                    break;
-                }
-                
-                groomers.forEach(function(curgroomer) {
-                    if(curgroomer['count'] < groomer['count']) {
-                        groomer = curgroomer;
-                    }
-                    else if(curgroomer['count'] == groomer['count']) {
-                        if(curgroomer['Seniority'] < groomer['Seniority']) {
-                            groomer = curgroomer;
+                        id = events[i]['GroomerID'];
+                        for(var i = 0; i < groomers.length; i++) {
+                            if(!groomers[i].hasOwnProperty('count')) {
+                                groomers['count'] = 0;
+                            }
+                            if(groomers[i]['ID'] == id) {
+                                groomers[i]['count']++;
+                            }
                         }
                     }
-                });
+                }
+                
+                groomer = groomers[0];
+                
+                if(groomers.length > 1) {
+                    for(var i = 1; i < groomers.length; i++) {
+                        if(groomers[i]['count'] < groomer['count']) {
+                            groomer = groomers[i];
+                        }
+                        else if(groomers[i]['count'] == groomer['count']) {
+                            if(groomers[i]['Seniority'] < groomer['Seniority']) {
+                                groomer = groomers[i];
+                            }
+                        }
+                    }
+                }
                 
                 return groomer['ID'];
                 
@@ -423,8 +437,6 @@ if($_SESSION['authenticated'] < 1) {
                     var index = today.getTime();
                     timeslots[index] = Array();
                     
-                    var groomer = pickgroomer(today);
-                    
                     for(var i = 0; i < groomers.length; i++) {
                         var minutes = getavailable(groomers[i]['ID'], today);
                         if(!minutes) {
@@ -450,52 +462,48 @@ if($_SESSION['authenticated'] < 1) {
                     // timeslots[today][i]: One of today's groomers (inside a for loop). This has
                         // an array at ['groomer'] with all the groomer's info, and an array
                         // at ['slots'] with the available slots for that groomer
-                    // littleslots[i][index]: An array of timeslots the size of the current event to the nearest 15 minutes, taken from a single open period
+                    // littleslots[index]: An array of timeslots the size of the current event to the nearest 15 minutes, taken from a single open period
                     
                     today = date.getTime();
+                    var availablegroomers = Array();
+                    
+                    for(var i = 0; i < timeslots[today].length; i++) {
+                        availablegroomers.push(timeslots[today][i]['groomer']);
+                    }
+                    
+                    var groomer = pickgroomer(date, availablegroomers);
+                    
+                    
                     var options = $("#slot");
                     options.empty();
                     var littleslots = Array();
-                    var totalslots = Array();
                     var x = Math.ceil(time/15); // The number of 15 minute intervals of a time
                     
                     // Break up the available slots into slots the size of the event.
                     // i = every groomer
                     for(var i = 0; i < timeslots[today].length; i++) {
-                        littleslots[i] = Array();
+                        if(timeslots[today][i]['groomer']['ID'] != groomer) {
+                            continue;
+                        }
                         var index = -1;
-                        // r = every slot for a given groomer
-                        for(var r = 0; r < timeslots[today][i]['slots'].length; r++) {
-                            for(var k = 0; k < timeslots[today][i]['slots'][r]['length']; k += 15) {
+                        // j = every slot for the chosen groomer
+                        for(var j = 0; j < timeslots[today][i]['slots'].length; j++) {
+                            for(var k = 0; k < timeslots[today][i]['slots'][j]['length']; k += 15) {
                                 // If the current 15 minute start time would make the end time greater than the
                                 // slot's end time, don't add it to littleslots (because it's too long)
-                                if(!(timeslots[today][i]['slots'][r]['start'] + k + x*15 > timeslots[today][i]['slots'][r]['end'])) {
+                                if(!(timeslots[today][i]['slots'][j]['start'] + k + x*15 > timeslots[today][i]['slots'][j]['end'])) {
                                     index++;
-                                    littleslots[i][index] = Array();
-                                    littleslots[i][index]['start'] = timeslots[today][i]['slots'][r]['start'] + k;
-                                    littleslots[i][index]['end'] = littleslots[i][index]['start'] + x*15;
+                                    littleslots[index] = Array();
+                                    littleslots[index]['start'] = timeslots[today][i]['slots'][j]['start'] + k;
+                                    littleslots[index]['end'] = littleslots[index]['start'] + x*15;
                                 }
-                            }
-                        }
-                    }
-                    // Add all of the available times from all groomers into totalslots, ignoring duplicates.
-                    for(var i = 0; i < littleslots.length; i++) {
-                        for(var j = 0; j < littleslots[i].length; j++) {
-                            var unique = true;
-                            for(var k = 0; k < totalslots.length; k++) {
-                                if(totalslots[k]['start'] == littleslots[i][j]['start']) {
-                                    unique = false;
-                                }
-                            }
-                            if(unique) {
-                                totalslots.push(littleslots[i][j]);
                             }
                         }
                     }
 
-                    for(var k = 0; k < totalslots.length; k++) {
-                        var start = totalslots[k]['start'];
-                        var end = totalslots[k]['end'];
+                    for(var i = 0; i < littleslots.length; i++) {
+                        var start = littleslots[i]['start'];
+                        var end = littleslots[i]['end'];
                         var startmin = start % 60;
                         var starthour = (start - startmin) / 60;
                         var endmin = end % 60;
@@ -517,19 +525,6 @@ if($_SESSION['authenticated'] < 1) {
                             endhour = 12;
                         }
                         
-                        // Get which groomer to schedule based on seniority
-                        var groomer;
-                        var seniority = 9999;
-                        console.log(timeslots[today]);
-                        for(var i = 0; i < timeslots[today].length; i++) {
-                            for(var j = 0; j < timeslots[today][i]['slots'].length; j++) {
-                                if(start == timeslots[today][i]['slots'][j]['start'] && timeslots[today][i]['groomer']['Seniority'] < seniority) {
-                                    groomer = timeslots[today][i]['groomer']['ID'];
-                                    seniority = timeslots[today][i]['groomer']['Seniority'];
-                                }
-                            }
-                        }
-                        
                         var timestamp = (start*60) + (today/1000) + offset;
                         options.append($("<option />").val(groomer + "-" + timestamp + "-" + starthour + ":" + (startmin < 10 ? "0" + startmin : startmin) + " " + s + "-" + endhour + ":" + (endmin < 10 ? "0" + endmin : endmin) + " " + e).text(starthour + ":" + (startmin < 10 ? "0" + startmin : startmin) + " " + s + " - " + endhour + ":" + (endmin < 10 ? "0" + endmin : endmin) + " " + e));
                     }
@@ -544,15 +539,27 @@ if($_SESSION['authenticated'] < 1) {
         $stmt->bindValue(':ID', $_POST['pet']);
         $stmt->execute();
         $pet = $stmt->fetch();
-        $_SESSION['info']['BathTime'] = $pet['BathTime'];
-        $_SESSION['info']['GroomTime'] = $pet['GroomTime'];
         if(!empty($pet)) {
+            $stmt = $database->prepare("SELECT Size, GroomPrice, BathPrice FROM Breeds WHERE ID = :ID");
+            $stmt->bindValue(':ID', $pet['Breed']);
+            $stmt->execute();
+            $res = $stmt->fetch();
+
+            $_SESSION['info']['BathTime'] = $pet['BathTime'];
+            $_SESSION['info']['GroomTime'] = $pet['GroomTime'];
+            $_SESSION['info']['Size'] = $res['Size'];
+            $_SESSION['info']['GroomPrice'] = $res['GroomPrice'];
+            $_SESSION['info']['BathPrice'] = $res['BathPrice'];
+            
             $stmt = $database->query("SELECT * FROM Services");
             $services = $stmt->fetchAll();
             if(!empty($services)) {
                 $_SESSION['info']['pet'] = $pet['ID'];
                 $stmt = $database->query("SELECT Name, ID FROM Users WHERE Access = 2");
                 $groomers = $stmt->fetchAll();
+                
+                $stmt = $database->query("SELECT SigUpcharge, SigPrice FROM Globals");
+                $globals = $stmt->fetch();
                 
                 echo '<form action="schedule.php" method="post">';
                 
