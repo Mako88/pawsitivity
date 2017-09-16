@@ -82,7 +82,11 @@ if(!empty($_GET['id'])) {
             if(!empty($pets)) {
                 echo '<table><th><td>ID</td><td>Name</td><td>Breed</td></th>';
                 foreach($pets as $pet) {
-                    echo '<tr style="cursor: pointer;" onclick="window.document.location=\'viewpet.php?id=' . $pet['ID'] . '\'"><td>' . $pet['ID'] . '</td><td>' . $pet['Name'] . '</td><td>' . $pet['Breed'] . '</td></tr>';
+                    $stmt = $database->prepare("SELECT Name FROM Breeds WHERE ID = :ID");
+                    $stmt->bindValue(':ID', $pet['Breed']);
+                    $stmt->execute();
+                    $breed = $stmt->fetch();
+                    echo '<tr style="cursor: pointer;" onclick="window.document.location=\'viewpet.php?id=' . $pet['ID'] . '\'"><td>' . $pet['ID'] . '</td><td>' . $pet['Name'] . '</td><td>' . $breed['Name'] . '</td></tr>';
                 }
                 echo '</table>';
             }

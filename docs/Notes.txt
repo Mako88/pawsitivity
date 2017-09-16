@@ -1,11 +1,19 @@
 schedule.php:
 	Don't allow users to schedule if Missed field is 1, tell them to call.
-	Check if a dog requires two people - if so, make sure two people's time slots are open for scheduling
-	Auto set breaks from 1:00-1:30
-	After 1:30 add a 15 minute cushion every 3 dogs
-	Add Recurring scheduling
+	- Check if a dog requires two people - if so, make sure two people's time slots are open for scheduling
+	- Auto set breaks from 1:00-1:30
+	- After 1:30 add a 15 minute cushion every 3 dogs
+	- Add Recurring scheduling
     Add price
     Disable groom services when bath selected
+    - Add an additional 30 minutes to the pickup time
+    - If only scheduling a bath, use list of bathers the same way groomers is done
+    - Change slot start time to after BathTime not after TotalTime
+    - Check BathTime/GroomTime based on whether Bath-only or Bath+Groom
+	
+
+bathcalendar/groomcalendar:
+	- Create separate calendars for bathing and grooming
     
 	
 search.php:
@@ -14,13 +22,13 @@ search.php:
 
 	
 newpet.php/viewpet.php:
-	Add dropdowns for Group/Breed and auto-set BathTime and GroomTime based on breed
-	Add "Scheduling" section to show when it's been scheduled and will be scheduled (Seperate into "Previous Visits" and "Future Visits")
+	- Add "Scheduling" section to show when it's been scheduled and will be scheduled (Seperate into "Previous Visits" and "Future Visits")
 	Change time to "clicker" in 15 minute intervals on newpet page (don't allow base editing)	
 
 
-editevent.php:
-	Allow manually adding/deleting/editing scheduled times by employees
+viewevent.php:
+	Allow manually editing scheduled times by employees
+    - Allow deleting scheduled times
 
 
 services.php:
@@ -33,11 +41,11 @@ newclient.php/viewclient.php:
 	
 
 newbreed.php/editbreed.php:
-	Add breed page to add/remove breeds and set prices/times
+	Allow editing/deleting breeds
     
 
 employeeschedule.php:
-	Add employee scheduling page
+	? Add employee scheduling page
 	
 
 newuser.php:

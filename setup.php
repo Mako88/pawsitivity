@@ -48,7 +48,7 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
         CREATE TABLE IF NOT EXISTS Pets(
             ID INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             Name TEXT NOT NULL,
-            Breed TEXT NOT NULL,
+            Breed INT(2) NOT NULL,
             Age TEXT,
             Weight TEXT,
             Vaccines TEXT,
@@ -56,8 +56,7 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
             Info TEXT,
             Picture TEXT,
             DogOfMonth TEXT,
-            GroomTime INT(32),
-            BathTime INT(32),
+            Time TEXT,
             TwoPeople INT(1),
             PreferredGroomer VARCHAR(255),
             Status INT(1),
@@ -121,8 +120,7 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
             Name TEXT,
             BreedGroup INT(1),
             Size VARCHAR(1),
-            GroomTime INT(11),
-            BathTime INT(11),
+            Time TEXT,
             GroomPrice INT(11),
             BathPrice INT(11)
     )";

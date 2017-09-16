@@ -10,6 +10,7 @@ if(!defined('DIRECT')) die(); // Don't allow this file to be called directly
         <li><a href="newuser.php">New User</a></li>
         <li><a href="newclient.php">New Client</a></li>
         <li><a href="newservice.php">New Service</a></li>
+        <li><a href="newbreed.php">New Breed</a></li>
         <li><a href="viewclient.php">View Clients</a></li>
         <li><a href="calendar.php">View Calendar</a></li>
         <?php } ?>

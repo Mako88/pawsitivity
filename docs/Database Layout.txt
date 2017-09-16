@@ -39,7 +39,7 @@ Owners Table:
 	
 Scheduling Table:
 	ID
-	PetID (-1 for groomer being off)
+	PetID (-1 for groomer being off, -2 for bather)
 	StartTime - UNIX timestamp
 	GroomTime
 	BathTime
@@ -82,8 +82,7 @@ Breeds Table:
 		6 - Herding Group
 		7 - Working Group
 	Size (P/S/M/L/XL)
-	GroomTime
-	BathTime
+	Time (An array of BathTime and GroomTime. Time['Bath']['BathTime'] and Time['Groom']['BathTime'])
 	GroomPrice
 	BathPrice
 	
