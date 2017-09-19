@@ -43,7 +43,7 @@ if(!empty($_GET['id'])) {
             (!empty($_POST['Notes'])) ? $stmt->bindValue(':Notes', $_POST['Notes']) : $stmt->bindValue(':Notes', NULL);
             (!empty($_POST['Info'])) ? $stmt->bindValue(':Info', $_POST['Info']) : $stmt->bindValue(':Info', NULL);
             ($dom != false) ? $stmt->bindValue(':DogOfMonth', $dom) : $stmt->bindValue(':DogOfMonth', NULL);
-            (is_array($_POST['Time'])) ? $stmt->bindValue(':Time', $_POST['Time']) : $stmt->bindValue(':Time', NULL);
+            (is_array($_POST['Time'])) ? $stmt->bindValue(':Time', json_encode($_POST['Time'])) : $stmt->bindValue(':Time', NULL);
             $stmt->bindValue(':PreferredGroomer', $_POST['PreferredGroomer']);
             $stmt->bindValue(':TwoPeople', $two);
             $stmt->bindValue(':ID', $_GET['id']);

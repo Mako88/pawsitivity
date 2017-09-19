@@ -66,10 +66,71 @@ if($_SESSION['authenticated'] < 1) {
                     $_SESSION['info']['timestamp'] = $slotinfo[1];
                     $_SESSION['info']['groomer'] = $slotinfo[0];
                     
-                    // CHANGE THIS //
-                    $_SESSION['info']['Recurring'] = 0;
-                    $_SESSION['info']['RecInterval'] = 0;
-                    $_SESSION['info']['EndDate'] = 0;
+                    if(!empty($_POST['recurring']) && $_POST['recurring'] != 1) {
+                        echo "<p>We're sorry, but the checkbox couldn't be verified.</p>";
+                        goto finish;
+                    }
+                    
+                    if(!empty($_POST['recurring'])) {
+                        
+                        $_SESSION['info']['Recurring'] = $_POST['recurring'];
+                        
+                        if(!is_numeric($_POST['weeks']) || $_POST['weeks'] < 1) {
+                            echo "<p>We're sorry but the number of weeks must be a positive number.</p>";
+                            goto finish;
+                        }
+                        
+                        $_SESSION['info']['RecInterval'] = $_POST['weeks'];
+                        
+                        $enddate = DateTime::createFromFormat('!m/d/Y', $_POST['enddate']);
+                        if($enddate === false) {
+                            echo "<p>The end date was incorrectly formatted.</p>";
+                            goto finish;
+                        }
+                        
+                        
+                        
+                        // Set the enddate to the end of the day (local) of the last instance
+                        // In the for loop, compare the current instance to the END of the enddate day
+                        for($i = $_SESSION['info']['timestamp']; $i < strtotime("tomorrow", $enddate->getTimestamp()) - 1; $i += $_SESSION['info']['RecInterval']*604800) {
+                            $lastinstance = $i;
+                        }
+                        $_SESSION['info']['EndDate'] = strtotime("tomorrow", $lastinstance) - 1;
+                        
+                        $stmt = $database->query("SELECT * FROM Scheduling WHERE PetID > 0");
+                        $events = $stmt->fetchAll();
+
+                        // Check if making this recurring will conflict with anything. $i is the timestamp of each reccurance
+                        for($i = $_SESSION['info']['timestamp']; $i < $_SESSION['info']['EndDate']; $i += $_SESSION['info']['RecInterval']*604800) {
+                            foreach($events as $event) {
+                                if($event['Recurring'] != 1) {
+                                    // Check if the current recurrance is between the start and end of each non-recurring event
+                                    if(($i >= $event['StartTime'] && $i < $event['StartTime'] + $event['GroomTime'] * 60) || ($i + $_SESSION['info']['GroomTime'] * 60 > $event['StartTime'] && $i + $_SESSION['info']['GroomTime'] * 60 <= $event['StartTime'] + $event['GroomTime'] * 60)) {
+                                        $finalevent = $i - $_SESSION['info']['RecInterval']*604800; // Make the last instance the one before it conflicted
+                                        break 2;
+                                    }
+                                }
+                                else {
+                                    // For recurring events, check every recurrence of what we're scheduling with every recurrence of each scheduled event
+                                    for($k = $event['StartTime']; $k < $event['EndDate']; $k += $event['RecInterval']*604800) {
+                                        
+                                        // Check if the current recurrance of our event ($i) overlaps with the current recurrance of the stored event ($k)
+                                        if(($i >= $k && $i < $k + $event['GroomTime'] * 60) || ($i + $_SESSION['info']['GroomTime'] * 60 > $k && $i + $_SESSION['info']['GroomTime'] * 60 <= $k + $event['GroomTime'] * 60)) {
+                                            $finalevent = $i - $_SESSION['info']['RecInterval']*604800; // Make the last instance the one before it conflicted
+                                            break 3;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if(isset($finalevent)) {
+                            $_SESSION['info']['EndDate'] = strtotime("tomorrow", $finalevent) - 1;
+                        }
+                    }
+                    else {
+                        $_SESSION['info']['Recurring'] = $_SESSION['info']['RecInterval'] = $_SESSION['info']['EndDate'] = 0;
+                    }
                     
                     $groomername = $groomername['Name'];
 
@@ -132,6 +193,17 @@ if($_SESSION['authenticated'] < 1) {
                     echo "<td>Pickup Time: </td><td>" . $end . "</td></tr></table>";
                     
                     echo "<br />";
+                    
+                    
+                    if(!empty($_POST['recurring'])) {
+                        $enddate = new DateTime('@'.$_SESSION['info']['EndDate']);
+                        echo "<h3>Automatic Rescheduling:</h3>";
+                        echo "<p>Your pet is automatically scheduled at this time every " . $_SESSION['info']['RecInterval'] . " week(s). Your final appointment will be on " . $enddate->format("l, m/d/Y");
+                    }
+                    if(isset($finalevent)) {
+                        echo '<p style="color: red">NOTE: The ending date is different from what you set due to a conflict.<br />';
+                        echo 'You can manually re-schedule for dates after ' . $enddate->format("m/d/Y") . '</p>';
+                    }
                     
                     echo '<form action="schedule.php" method="post" id="confirm">';
                     echo '<input type="hidden" name="confirm" value="1" />';
@@ -229,7 +301,7 @@ if($_SESSION['authenticated'] < 1) {
         $_SESSION['info']['GroomTime'] = $groomtime;
         
         // Since dogs can be bathed and groomed concurrently, use just the groom time
-        // As the slot size
+        // as the slot size
         $slottime = ceil($groomtime/15)*15;
         
         $stmt = $database->query("SELECT Tiers FROM Globals");
@@ -240,6 +312,9 @@ if($_SESSION['authenticated'] < 1) {
         <input type="text" id="datepicker" name="date" /><br />
         <label for="slot">Please pick a time slot: </label>
         <select id="slot" name="slot"><option value="NULL" selected disabled>Please select a day...</option></select><br />
+        <input type="checkbox" name="recurring" id="recurring" value="1" /><label for="recurring">Automatically reschedule every </label>
+        <input type="text" name="weeks" id="weeks" /><label> week(s) until </label>
+        <input type="text" id="datepicker2" name="enddate" /><br />
         <input type="submit" value="Next" />
     </form>
     <script>
@@ -267,6 +342,8 @@ if($_SESSION['authenticated'] < 1) {
             function pickgroomer(today, groomers) {
                 
                 var id;
+                
+                today = moment(today);
     
                 for(var i = 0; i < events.length; i++) {
 
@@ -502,7 +579,6 @@ if($_SESSION['authenticated'] < 1) {
                     
                     var groomer = pickgroomer(date, availablegroomers);
                     
-                    
                     var options = $("#slot");
                     options.empty();
                     var littleslots = Array();
@@ -561,6 +637,11 @@ if($_SESSION['authenticated'] < 1) {
                         options.append($("<option />").val(groomer + "-" + timestamp + "-" + starthour + ":" + (startmin < 10 ? "0" + startmin : startmin) + " " + s + "-" + endhour + ":" + (endmin < 10 ? "0" + endmin : endmin) + " " + e).text(starthour + ":" + (startmin < 10 ? "0" + startmin : startmin) + " " + s + " - " + endhour + ":" + (endmin < 10 ? "0" + endmin : endmin) + " " + e));
                     }
                 }
+            });
+            
+            $('#datepicker2').pikaday({
+                format: 'MM/DD/YYYY',
+                minDate: new Date()
             });
         });
     </script>

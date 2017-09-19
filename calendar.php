@@ -38,10 +38,17 @@
 <?php include "include/footer.php"; ?>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-<script src='js/moment.js'></script>
+<script src='js/moment.min.js'></script>
+<script src="js/moment-timezone.min.js"></script>
 <script src='js/fullcalendar.min.js'></script>
 <script>
     $(document).ready(function() {
+        
+        // Offset of the Salon's timezone from UTC.
+        var offset = moment.tz.zone("<?php echo $_SESSION['info']['Timezone']; ?>").offset(moment())*60;
+
+        // Offset of user's local timezone from UTC.
+        var localoffset = new Date().getTimezoneOffset();
         
         var events = <?php echo json_encode($events); ?>;
         
@@ -56,8 +63,8 @@
             
             var event = {
                 id: events[i]['ID'],
-                start: events[i]['StartTime'] * 1000,
-                end: (events[i]['StartTime'] + (events[i]['TotalTime'] * 60)) * 1000,
+                start: (events[i]['StartTime'] - offset) * 1000,
+                end: (events[i]['StartTime'] + (events[i]['TotalTime'] * 60) - offset) * 1000,
                 title: pets[index][0]['Name']
             };
 
@@ -71,6 +78,18 @@
                 left:   'title',
                 center: '',
                 right:  'today month listDay prev,next'
+            },
+            dayClick: function(date, jsEvent, view) {
+                if (view.name === "month") {
+                    $('#calendar').fullCalendar('gotoDate', date);
+                    $('#calendar').fullCalendar('changeView', 'listDay');
+                }
+            },
+            eventClick: function(event, jsEvent, view) {
+                if(view.name === "month") {
+                    $('#calendar').fullCalendar('gotoDate', event.start);
+                    $('#calendar').fullCalendar('changeView', 'listDay');
+                }
             }
         });
 

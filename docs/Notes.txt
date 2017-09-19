@@ -1,11 +1,10 @@
 schedule.php:
 	Don't allow users to schedule if Missed field is 1, tell them to call.
-	- Check if a dog requires two people - if so, make sure two people's time slots are open for scheduling
-	- Add Recurring scheduling
+	- Check if a dog requires two people - if so, add GroomTime to BathTime and mark as 2nd person
     Add price
     Disable groom services when bath selected
-    - If only scheduling a bath, use list of bathers the same way groomers is done
 	Don't allow scheduling in the past (today)
+    - Only allow 2 large dogs at a time
 	
 
 bathcalendar/groomcalendar:
@@ -20,7 +19,8 @@ search.php:
 newpet.php/viewpet.php:
 	- Make "Scheduled" section links to view/edit events.
 	Change time to "clicker" in 15 minute intervals on newpet page (don't allow base editing)	
-
+    - Add link to "Schedule this pet"
+    
 
 viewevent.php:
 	Allow manually editing scheduled times by employees
@@ -58,4 +58,5 @@ Misc:
 	Find timeclock software (with the ability to print/email reports)
 	Figure out text/email reminders with scheduling
     Automatically remove events the age from global settings
+    Prevent infinite redirect when user doesn't have permission to access page
     
