@@ -94,9 +94,9 @@ else if(!empty($_POST)) {
         
             
         }
-        /*$url = $http . $_SERVER['HTTP_HOST'] . "/viewpet.php?id=" . $id;
+        $url = $http . $_SERVER['HTTP_HOST'] . "/viewpet.php?id=" . $id;
         echo "<script type='text/javascript'>document.location.href='{$url}';</script>";
-        echo '<meta http-equiv="refresh" content="0;url=' . $url . '">';*/
+        echo '<meta http-equiv="refresh" content="0;url=' . $url . '">';
     }
     else {
         echo "<p>Required fields not entered.</p>";

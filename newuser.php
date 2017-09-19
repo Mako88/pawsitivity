@@ -46,7 +46,7 @@ else {
         <label for="level">User Access Level: </label>
         <select name="level">
             <option value="2">Groomer</option>
-            <option value="3">Non-Groomer</option>
+            <option value="3">Bather</option>
         </select><br />
         <label for="tier">Groomer Tier: </label>
         <select name="tier">

@@ -39,7 +39,7 @@ if($_SESSION['authenticated'] < 1) {
         $stmt->bindValue(':RecInterval', $_SESSION['info']['RecInterval']);
         $stmt->bindValue(':EndDate', $_SESSION['info']['EndDate']);
         $stmt->bindValue(':Package', $_SESSION['info']['package']);
-        $stmt->bindValue(':Services', json_encode($_SESSION['info']['services']));
+        (!empty($_SESSION['info']['services']) ? $stmt->bindValue(':Services', json_encode($_SESSION['info']['services'])) : $stmt->bindValue(':Services', NULL));
         $stmt->execute();
         
         echo "<p>Your pet has been scheduled. Thanks!</p>";
@@ -94,14 +94,16 @@ if($_SESSION['authenticated'] < 1) {
                             break;
                     }
                     
-                    $services = array();
-                    
-                    foreach($_SESSION['info']['services'] as $service) {
-                        $stmt = $database->prepare("SELECT Name FROM Services WHERE ID = :ID");
-                        $stmt->bindValue(':ID', $service);
-                        $stmt->execute();
-                        $temp = $stmt->fetch();
-                        $services[] = $temp['Name'];
+                    if(!empty($_SESSION['info']['services'])) {
+                        $services = array();
+
+                        foreach($_SESSION['info']['services'] as $service) {
+                            $stmt = $database->prepare("SELECT Name FROM Services WHERE ID = :ID");
+                            $stmt->bindValue(':ID', $service);
+                            $stmt->execute();
+                            $temp = $stmt->fetch();
+                            $services[] = $temp['Name'];
+                        }
                     }
 
                     $start = $slotinfo[2];
@@ -112,9 +114,16 @@ if($_SESSION['authenticated'] < 1) {
                     echo "<table><tr>";
                     echo "<td>Pet: </td><td>" . $petname . "</td></tr><tr>";
                     echo "<td>Package: </td><td>" . $package . "</td></tr><tr>";
-                    echo "<td>Services: </td><td><ul>";
-                    foreach($services as $service) {
-                        echo "<li>" . $service . "</li>";
+                    echo "<td>Services: </td><td>";
+                    if(!empty($_SESSION['info']['services'])) {
+                        echo "<ul>";
+                        foreach($services as $service) {
+                            echo "<li>" . $service . "</li>";
+                        }
+                        echo "</ul>";
+                    }
+                    else {
+                        echo "None";
                     }
                     echo "</ul></td></tr><tr>";
                     echo "<td>Groomer: </td><td>" . $groomername . "</td></tr><tr>";
@@ -156,7 +165,7 @@ if($_SESSION['authenticated'] < 1) {
             $stmt->execute();
             $events = $stmt->fetchAll();
             if(!empty($events)) {
-                $stmt = $database->prepare("SELECT ID, Seniority FROM Users WHERE ID = :ID");
+                $stmt = $database->prepare("SELECT ID, Seniority, Tier FROM Users WHERE ID = :ID");
                 $stmt->bindValue(':ID', $_POST['groomer']);
                 $stmt->execute();
                 $groomers = $stmt->fetchAll();
@@ -164,25 +173,28 @@ if($_SESSION['authenticated'] < 1) {
             else {
                 $stmt = $database->query("SELECT * FROM Scheduling");
                 $events = $stmt->fetchAll();
-                $stmt = $database->query("SELECT ID, Seniority FROM Users WHERE Access = 2");
+                $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2");
                 $groomers = $stmt->fetchAll();
             }
         }
         else {
             $stmt = $database->query("SELECT * FROM Scheduling");
             $events = $stmt->fetchAll();
-            $stmt = $database->query("SELECT ID, Seniority FROM Users WHERE Access = 2");
+            $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2");
             $groomers = $stmt->fetchAll();
         }
         
         // Calculate time for current pet
         $totaltime = 0;
-        $bathtime = $_SESSION['info']['BathTime'];
-        $groomtime = 0;
         
         if($_SESSION['info']['package'] == 2 || $_SESSION['info']['package'] == 4) {
-             $groomtime = $_SESSION['info']['GroomTime'];
-        }       
+            $groomtime = $_SESSION['info']['Time']['Groom']['GroomTime'];
+            $bathtime = $_SESSION['info']['Time']['Groom']['BathTime'];
+        }
+        else {
+            $groomtime = $_SESSION['info']['Time']['Bath']['GroomTime'];
+            $bathtime = $_SESSION['info']['Time']['Bath']['BathTime'];
+        }   
         
         if(!empty($_SESSION['info']['services'])) {
         
@@ -202,18 +214,26 @@ if($_SESSION['authenticated'] < 1) {
                         break;
                 }
             }
-        }
+        }        
         
-        $totaltime = $bathtime + $groomtime;
+        $totaltime = ceil(($bathtime + $groomtime)/15)*15;
         
         if(empty($totaltime)) {
             echo "<p>We're sorry, but the total time is zero.</p>";
             goto finish;
         }
         
-        $_SESSION['info']['TotalTime'] = ceil($totaltime/15)*15;
-        $_SESSION['info']['BathTime'] = ceil($bathtime/15)*15;
-        $_SESSION['info']['GroomTime'] = ceil($groomtime/15)*15;
+        // Round total time, but not individual times
+        $_SESSION['info']['TotalTime'] = $totaltime;
+        $_SESSION['info']['BathTime'] = $bathtime;
+        $_SESSION['info']['GroomTime'] = $groomtime;
+        
+        // Since dogs can be bathed and groomed concurrently, use just the groom time
+        // As the slot size
+        $slottime = ceil($groomtime/15)*15;
+        
+        $stmt = $database->query("SELECT Tiers FROM Globals");
+        $tiers = $stmt->fetch();
 ?>
     <form action="schedule.php" method="post" id="day">
         <label for="datepicker">Please pick a day to schedule your pet: </label>
@@ -226,23 +246,20 @@ if($_SESSION['authenticated'] < 1) {
         $(function() {
             
             var events = <?php echo json_encode($events); ?>;
-            var time = <?php echo $totaltime; ?>;
+            var totaltime = <?php echo $totaltime; ?>;
+            var slottime = <?php echo $slottime; ?>;
             var groomers = <?php echo json_encode($groomers); ?>;
+            var tiers = <?php echo $tiers['Tiers']; ?>;
+            var size = "<?php echo $_SESSION['info']['Size']; ?>";
             
             var timeslots = Array();
-            var offset;
             var selectedinfo = Array();
             
+            // Offset of the Salon's timezone from UTC.
+            var offset = moment.tz.zone("<?php echo $_SESSION['info']['Timezone']; ?>").offset(moment())*60;
             
-            var nowInEasternTime = moment().tz("America/New_York");
-            
-            if(nowInEasternTime.isDST()) {
-                offset = -240;
-            }
-            else {
-                offset = -300;
-            }
-            
+            // Offset of user's local timezone from UTC.
+            var localoffset = new Date().getTimezoneOffset();
             
             // Function that given a day and array of groomers
             // returns the ID of the groomer with the fewest scheduled
@@ -257,9 +274,8 @@ if($_SESSION['authenticated'] < 1) {
                         continue;
                     }
 
-                    var event = moment.tz(events[i]['StartTime'] * 1000, "America/New_York");
-
-                    if(events[i]['Recurring'] == 1 && (events[i]['EndDate'] != null ? today.isSameOrBefore(moment.tz(events[i]['EndDate'] * 1000, "America/New_York"), "day") : 1)) {
+                    var event = moment((events[i]['StartTime'] - (offset - localoffset*60)) * 1000);
+                    if(events[i]['Recurring'] == 1 && (events[i]['EndDate'] != null ? today.isSameOrBefore(moment((events[i]['EndDate'] - (offset - localoffset*60)) * 1000), "day") : 1)) {
                         while(event.isSameOrBefore(today, "day")) {
                             event.add(events[i]['RecInterval'], 'weeks'); // Add the number of weeks as an interval
                             if(event.isSame(today, "day")) {
@@ -270,12 +286,12 @@ if($_SESSION['authenticated'] < 1) {
 
                     if(event.isSame(today, "day")) {
                         id = events[i]['GroomerID'];
-                        for(var i = 0; i < groomers.length; i++) {
-                            if(!groomers[i].hasOwnProperty('count')) {
-                                groomers['count'] = 0;
+                        for(var j = 0; j < groomers.length; j++) {
+                            if(!groomers[j].hasOwnProperty('count')) {
+                                groomers[j]['count'] = 0;
                             }
-                            if(groomers[i]['ID'] == id) {
-                                groomers[i]['count']++;
+                            if(groomers[j]['ID'] == id) {
+                                groomers[j]['count']++;
                             }
                         }
                     }
@@ -304,7 +320,6 @@ if($_SESSION['authenticated'] < 1) {
             // of minutes which that groomer has available that day, or
             // false if there are none.
             function getavailable(id, today) {
-                
                 var todayminutes = Array();
 
                 // Fill array with minutes spa is open today
@@ -314,6 +329,9 @@ if($_SESSION['authenticated'] < 1) {
                     case 3:
                         var i = 540; // 0900 in minutes
                         while(i <= 1020) { // 1700 in minutes
+                            if(i == 780) {
+                                i = 810; // Add a break from 1:00 - 1:30
+                            }
                             todayminutes.push(i);
                             i++;
                         }
@@ -324,6 +342,9 @@ if($_SESSION['authenticated'] < 1) {
                     case 5:
                         var i = 480; // 0900 in minutes
                         while(i <= 1080) { // 1800 in minutes
+                            if(i == 780) {
+                                i = 810; // Add a break from 1:00 - 1:30
+                            }
                             todayminutes.push(i);
                             i++;
                         }
@@ -333,6 +354,9 @@ if($_SESSION['authenticated'] < 1) {
                     case 6:
                         var i = 540; // 0900 in minutes
                         while(i <= 900) { // 1500 in minutes
+                            if(i == 780) {
+                                i = 810; // Add a break from 1:00 - 1:30
+                            }
                             todayminutes.push(i);
                             i++;
                         }
@@ -347,10 +371,10 @@ if($_SESSION['authenticated'] < 1) {
                     
                     // Creating a date from a UTC timestamp, returns a local date. Subtract the offset
                     // to counteract this.
-                    var eventstart = new Date((events[i]['StartTime'] - offset) * 1000);
+                    var eventstart = new Date((events[i]['StartTime'] - (offset - localoffset*60)) * 1000);
 
 
-                    if(events[i]['Recurring'] == 1 && (events[i]['EndDate'] != null ? today <= new Date((events[i]['EndDate'] - offset) * 1000) : 1)) {
+                    if(events[i]['Recurring'] == 1 && (events[i]['EndDate'] != null ? today <= new Date((events[i]['EndDate'] - (offset - localoffset*60)) * 1000) : 1)) {
                         while(eventstart <= today) {
                             eventstart = new Date(eventstart.getTime() + (604800000 * events[i]['RecInterval'])); // Add the number of weeks as an interval
                             if(eventstart.toDateString() === today.toDateString()) {
@@ -362,7 +386,7 @@ if($_SESSION['authenticated'] < 1) {
                     if(eventstart.toDateString() === today.toDateString()) {
                         // Remove scheduled events' times from today's minutes array
                         var startminutes = (eventstart.getHours() * 60) + (eventstart.getMinutes());
-                        var endminutes = events[i]['TotalTime'] + startminutes - 1;
+                        var endminutes = Math.ceil(events[i]['GroomTime']/15)*15 + startminutes - 1;
                         var eventminutes = Array();
                         while(startminutes <= endminutes) {
                             eventminutes.push(startminutes);
@@ -426,6 +450,7 @@ if($_SESSION['authenticated'] < 1) {
                 format: 'MM/DD/YYYY',
                 minDate: new Date(),
                 disableDayFn: function(today) {
+                    
                     // Disable Sundays and Mondays
                     if(today.getDay() == 0 || today.getDay() == 1) {
                         return true;
@@ -442,7 +467,11 @@ if($_SESSION['authenticated'] < 1) {
                         if(!minutes) {
                             continue;
                         }
-                        var slots = slotfits(minutes, time);
+                        
+                        // Correct slottime for each groomer's tier
+                        var temp = groomers[i]['Tier'];
+                        var groomerslottime = slottime + tiers[temp][size];
+                        var slots = slotfits(minutes, groomerslottime);
                         if(slots) {
                             
                             timeslots[index].push(Array());
@@ -477,11 +506,12 @@ if($_SESSION['authenticated'] < 1) {
                     var options = $("#slot");
                     options.empty();
                     var littleslots = Array();
-                    var x = Math.ceil(time/15); // The number of 15 minute intervals of a time
+                    var x = Math.ceil(totaltime/15); // The number of 15 minute intervals in the slot being scheduled
                     
                     // Break up the available slots into slots the size of the event.
                     // i = every groomer
                     for(var i = 0; i < timeslots[today].length; i++) {
+                        
                         if(timeslots[today][i]['groomer']['ID'] != groomer) {
                             continue;
                         }
@@ -491,16 +521,17 @@ if($_SESSION['authenticated'] < 1) {
                             for(var k = 0; k < timeslots[today][i]['slots'][j]['length']; k += 15) {
                                 // If the current 15 minute start time would make the end time greater than the
                                 // slot's end time, don't add it to littleslots (because it's too long)
-                                if(!(timeslots[today][i]['slots'][j]['start'] + k + x*15 > timeslots[today][i]['slots'][j]['end'])) {
+                                // We're also adding an additional 30 minutes to the end of each slot for pickup
+                                if(!(timeslots[today][i]['slots'][j]['start'] + k + x*15 + 30 > timeslots[today][i]['slots'][j]['end'])) {
                                     index++;
                                     littleslots[index] = Array();
                                     littleslots[index]['start'] = timeslots[today][i]['slots'][j]['start'] + k;
-                                    littleslots[index]['end'] = littleslots[index]['start'] + x*15;
+                                    littleslots[index]['end'] = littleslots[index]['start'] + x*15 + 30;
                                 }
                             }
                         }
                     }
-
+                    
                     for(var i = 0; i < littleslots.length; i++) {
                         var start = littleslots[i]['start'];
                         var end = littleslots[i]['end'];
@@ -525,7 +556,8 @@ if($_SESSION['authenticated'] < 1) {
                             endhour = 12;
                         }
                         
-                        var timestamp = (start*60) + (today/1000) + offset;
+                        
+                        var timestamp = (start*60) + (today/1000) + (offset - localoffset*60);
                         options.append($("<option />").val(groomer + "-" + timestamp + "-" + starthour + ":" + (startmin < 10 ? "0" + startmin : startmin) + " " + s + "-" + endhour + ":" + (endmin < 10 ? "0" + endmin : endmin) + " " + e).text(starthour + ":" + (startmin < 10 ? "0" + startmin : startmin) + " " + s + " - " + endhour + ":" + (endmin < 10 ? "0" + endmin : endmin) + " " + e));
                     }
                 }
@@ -545,8 +577,7 @@ if($_SESSION['authenticated'] < 1) {
             $stmt->execute();
             $res = $stmt->fetch();
 
-            $_SESSION['info']['BathTime'] = $pet['BathTime'];
-            $_SESSION['info']['GroomTime'] = $pet['GroomTime'];
+            $_SESSION['info']['Time'] = json_decode($pet['Time'], true);
             $_SESSION['info']['Size'] = $res['Size'];
             $_SESSION['info']['GroomPrice'] = $res['GroomPrice'];
             $_SESSION['info']['BathPrice'] = $res['BathPrice'];
@@ -555,7 +586,7 @@ if($_SESSION['authenticated'] < 1) {
             $services = $stmt->fetchAll();
             if(!empty($services)) {
                 $_SESSION['info']['pet'] = $pet['ID'];
-                $stmt = $database->query("SELECT Name, ID FROM Users WHERE Access = 2");
+                $stmt = $database->query("SELECT Name, ID, Tier FROM Users WHERE Access = 2");
                 $groomers = $stmt->fetchAll();
                 
                 $stmt = $database->query("SELECT SigUpcharge, SigPrice FROM Globals");
@@ -608,6 +639,10 @@ if($_SESSION['authenticated'] < 1) {
         $stmt->bindValue(':ID', $id);
         $stmt->execute();
         $pets = $stmt->fetchAll();
+        
+        $stmt = $database->query("SELECT Timezone FROM Globals");
+        $timezone = $stmt->fetch();
+        $_SESSION['info']['Timezone'] = $timezone['Timezone'];
 
         if(!empty($pets)) {
             

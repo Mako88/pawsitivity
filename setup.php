@@ -152,7 +152,7 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
 
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
-    $stmt = $database->prepare('INSERT INTO Users (ID, Email, Password, Access, Visited) VALUES (:ID, :Email, :Password, 3, 1)');
+    $stmt = $database->prepare('INSERT INTO Users (ID, Email, Password, Access, Visited) VALUES (:ID, :Email, :Password, 5, 1)');
     $stmt->bindValue(':ID', $_POST['username']);
     $stmt->bindValue(':Email', $_POST['email']);
     $stmt->bindValue(':Password', $password);

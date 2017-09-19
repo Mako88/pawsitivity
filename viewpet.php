@@ -96,6 +96,13 @@ if(!empty($_GET['id'])) {
         $stmt->execute();
         $pet = $stmt->fetch();
         $pet['Time'] = json_decode($pet['Time'], true);
+        $stmt = $database->prepare("SELECT * FROM Scheduling WHERE PetID = :ID");
+        $stmt->bindValue(':ID', $id);
+        $stmt->execute();
+        $events = $stmt->fetchAll();
+        $stmt = $database->query("SELECT Timezone FROM Globals");
+        $temp = $stmt->fetch();
+        $timezone = $temp['Timezone'];
         $stmt = $database->prepare("SELECT FirstName, LastName FROM Owners WHERE ID = :ID");
         $stmt->bindValue(':ID', $pet['OwnedBy']);
         $stmt->execute();
@@ -130,9 +137,46 @@ if(!empty($_GET['id'])) {
                 </tr>
                 <tr><td>Preferred Groomer</td><td><?php echo ((!empty($groomername['Name'])) ? $groomername['Name'] : 'None'); ?></td></tr>
                 <tr><td>Requires Two People</td><td><?php echo (($pet['TwoPeople']) ? 'yes' : 'no'); ?></td></tr>
-                <tr><td>Owned By</td><td><a href="viewclient.php?id='<?php echo $pet['OwnedBy'] ?>"><?php echo $owner['FirstName'] . ' ' . $owner['LastName'] . ' ' . '(' . $pet['OwnedBy'] . ')'; ?></a></td></tr>';
+                <tr><td>Owned By</td><td><a href="viewclient.php?id=<?php echo $pet['OwnedBy'] ?>"><?php echo $owner['FirstName'] . ' ' . $owner['LastName'] . ' ' . '(' . $pet['OwnedBy'] . ')'; ?></a></td></tr>
             </table>
-        <?php }
+            <h2>Scheduling:</h2>
+            <?php
+                if(empty($events)) {
+                    echo "<p>This pet doesn't have anything scheduled. :/</p>";
+                }
+                else {
+                    $futureevents = array();
+                    $pastevents = array();
+                    foreach($events as $event) {
+                        if($event['StartTime'] > time()) {
+                            array_push($futureevents, $event);
+                        }
+                        else {
+                            array_push($pastevents, $event);
+                        }
+                    }
+                    if(!empty($futureevents)) {
+                        echo "<h3>Future Visits:</h3>";
+                        echo "<table>";
+                        foreach($futureevents as $event) {
+                            $date = new DateTime("@" . ($event['StartTime']));
+                            $date->setTimezone(new DateTimeZone($timezone));
+                            echo "<tr><td>" . $date->format("m/d/Y @ h:i A") . "</td></tr>";
+                        }
+                        echo "</table>";
+                    }
+                    if(!empty($pastevents)) {
+                        echo "<h3>Past Visits:</h3>";
+                        echo "<table>";
+                        foreach($pastevents as $event) {
+                            $date = new DateTime("@" . ($event['StartTime']));
+                            $date->setTimezone(new DateTimeZone($timezone));
+                            echo "<tr><td>" . $date->format("m/d/Y @ h:i A") . "</td></tr>";
+                        }
+                        echo "</table>";
+                    }
+                }
+        }
         else {
             $stmt = $database->query("SELECT Name, ID FROM Users WHERE Access = 2");
             $groomers = $stmt->fetchAll(); ?>

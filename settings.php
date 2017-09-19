@@ -2,7 +2,7 @@
 include "include/header.php";
 
 // Only allow admin to edit global settings
-if($_SESSION['authenticated'] < 3) {
+if($_SESSION['authenticated'] != 5) {
     header("Location: " . $http . $_SERVER['HTTP_HOST'] . "/login.php?redirect=" . $redirect);
     die();
 }
