@@ -27,6 +27,19 @@
     
     $stmt = $database->query("SELECT * FROM Scheduling WHERE PetID != -1");
     $events = $stmt->fetchAll();
+    $allevents = array();
+    
+    foreach($events as $event) {
+        if($event['Recurring'] == 1) {
+            for($i = $event['StartTime']; $i < $event['EndDate']; $i += $event['RecInterval']*604800) {                      
+                $event['StartTime'] = $i;
+                array_push($allevents, $event);
+            }
+        }
+        else {
+            array_push($allevents, $event);
+        }
+    }
     
     $stmt = $database->query("SELECT ID, Name FROM Pets");
     $pets = $stmt->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_GROUP);
@@ -50,7 +63,7 @@
         // Offset of user's local timezone from UTC.
         var localoffset = new Date().getTimezoneOffset();
         
-        var events = <?php echo json_encode($events); ?>;
+        var events = <?php echo json_encode($allevents); ?>;
         
         var pets = <?php echo json_encode($pets); ?>;
         
@@ -89,6 +102,9 @@
                 if(view.name === "month") {
                     $('#calendar').fullCalendar('gotoDate', event.start);
                     $('#calendar').fullCalendar('changeView', 'listDay');
+                }
+                else if(view.name === "listDay") {
+                    
                 }
             }
         });
