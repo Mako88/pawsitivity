@@ -99,14 +99,14 @@
                     break;
                 case 'groom':
                     for(var i = 0; i < events.length; i++) {
-                        objects[i]['start'] = (events[i]['StartTime'] - offset + events[i]['BathTime'] * 60) * 1000;
+                        objects[i]['start'] = (events[i]['StartTime'] - offset + Math.ceil(events[i]['BathTime']/15)*15 * 60) * 1000;
                         objects[i]['end'] = (events[i]['StartTime'] - offset + events[i]['TotalTime'] * 60) * 1000;
                     }
                     break;
                 case 'bath':
                     for(var i = 0; i < events.length; i++) {
                         objects[i]['start'] = (events[i]['StartTime'] - offset) * 1000;
-                        objects[i]['end'] = (events[i]['StartTime'] + (events[i]['BathTime'] * 60) - offset) * 1000;
+                        objects[i]['end'] = (events[i]['StartTime'] + (Math.ceil(events[i]['BathTime']/15)*15 * 60) - offset) * 1000;
                     }
                     break;
             }
