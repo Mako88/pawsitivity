@@ -84,13 +84,63 @@
 
             objects.push(event);
         }
+        
+        function switchView(view) {
+            
+            var start;
+            var end;
+            
+            switch(view) {
+                case 'all':
+                    for(var i = 0; i < objects.length; i++) {
+                        objects[i]['start'] = (events[i]['StartTime'] - offset) * 1000;
+                        objects[i]['end'] = (events[i]['StartTime'] + (events[i]['TotalTime'] * 60) - offset) * 1000;
+                    }
+                    break;
+                case 'groom':
+                    for(var i = 0; i < events.length; i++) {
+                        objects[i]['start'] = (events[i]['StartTime'] - offset + events[i]['BathTime'] * 60) * 1000;
+                        objects[i]['end'] = (events[i]['StartTime'] - offset + events[i]['TotalTime'] * 60) * 1000;
+                    }
+                    break;
+                case 'bath':
+                    for(var i = 0; i < events.length; i++) {
+                        objects[i]['start'] = (events[i]['StartTime'] - offset) * 1000;
+                        objects[i]['end'] = (events[i]['StartTime'] + (events[i]['BathTime'] * 60) - offset) * 1000;
+                    }
+                    break;
+            }
+            
+            $('#calendar').fullCalendar('removeEvents');
+            $('#calendar').fullCalendar( 'renderEvents', objects );
+        }
 
         $('#calendar').fullCalendar({
             events: objects,
+            customButtons: {
+                viewAll: {
+                    text: 'All',
+                    click: function() {
+                        switchView('all')
+                    }
+                },
+                viewGroom: {
+                    text: 'Groom',
+                    click: function() {
+                        switchView('groom')
+                    }
+                },
+                viewBath: {
+                    text: 'Bath',
+                    click: function() {
+                        switchView('bath')
+                    }
+                }
+            },
             header: {
                 left:   'title',
                 center: '',
-                right:  'today month listDay prev,next'
+                right:  'viewAll viewGroom viewBath today month listDay prev,next'
             },
             dayClick: function(date, jsEvent, view) {
                 if (view.name === "month") {

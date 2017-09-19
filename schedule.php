@@ -297,12 +297,12 @@ if($_SESSION['authenticated'] < 1) {
         
         // Round total time, but not individual times
         $_SESSION['info']['TotalTime'] = $totaltime;
-        $_SESSION['info']['BathTime'] = $bathtime;
-        $_SESSION['info']['GroomTime'] = $groomtime;
+        $_SESSION['info']['BathTime'] = ceil($bathtime/15)*15;
+        $_SESSION['info']['GroomTime'] = ceil($groomtime/15)*15;
         
         // Since dogs can be bathed and groomed concurrently, use just the groom time
         // as the slot size
-        $slottime = ceil($groomtime/15)*15;
+        $slottime = $groomtime;
         
         $stmt = $database->query("SELECT Tiers FROM Globals");
         $tiers = $stmt->fetch();
