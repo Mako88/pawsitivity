@@ -111,6 +111,13 @@ if(!empty($_GET['id'])) {
         $stmt->bindValue(':ID', $pet['PreferredGroomer']);
         $stmt->execute();
         $groomername = $stmt->fetch();
+        
+        if(!empty($_GET['delete'])) {
+            $stmt = $database->prepare("DELETE FROM Scheduling WHERE ID = :ID");
+            $stmt->bindValue(':ID', $_GET['delete']);
+            $stmt->execute();
+        }
+        
         if(empty($_GET['e'])) { ?>
             <a href="viewpet.php?id=<?php echo $pet['ID']; ?>&e=1">Edit Pet</a>
             <?php echo (!empty($pet['Picture'])) ? '<img src="' . $pet['Picture'] . '" />' : ''; ?>
@@ -136,7 +143,7 @@ if(!empty($_GET['id'])) {
                     </td>
                 </tr>
                 <tr><td>Preferred Groomer</td><td><?php echo ((!empty($groomername['Name'])) ? $groomername['Name'] : 'None'); ?></td></tr>
-                <tr><td>Requires Two People</td><td><?php echo (($pet['TwoPeople']) ? 'yes' : 'no'); ?></td></tr>
+                <tr><td>Requires Two People</td><td><?php echo (($pet['TwoPeople'] == 1) ? 'yes' : 'no'); ?></td></tr>
                 <tr><td>Owned By</td><td><a href="viewclient.php?id=<?php echo $pet['OwnedBy'] ?>"><?php echo $owner['FirstName'] . ' ' . $owner['LastName'] . ' ' . '(' . $pet['OwnedBy'] . ')'; ?></a></td></tr>
             </table>
             <h2>Scheduling:</h2>
@@ -161,7 +168,7 @@ if(!empty($_GET['id'])) {
                         foreach($futureevents as $event) {
                             $date = new DateTime("@" . ($event['StartTime']));
                             $date->setTimezone(new DateTimeZone($timezone));
-                            echo "<tr><td>" . $date->format("m/d/Y @ h:i A") . "</td></tr>";
+                            echo '<tr><td>' . $date->format("m/d/Y @ h:i A") . ' <a href="viewpet.php?id=' . $_GET['id'] . '&delete=' . $event['ID'] . '" onclick="return confirm(\'Are you sure you want to delete this event?\')">Delete</a></td></tr>';
                         }
                         echo "</table>";
                     }
@@ -171,7 +178,7 @@ if(!empty($_GET['id'])) {
                         foreach($pastevents as $event) {
                             $date = new DateTime("@" . ($event['StartTime']));
                             $date->setTimezone(new DateTimeZone($timezone));
-                            echo "<tr><td>" . $date->format("m/d/Y @ h:i A") . "</td></tr>";
+                            echo '<tr><td>' . $date->format("m/d/Y @ h:i A") . ' <a href="viewpet.php?id=' . $_GET['id'] . '&delete=' . $event['ID'] . '" onclick="return confirm(\'Are you sure you want to delete this event?\')">Delete</a></td></tr>';
                         }
                         echo "</table>";
                     }
@@ -273,7 +280,7 @@ if(!empty($_GET['id'])) {
                         }
                     ?>
                 </select><br />
-                <label for="TwoPeople">Requires Two People: </label><input type="checkbox" name="TwoPeople" id="TwoPeople" value="<?php echo $pet['TwoPeople']; ?>"><br />
+                <label for="TwoPeople">Requires Two People: </label><input type="checkbox" name="TwoPeople" id="TwoPeople" value="1" <?php echo ($pet['TwoPeople'] == 1 ? 'checked' : ''); ?>><br />
                 <input type="submit" value="Submit">
             </form>
         <?php }

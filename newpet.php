@@ -224,7 +224,7 @@ $(function() {
             }
         ?>
     </select><br />
-    <label for="TwoPeople">Requires Two People: </label><input type="checkbox" name="TwoPeople" id="TwoPeople"><br />
+    <label for="TwoPeople">Requires Two People: </label><input type="checkbox" name="TwoPeople" id="TwoPeople" value="1"><br />
     <input type="submit" value="Submit">
 </form>
 

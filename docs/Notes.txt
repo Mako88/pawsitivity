@@ -1,6 +1,6 @@
 schedule.php:
 	Don't allow users to schedule if Missed field is 1, tell them to call.
-	- Check if a dog requires two people - if so, add GroomTime to BathTime and mark as 2nd person
+	- If a dog requires two people, differentiate bathing time and helping time
     Add price
     Disable groom services when bath selected
 	Don't allow scheduling in the past (today)
@@ -8,7 +8,7 @@ schedule.php:
 	
 
 bathcalendar/groomcalendar:
-	- Create separate calendars for bathing and grooming
+	- Add needed information/links?
     
 	
 search.php:
@@ -24,8 +24,6 @@ newpet.php/viewpet.php:
 
 viewevent.php:
 	Allow manually editing scheduled times by employees
-    - Allow deleting scheduled times
-
 
 services.php:
 	Allow editing services

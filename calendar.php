@@ -25,6 +25,9 @@
 <?php 
     include "include/menu.php";
     
+    $stmt = $database->query("SELECT ID, Name, TwoPeople FROM Pets");
+    $pets = $stmt->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_GROUP);
+    
     $stmt = $database->query("SELECT * FROM Scheduling WHERE PetID != -1");
     $events = $stmt->fetchAll();
     $allevents = array();
@@ -33,16 +36,15 @@
         if($event['Recurring'] == 1) {
             for($i = $event['StartTime']; $i < $event['EndDate']; $i += $event['RecInterval']*604800) {                      
                 $event['StartTime'] = $i;
+                $event['TwoPeople'] = $pets[$event['PetID']][0]['TwoPeople'];
                 array_push($allevents, $event);
             }
         }
         else {
+            $event['TwoPeople'] = $pets[$event['PetID']][0]['TwoPeople'];
             array_push($allevents, $event);
         }
     }
-    
-    $stmt = $database->query("SELECT ID, Name FROM Pets");
-    $pets = $stmt->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_GROUP);
     
 ?>
     
@@ -78,7 +80,8 @@
                 id: events[i]['ID'],
                 start: (events[i]['StartTime'] - offset) * 1000,
                 end: (events[i]['StartTime'] + (events[i]['TotalTime'] * 60) - offset) * 1000,
-                title: pets[index][0]['Name']
+                title: pets[index][0]['Name'],
+                TwoPeople: events[i]['TwoPeople']
             };
 
 
@@ -106,7 +109,12 @@
                 case 'bath':
                     for(var i = 0; i < events.length; i++) {
                         objects[i]['start'] = (events[i]['StartTime'] - offset) * 1000;
-                        objects[i]['end'] = (events[i]['StartTime'] + (Math.ceil(events[i]['BathTime']/15)*15 * 60) - offset) * 1000;
+                        if(objects[i]['TwoPeople'] == 1) {
+                            objects[i]['end'] = (events[i]['StartTime'] - offset + events[i]['TotalTime'] * 60) * 1000;
+                        }
+                        else {
+                            objects[i]['end'] = (events[i]['StartTime'] + (Math.ceil(events[i]['BathTime']/15)*15 * 60) - offset) * 1000;
+                        }
                     }
                     break;
             }
