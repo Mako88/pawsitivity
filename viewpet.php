@@ -95,6 +95,10 @@ if(!empty($_GET['id'])) {
         $stmt->bindValue(':ID', $id);
         $stmt->execute();
         $pet = $stmt->fetch();
+        $stmt = $database->prepare("SELECT Name FROM Breeds WHERE ID = :ID");
+        $stmt->bindValue(':ID', $pet['Breed']);
+        $stmt->execute();
+        $breed = $stmt->fetch();
         $pet['Time'] = json_decode($pet['Time'], true);
         $stmt = $database->prepare("SELECT * FROM Scheduling WHERE PetID = :ID");
         $stmt->bindValue(':ID', $id);
@@ -124,7 +128,7 @@ if(!empty($_GET['id'])) {
             <table>
                 <tr><td>ID</td><td><?php echo $pet['ID']; ?></td></tr>
                 <tr><td>Name</td><td><?php echo $pet['Name']; ?></td></tr>
-                <tr><td>Breed</td><td><?php echo $pet['Breed']; ?></td></tr>
+                <tr><td>Breed</td><td><?php echo $breed['Name']; ?></td></tr>
                 <tr><td>Age</td><td><?php echo $pet['Age']; ?></td></tr>
                 <tr><td>Weight</td><td><?php echo $pet['Weight'] ?></td></tr>
                 <tr><td>Vaccines</td><td><?php echo ((!empty($pet['Vaccines'])) ? '<a href="' . $pet['Vaccines'] . '">View</a>' : ''); ?></td></tr>
