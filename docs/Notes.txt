@@ -5,7 +5,8 @@ schedule.php:
     Disable groom services when bath selected
 	Don't allow scheduling in the past (today)
     - Only allow 2 large dogs at a time
-	
+    Check "This breed doesn't get groomed", and disable the groom options if enabled
+    
 
 bathcalendar/groomcalendar:
 	- Add needed information/links?
@@ -20,6 +21,7 @@ newpet.php/viewpet.php:
 	- Make "Scheduled" section links to view/edit events.
 	Change time to "clicker" in 15 minute intervals on newpet page (don't allow base editing)	
     - Add link to "Schedule this pet"
+    - Add checkbox "Client can schedule groom" Which is unchecked by default on breeds with "doesn't get groomed" set. This can be manually checked after the times have been entered by staff.
     
 
 viewevent.php:
@@ -36,6 +38,8 @@ newclient.php/viewclient.php:
 
 newbreed.php/editbreed.php:
 	Allow editing/deleting breeds
+    Add checkbox "This breed doesn't get groomed"
+    Allow "0" in time and price
     
 
 employeeschedule.php:

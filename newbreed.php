@@ -20,7 +20,7 @@ if($_SESSION['authenticated'] < 2) {
 <h2>Add Breed</h2>
 <?php
 
-if(!empty($_POST['Name']) && isset($_POST['Group']) && !empty($_POST['Size']) && !empty($_POST['GroomPrice']) && !empty($_POST['BathPrice'])) {
+if(!empty($_POST['Name']) && isset($_POST['Group']) && !empty($_POST['Size']) && isset($_POST['GroomPrice']) && isset($_POST['BathPrice'])) {
 
     if(is_array($_POST['Time'])) {
         $stmt = $database->prepare('INSERT INTO Breeds (Name, BreedGroup, Size, Time, GroomPrice, BathPrice) VALUES (:Name, :Group, :Size, :Time, :GroomPrice, :BathPrice)');
