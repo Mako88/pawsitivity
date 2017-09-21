@@ -128,7 +128,7 @@ if(!empty($_GET['id'])) {
             <table>
                 <tr><td>ID:</td><td><?php echo $pet['ID']; ?></td></tr>
                 <tr><td>Name:</td><td><?php echo $pet['Name']; ?></td></tr>
-                <tr><td>Breed:</td><td><?php echo $breed['Name']; ?></td></tr>
+                <tr><td>Breed:</td><td><a href="viewbreed.php?id=<?php echo $pet['Breed']; ?>"><?php echo $breed['Name']; ?></a></td></tr>
                 <tr><td>Age:</td><td><?php echo $pet['Age']; ?></td></tr>
                 <tr><td>Weight:</td><td><?php echo $pet['Weight'] ?></td></tr>
                 <tr><td>Vaccines:</td><td><?php echo ((!empty($pet['Vaccines'])) ? '<a href="' . $pet['Vaccines'] . '">View</a>' : ''); ?></td></tr>
