@@ -119,10 +119,10 @@ if(!empty($_GET['id'])) {
                     <td>
                         <strong>Bath Only:</strong><br />
                         Bath Time: <?php echo $breed['Time']['Bath']['BathTime']; ?><br />
-                        Groom Time: <?php echo $pet['Time']['Bath']['GroomTime']; ?><br />
+                        Groom Time: <?php echo $breed['Time']['Bath']['GroomTime']; ?><br />
                         <strong>Bath &amp; Groom:</strong><br />
-                        Bath Time: <?php echo $pet['Time']['Groom']['BathTime']; ?><br />
-                        Groom Time: <?php echo $pet['Time']['Groom']['GroomTime']; ?><br />
+                        Bath Time: <?php echo $breed['Time']['Groom']['BathTime']; ?><br />
+                        Groom Time: <?php echo $breed['Time']['Groom']['GroomTime']; ?><br />
                     </td>
                 </tr>
                 <tr><td>Base Bath Price: </td><td><?php echo $breed['BathPrice']; ?></td></tr>
