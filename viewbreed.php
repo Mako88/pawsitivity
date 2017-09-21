@@ -27,7 +27,7 @@ if(!empty($_GET['id'])) {
     $stmt->bindValue(':ID', $id);
     $stmt->execute();
     $breed = $stmt->fetch();
-    if(!empty($breeds)) {
+    if(!empty($breed)) {
         if(!empty($_POST['Name']) && isset($_POST['Group']) && !empty($_POST['Size']) && isset($_POST['GroomPrice']) && isset($_POST['BathPrice']) && !empty($_GET['id'])) {
 
             if(is_array($_POST['Time'])) {
