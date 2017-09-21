@@ -347,7 +347,7 @@ else {
                     break;
             }
             echo '</td>';
-            $time = json_decode($breeds['Time'], true);
+            $time = json_decode($breed['Time'], true);
             echo '<td><strong>Bath Time: </strong>' . $time['Bath']['BathTime'] . '<br />';
             echo '<strong>Groom Time: </strong>' . $time['Bath']['GroomTime'] . '</td>';
             echo '<td><strong>Bath Time: </strong>' . $time['Groom']['BathTime'] . '<br />';
