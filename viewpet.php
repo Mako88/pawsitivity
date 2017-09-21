@@ -132,7 +132,7 @@ if(!empty($_GET['id'])) {
         
         if(empty($_GET['e'])) { ?>
             <a href="viewpet.php?id=<?php echo $pet['ID']; ?>&e=1">Edit Pet</a>
-            <a href="viewbreed.php?id=<?php echo $pet['ID']; ?>&delpet=<?php echo $pet['ID']; ?>" onclick="return confirm('Are you sure you want to delete this pet?')">Delete Pet</a><br />
+            <a href="viewpet.php?id=<?php echo $pet['ID']; ?>&delpet=<?php echo $pet['ID']; ?>" onclick="return confirm('Are you sure you want to delete this pet?')">Delete Pet</a><br />
             <?php echo (!empty($pet['Picture'])) ? '<img src="' . $pet['Picture'] . '" />' : ''; ?>
             <table>
                 <tr><td>ID:</td><td><?php echo $pet['ID']; ?></td></tr>

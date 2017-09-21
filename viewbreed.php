@@ -110,7 +110,7 @@ if(!empty($_GET['id'])) {
     
             $breed['Time'] = json_decode($breed['Time'], true); ?>
     
-            <a href="viewbreed.php?id=<?php echo $breed['ID']; ?>&e=1">Edit Breed</a><br />
+            <a href="viewbreed.php?id=<?php echo $breed['ID']; ?>&e=1">Edit Breed</a>
             <a href="viewbreed.php?id=<?php echo $breed['ID']; ?>&delete=<?php echo $breed['ID']; ?>" onclick="return confirm('Are you sure you want to delete this breed?')">Delete Breed</a><br />
             <table>
                 <tr><td>ID: </td><td><?php echo $breed['ID']; ?></td></tr>
