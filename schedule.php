@@ -647,7 +647,7 @@ if($_SESSION['authenticated'] < 1) {
     </script>
 <?php
     }
-    else if(!empty($_POST['pet'])) {
+    else if(!empty($_POST['pet']) || (!empty($_GET['pet']) && $_SESSION['authenticated'] > 1)) {
         $stmt = $database->prepare("SELECT * FROM Pets WHERE ID = :ID");
         $stmt->bindValue(':ID', $_POST['pet']);
         $stmt->execute();
