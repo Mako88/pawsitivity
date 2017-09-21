@@ -39,9 +39,6 @@ if(!empty($_GET['id'])) {
                 $stmt->bindValue(':GroomPrice', $_POST['GroomPrice']);
                 $stmt->bindValue(':BathPrice', $_POST['BathPrice']);
                 $stmt->execute();
-
-                echo "<p>Breed added!</p>";
-                goto finish;
             }
             else {
                 echo "<p>The Time information was corrupted.</p>";
