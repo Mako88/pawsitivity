@@ -31,13 +31,14 @@ if(!empty($_GET['id'])) {
         if(!empty($_POST['Name']) && isset($_POST['Group']) && !empty($_POST['Size']) && isset($_POST['GroomPrice']) && isset($_POST['BathPrice']) && !empty($_GET['id'])) {
 
             if(is_array($_POST['Time'])) {
-                $stmt = $database->prepare('UPDATE Breeds Set Name=:Name, BreedGroup=:Group, Size=:Size, Time=:Time, GroomPrice=:GroomPrice, BathPrice=:BathPrice');
+                $stmt = $database->prepare('UPDATE Breeds Set Name=:Name, BreedGroup=:Group, Size=:Size, Time=:Time, GroomPrice=:GroomPrice, BathPrice=:BathPrice WHERE ID = :ID');
                 $stmt->bindValue(':Name', $_POST['Name']);
                 $stmt->bindValue(':Group', $_POST['Group']);
                 $stmt->bindValue(':Size', $_POST['Size']);
                 $stmt->bindValue(':Time', json_encode($_POST['Time']));
                 $stmt->bindValue(':GroomPrice', $_POST['GroomPrice']);
                 $stmt->bindValue(':BathPrice', $_POST['BathPrice']);
+                $stmt->bindValue(':ID', $id);
                 $stmt->execute();
                 
                 $stmt = $database->prepare("SELECT * FROM Breeds WHERE ID = :ID");
