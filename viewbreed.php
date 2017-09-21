@@ -155,11 +155,11 @@ if(!empty($_GET['id'])) {
                 </select><br />
                 <label>Time (In Minutes): </label><br />
                     <label>Bath Only: </label><br />
-                        <label for="BathBath">Bathing Time: </label><input id="BathBath" type="text" name="Time[Bath][BathTime]" value="<?php $breed['Time']['Bath']['BathTime'] ?>" /><br />
-                        <label for="BathGroom">Grooming Time: </label><input id="BathGroom" type="text" name="Time[Bath][GroomTime]" value="<?php $breed['Time']['Bath']['GroomTime'] ?>" /><br />
+                        <label for="BathBath">Bathing Time: </label><input id="BathBath" type="text" name="Time[Bath][BathTime]" value="<?php echo $breed['Time']['Bath']['BathTime']; ?>" /><br />
+                        <label for="BathGroom">Grooming Time: </label><input id="BathGroom" type="text" name="Time[Bath][GroomTime]" value="<?php echo $breed['Time']['Bath']['GroomTime']; ?>" /><br />
                     <label>Bath and Groom: </label><br />
-                        <label for="GroomBath">Bathing Time: </label><input id="GroomBath" type="text" name="Time[Groom][BathTime]" value="<?php $breed['Time']['Groom']['BathTime'] ?>" /><br />
-                        <label for="GroomGroom">Grooming Time: </label><input id="GroomGroom" type="text" name="Time[Groom][GroomTime]" value="<?php $breed['Time']['Groom']['GroomTime'] ?>" /><br />
+                        <label for="GroomBath">Bathing Time: </label><input id="GroomBath" type="text" name="Time[Groom][BathTime]" value="<?php echo $breed['Time']['Groom']['BathTime']; ?>" /><br />
+                        <label for="GroomGroom">Grooming Time: </label><input id="GroomGroom" type="text" name="Time[Groom][GroomTime]" value="<?php echo $breed['Time']['Groom']['GroomTime']; ?>" /><br />
                 <label for="BathPrice">Base Bath Price: </label><input type="text" name="BathPrice" id="BathPrice" value="<?php echo $breed['BathPrice'] ?>"><br />
                 <label for="GroomPrice">Base Grooming Price: </label><input type="text" name="GroomPrice" id="GroomPrice" value="<?php echo $breed['GroomPrice'] ?>"><br />
                 <input type="submit" value="Submit">
