@@ -6,6 +6,7 @@ schedule.php:
 	Don't allow scheduling in the past (today)
     - Only allow 2 large dogs at a time
     Check "This breed doesn't get groomed", and disable the groom options if enabled
+    Make sure bath price and groom price aren't added
     
 
 bathcalendar/groomcalendar:

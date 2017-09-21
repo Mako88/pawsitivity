@@ -119,7 +119,7 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
             ID INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
             Name TEXT,
             BreedGroup INT(1),
-            Size VARCHAR(1),
+            Size VARCHAR(2),
             Time TEXT,
             GroomPrice INT(11),
             BathPrice INT(11)
