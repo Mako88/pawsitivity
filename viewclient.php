@@ -127,7 +127,7 @@ else {
     $stmt = $database->query("SELECT * FROM Owners");
     $clients = $stmt->fetchAll();
     if(!empty($clients)) {
-        echo '<table><th><td>ID</td><td>First Name</td><td>Last Name</td></th>';
+        echo '<table><tr><th>ID</th><th>First Name</th><th>Last Name</th></tr>';
         foreach($clients as $client) {
             echo '<tr style="cursor: pointer;" onclick="window.document.location=\'viewclient.php?id=' . $client['ID'] . '\'"><td>' . $client['ID'] . '</td><td>' . $client['FirstName'] . '</td><td>' . $client['LastName'] . '</td></tr>';
         }

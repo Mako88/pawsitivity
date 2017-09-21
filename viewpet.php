@@ -126,15 +126,15 @@ if(!empty($_GET['id'])) {
             <a href="viewpet.php?id=<?php echo $pet['ID']; ?>&e=1">Edit Pet</a>
             <?php echo (!empty($pet['Picture'])) ? '<img src="' . $pet['Picture'] . '" />' : ''; ?>
             <table>
-                <tr><td>ID</td><td><?php echo $pet['ID']; ?></td></tr>
-                <tr><td>Name</td><td><?php echo $pet['Name']; ?></td></tr>
-                <tr><td>Breed</td><td><?php echo $breed['Name']; ?></td></tr>
-                <tr><td>Age</td><td><?php echo $pet['Age']; ?></td></tr>
-                <tr><td>Weight</td><td><?php echo $pet['Weight'] ?></td></tr>
-                <tr><td>Vaccines</td><td><?php echo ((!empty($pet['Vaccines'])) ? '<a href="' . $pet['Vaccines'] . '">View</a>' : ''); ?></td></tr>
-                <tr><td>Notes</td><td><?php echo $pet['Notes']; ?></td></tr>
-                <tr><td>Info</td><td><?php echo $pet['Info']; ?></td></tr>
-                <tr><td>Dog of the Month Date</td><td><?php echo date('m/d/Y', $pet['DogOfMonth']); ?></td></tr>
+                <tr><td>ID:</td><td><?php echo $pet['ID']; ?></td></tr>
+                <tr><td>Name:</td><td><?php echo $pet['Name']; ?></td></tr>
+                <tr><td>Breed:</td><td><?php echo $breed['Name']; ?></td></tr>
+                <tr><td>Age:</td><td><?php echo $pet['Age']; ?></td></tr>
+                <tr><td>Weight:</td><td><?php echo $pet['Weight'] ?></td></tr>
+                <tr><td>Vaccines:</td><td><?php echo ((!empty($pet['Vaccines'])) ? '<a href="' . $pet['Vaccines'] . '">View</a>' : ''); ?></td></tr>
+                <tr><td>Notes:</td><td><?php echo $pet['Notes']; ?></td></tr>
+                <tr><td>Info:</td><td><?php echo $pet['Info']; ?></td></tr>
+                <tr><td>Dog of the Month Date:</td><td><?php echo date('m/d/Y', $pet['DogOfMonth']); ?></td></tr>
                 <tr>
                     <td>Time (In Minutes):</td>
                     <td>
@@ -146,9 +146,9 @@ if(!empty($_GET['id'])) {
                         Groom Time: <?php echo $pet['Time']['Groom']['GroomTime']; ?><br />
                     </td>
                 </tr>
-                <tr><td>Preferred Groomer</td><td><?php echo ((!empty($groomername['Name'])) ? $groomername['Name'] : 'None'); ?></td></tr>
-                <tr><td>Requires Two People</td><td><?php echo (($pet['TwoPeople'] == 1) ? 'yes' : 'no'); ?></td></tr>
-                <tr><td>Owned By</td><td><a href="viewclient.php?id=<?php echo $pet['OwnedBy'] ?>"><?php echo $owner['FirstName'] . ' ' . $owner['LastName'] . ' ' . '(' . $pet['OwnedBy'] . ')'; ?></a></td></tr>
+                <tr><td>Preferred Groomer:</td><td><?php echo ((!empty($groomername['Name'])) ? $groomername['Name'] : 'None'); ?></td></tr>
+                <tr><td>Requires Two People:</td><td><?php echo (($pet['TwoPeople'] == 1) ? 'yes' : 'no'); ?></td></tr>
+                <tr><td>Owned By:</td><td><a href="viewclient.php?id=<?php echo $pet['OwnedBy'] ?>"><?php echo $owner['FirstName'] . ' ' . $owner['LastName'] . ' ' . '(' . $pet['OwnedBy'] . ')'; ?></a></td></tr>
             </table>
             <h2>Scheduling:</h2>
             <?php
@@ -297,7 +297,7 @@ else {
     $stmt = $database->query("SELECT * FROM Pets");
     $pets = $stmt->fetchAll();
     if(!empty($pets)) {
-        echo '<table><th><td>ID</td><td>Name</td><td>Owned By</td></th>';
+        echo '<table><tr><th>ID</th><th>Name</th><th>Owned By</th></tr>';
         foreach($pets as $pet) {
             $stmt = $database->query("SELECT FirstName, LastName FROM Owners WHERE ID = " . $pet['OwnedBy']);
             $owner = $stmt->fetch();
