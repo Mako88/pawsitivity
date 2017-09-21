@@ -294,7 +294,7 @@ if(!empty($_GET['id'])) {
     }
 }
 else {
-    $stmt = $database->query("SELECT * FROM Breeds ORDER BY Group, Name");
+    $stmt = $database->query("SELECT * FROM Breeds ORDER BY BreedGroup, Name");
     $breeds = $stmt->fetchAll();
     if(!empty($breeds)) {
         echo '<table><th><td>Name</td><td>Group</td><td>Size</td><td>Bath-Only Times</td><td>Bath &amp; Groom Times</td><td>Base Bath Price</td><td>Base Groom Price</td></th>';
