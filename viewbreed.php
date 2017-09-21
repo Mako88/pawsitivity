@@ -39,6 +39,11 @@ if(!empty($_GET['id'])) {
                 $stmt->bindValue(':GroomPrice', $_POST['GroomPrice']);
                 $stmt->bindValue(':BathPrice', $_POST['BathPrice']);
                 $stmt->execute();
+                
+                $stmt = $database->prepare("SELECT * FROM Breeds WHERE ID = :ID");
+                $stmt->bindValue(':ID', $id);
+                $stmt->execute();
+                $breed = $stmt->fetch();
             }
             else {
                 echo "<p>The Time information was corrupted.</p>";
