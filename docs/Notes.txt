@@ -22,11 +22,11 @@ search.php:
 newpet.php/viewpet.php:
 	- Make "Scheduled" section links to view/edit events.
 	Change time to "clicker" in 15 minute intervals on newpet page (don't allow base editing)	
-    - Add link to "Schedule this pet"
 
 	
 viewevent.php:
 	Allow manually editing scheduled times by employees
+	
 
 services.php:
 	Allow editing services
@@ -35,12 +35,6 @@ services.php:
 newclient.php/viewclient.php:
 	Allow resetting the "missed" field on client pages
 	Add date created for each client
-	
-
-newbreed.php/editbreed.php:
-	Allow editing/deleting breeds
-    Add checkbox "This breed doesn't get groomed"
-    Allow "0" in time and price
     
 
 employeeschedule.php:
