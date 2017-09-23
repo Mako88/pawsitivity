@@ -658,7 +658,11 @@ if($_SESSION['authenticated'] < 1) {
             $stmt->bindValue(':ID', $pet['Breed']);
             $stmt->execute();
             $res = $stmt->fetch();
-
+			
+			$stmt = $database->query("SELECT Timezone FROM Globals");
+			$timezone = $stmt->fetch();
+			
+			$_SESSION['info']['Timezone'] = $timezone['Timezone'];
             $_SESSION['info']['Time'] = json_decode($pet['Time'], true);
             $_SESSION['info']['Size'] = $res['Size'];
             $_SESSION['info']['GroomPrice'] = $res['GroomPrice'];
@@ -721,10 +725,6 @@ if($_SESSION['authenticated'] < 1) {
         $stmt->bindValue(':ID', $id);
         $stmt->execute();
         $pets = $stmt->fetchAll();
-        
-        $stmt = $database->query("SELECT Timezone FROM Globals");
-        $timezone = $stmt->fetch();
-        $_SESSION['info']['Timezone'] = $timezone['Timezone'];
 
         if(!empty($pets)) {
             
