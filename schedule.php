@@ -352,7 +352,7 @@ if($_SESSION['authenticated'] < 1) {
                     }
 
                     var event = moment((events[i]['StartTime'] - (offset - localoffset*60)) * 1000);
-                    if(events[i]['Recurring'] == 1 && (events[i]['EndDate'] != null ? today.isSameOrBefore(moment((events[i]['EndDate'] - (offset - localoffset*60)) * 1000), "day") : 1)) {
+                    if((!event.isSame(today, "day")) && events[i]['Recurring'] == 1 && (events[i]['EndDate'] != null ? today.isSameOrBefore(moment((events[i]['EndDate'] - (offset - localoffset*60)) * 1000), "day") : 1)) {
                         while(event.isSameOrBefore(today, "day")) {
                             event.add(events[i]['RecInterval'], 'weeks'); // Add the number of weeks as an interval
                             if(event.isSame(today, "day")) {
@@ -463,6 +463,7 @@ if($_SESSION['authenticated'] < 1) {
                     if(eventstart.toDateString() === today.toDateString()) {
                         // Remove scheduled events' times from today's minutes array
                         var startminutes = (eventstart.getHours() * 60) + (eventstart.getMinutes());
+                        startminutes += Math.ceil(events[i]['BathTime']/15)*15;
                         var endminutes = Math.ceil(events[i]['GroomTime']/15)*15 + startminutes - 1;
                         var eventminutes = Array();
                         while(startminutes <= endminutes) {
@@ -598,7 +599,7 @@ if($_SESSION['authenticated'] < 1) {
                                 // If the current 15 minute start time would make the end time greater than the
                                 // slot's end time, don't add it to littleslots (because it's too long)
                                 // We're also adding an additional 30 minutes to the end of each slot for pickup
-                                if(!(timeslots[today][i]['slots'][j]['start'] + k + x*15 + 30 > timeslots[today][i]['slots'][j]['end'])) {
+                                if(!(timeslots[today][i]['slots'][j]['start'] + k + x*15 > timeslots[today][i]['slots'][j]['end'])) {
                                     index++;
                                     littleslots[index] = Array();
                                     littleslots[index]['start'] = timeslots[today][i]['slots'][j]['start'] + k;
@@ -607,7 +608,7 @@ if($_SESSION['authenticated'] < 1) {
                             }
                         }
                     }
-                    
+                                        
                     for(var i = 0; i < littleslots.length; i++) {
                         var start = littleslots[i]['start'];
                         var end = littleslots[i]['end'];
@@ -662,6 +663,7 @@ if($_SESSION['authenticated'] < 1) {
 			$stmt = $database->query("SELECT Timezone FROM Globals");
 			$timezone = $stmt->fetch();
 			
+            $_SESSION['info'] = array();
 			$_SESSION['info']['Timezone'] = $timezone['Timezone'];
             $_SESSION['info']['Time'] = json_decode($pet['Time'], true);
             $_SESSION['info']['Size'] = $res['Size'];
@@ -720,7 +722,6 @@ if($_SESSION['authenticated'] < 1) {
             $id = $_SESSION['ID'];
         }
 
-        $_SESSION['info'] = array();
         $stmt = $database->prepare("SELECT * FROM Pets WHERE OwnedBy = :ID");
         $stmt->bindValue(':ID', $id);
         $stmt->execute();
