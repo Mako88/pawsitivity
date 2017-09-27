@@ -100,10 +100,6 @@ if(!empty($_GET['id'])) {
         $stmt->execute();
         $breed = $stmt->fetch();
         $pet['Time'] = json_decode($pet['Time'], true);
-        $stmt = $database->prepare("SELECT * FROM Scheduling WHERE PetID = :ID");
-        $stmt->bindValue(':ID', $id);
-        $stmt->execute();
-        $events = $stmt->fetchAll();
         $stmt = $database->query("SELECT Timezone FROM Globals");
         $temp = $stmt->fetch();
         $timezone = $temp['Timezone'];
@@ -118,9 +114,14 @@ if(!empty($_GET['id'])) {
         
         if(!empty($_GET['delschedule'])) {
             $stmt = $database->prepare("DELETE FROM Scheduling WHERE ID = :ID");
-            $stmt->bindValue(':ID', $_GET['delete']);
+            $stmt->bindValue(':ID', $_GET['delschedule']);
             $stmt->execute();
         }
+        
+        $stmt = $database->prepare("SELECT * FROM Scheduling WHERE PetID = :ID");
+        $stmt->bindValue(':ID', $id);
+        $stmt->execute();
+        $events = $stmt->fetchAll();
         
         if(!empty($_GET['delpet'])) {
             $stmt = $database->prepare("DELETE FROM Pets WHERE ID = :ID");

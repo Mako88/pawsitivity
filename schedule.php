@@ -664,6 +664,7 @@ if($_SESSION['authenticated'] < 1) {
 			$timezone = $stmt->fetch();
 			
             $_SESSION['info'] = array();
+            $_SESSION['info']['client'] = $pet['OwnedBy'];
 			$_SESSION['info']['Timezone'] = $timezone['Timezone'];
             $_SESSION['info']['Time'] = json_decode($pet['Time'], true);
             $_SESSION['info']['Size'] = $res['Size'];
@@ -728,8 +729,6 @@ if($_SESSION['authenticated'] < 1) {
         $pets = $stmt->fetchAll();
 
         if(!empty($pets)) {
-            
-            $_SESSION['info']['client'] = $id;
             
             echo '<form action="schedule.php" method="post">';
             echo '<label for="pet">Select which pet you would like to schedule: </label>';
