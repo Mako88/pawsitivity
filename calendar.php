@@ -38,41 +38,33 @@
     $allevents = array();
     
     foreach($events as $event) {
-        $services = array();
         if($event['Recurring'] == 1) {
             for($i = $event['StartTime']; $i < $event['EndDate']; $i += $event['RecInterval']*604800) {                      
                 $event['StartTime'] = $i;
                 $event['TwoPeople'] = $pets[$event['PetID']][0]['TwoPeople'];
                 $event['URL'] = $event['ID'] . "-" . $i;
-                if(!empty($event['Services'])) {
-                    $event['Services'] = json_decode($event['Services'], true);
-                    foreach($event['Services'] as $service) {
-                        $stmt = $database->prepare("SELECT Name FROM Services WHERE ID = :ID");
-                        $stmt->bindValue(":ID", $service);
-                        $stmt->execute();
-                        $serv = $stmt->fetch();
-                        array_push($services, $serv);
-                    }
-                    $event['Services'] = json_encode($services);
-                }
                 array_push($allevents, $event);
             }
         }
         else {
             $event['TwoPeople'] = $pets[$event['PetID']][0]['TwoPeople'];
             $event['URL'] = $event['ID'];
-            if(!empty($event['Services'])) {
-                $event['Services'] = json_decode($event['Services'], true);
-                foreach($event['Services'] as $service) {
-                    $stmt = $database->prepare("SELECT Name FROM Services WHERE ID = :ID");
-                    $stmt->bindValue(":ID", $service);
-                    $stmt->execute();
-                    $serv = $stmt->fetch();
-                    array_push($services, $serv);
-                }
-                $event['Services'] = json_encode($services);
-            }
             array_push($allevents, $event);
+        }
+    }
+    
+    foreach($allevents as $key => $event) {
+        if(!empty($event['Services'])) {
+            $services = array();
+            $event['Services'] = json_decode($event['Services'], true);
+            foreach($event['Services'] as $service) {
+                $stmt = $database->prepare("SELECT Name, Type FROM Services WHERE ID = :ID");
+                $stmt->bindValue(":ID", $service);
+                $stmt->execute();
+                $serv = $stmt->fetch();
+                array_push($services, $serv);
+            }
+            $allevents[$key]['Services'] = json_encode($services);
         }
     }
     
@@ -89,6 +81,10 @@
 <script src='js/fancybox.min.js'></script>
 <script>
     $(document).ready(function() {
+        
+        function nl2br(str) {       
+            return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ '<br />' +'$2');
+        }
         
         // Offset of the Salon's timezone from UTC.
         var offset = moment.tz.zone("<?php echo $_SESSION['info']['Timezone']; ?>").offset(moment())*60;
@@ -120,7 +116,8 @@
                 notes: pets[index][0]['Notes'],
                 services: JSON.parse(events[i]['Services']),
                 phone: clients[index2][0]['Phone'],
-                url: events[i]['URL']
+                url: events[i]['URL'],
+                view: 'all'
             };
 
 
@@ -137,12 +134,14 @@
                     for(var i = 0; i < objects.length; i++) {
                         objects[i]['start'] = (events[i]['StartTime'] - offset) * 1000;
                         objects[i]['end'] = (events[i]['StartTime'] + (events[i]['TotalTime'] * 60) - offset) * 1000;
+                        objects[i].view = 'all';
                     }
                     break;
                 case 'groom':
                     for(var i = 0; i < events.length; i++) {
                         objects[i]['start'] = (events[i]['StartTime'] - offset + Math.ceil(events[i]['BathTime']/15)*15 * 60) * 1000;
                         objects[i]['end'] = (events[i]['StartTime'] - offset + events[i]['TotalTime'] * 60) * 1000;
+                        objects[i].view = 'groom';
                     }
                     break;
                 case 'bath':
@@ -154,6 +153,7 @@
                         else {
                             objects[i]['end'] = (events[i]['StartTime'] + (Math.ceil(events[i]['BathTime']/15)*15 * 60) - offset) * 1000;
                         }
+                        objects[i].view = 'bath';
                     }
                     break;
             }
@@ -199,6 +199,7 @@
                 if(view.name === "month") {
                     $('#calendar').fullCalendar('gotoDate', event.start);
                     $('#calendar').fullCalendar('changeView', 'listDay');
+                    return false;
                 }
                 else if(view.name === "listDay") {
                     $.fancybox.open({
@@ -213,17 +214,67 @@
                     if(event.warnings != null) {
                         element.children().last().append('<span class="warning">' + event.warnings + '</span>');
                     }
-                    var services = 'Services:<br />';
+                    var services = 'No Services<br />';
+                    var bathservices = '';
+                    var groomservices = '';
+                    var sigservices = '';
                     if(event.services != null) {
+                        services = '';
                         for(var i = 0; i < event.services.length; i++) {
-                            services += event.services[i]['Name'];
-                            services += '<br />';
+                            switch(event.services[i]['Type']) {
+                                case 0: // Signature
+                                    sigservices += event.services[i]['Name'];
+                                    sigservices += '<br />';
+                                    break;
+                                case 1: // Bath
+                                    bathservices += event.services[i]['Name'];
+                                    bathservices += '<br />';
+                                    break;
+                                case 2: // Groom
+                                    groomservices += event.services[i]['Name'];
+                                    groomservices += '<br />';
+                                    break;
+                            }
+                        }
+                        switch(event.view) {
+                            case 'all':
+                                if(sigservices != '') {
+                                    services += 'Signature Services:<br />';
+                                    services += sigservices;
+                                }
+                                if(bathservices != '') {
+                                    services += 'Bath Services:<br />';
+                                    services += bathservices;
+                                }
+                                if(groomservices != '') {
+                                    services += 'Groom Services:<br />';
+                                    services += groomservices;
+                                }
+                                break;
+                            case 'groom':
+                                if(sigservices != '') {
+                                    services += 'Signature Services:<br />';
+                                    services += sigservices;
+                                }
+                                if(groomservices != '') {
+                                    services += 'Groom Services:<br />';
+                                    services += groomservices;
+                                }
+                                break;
+                            case 'bath':
+                                if(sigservices != '') {
+                                    services += 'Signature Services:<br />';
+                                    services += sigservices;
+                                }
+                                if(bathservices != '') {
+                                    services += 'Bath Services:<br />';
+                                    services += bathservices;
+                                }
+                                break;
                         }
                     }
-                    else {
-                        services = 'No Services<br />';
-                    }
-                    element.children().last().append('<div style="display: none" id="' + event.url + '">Warnings: ' + event.warnings + '<br />Notes: ' + event.notes + '<br />' + ((event.TwoPeople == 1) ? 'Requires two people<br />Phone: ' : '<br />Phone: ') + event.phone + '<br />' + services + '</div>');
+                    
+                    element.children().last().append('<div style="display: none" id="' + event.url + '">' + event.title + '<br />Warnings: ' + nl2br(event.warnings) + '<br />Notes: ' + nl2br(event.notes) + '<br />' + ((event.TwoPeople == 1) ? 'Requires two people<br />Phone: ' : '<br />Phone: ') + event.phone + '<br />' + services + '</div>');
                 }
             }
         });
