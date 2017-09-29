@@ -117,7 +117,8 @@
                 services: JSON.parse(events[i]['Services']),
                 phone: clients[index2][0]['Phone'],
                 url: events[i]['URL'],
-                view: 'all'
+                view: 'all',
+                owner: clients[index2][0]['FirstName'] + ' ' + clients[index2][0]['LastName']
             };
 
 
@@ -274,7 +275,7 @@
                         }
                     }
                     
-                    element.children().last().append('<div style="display: none" id="' + event.url + '">' + event.title + '<br />Warnings: ' + nl2br(event.warnings) + '<br />Notes: ' + nl2br(event.notes) + '<br />' + ((event.TwoPeople == 1) ? 'Requires two people<br />Phone: ' : '<br />Phone: ') + event.phone + '<br />' + services + '</div>');
+                    element.children().last().append('<div style="display: none" id="' + event.url + '">Pet Name: ' + event.title + '<br />Warnings: ' + nl2br(event.warnings) + '<br />Notes: ' + nl2br(event.notes) + '<br />' + ((event.TwoPeople == 1) ? 'Requires two people<br />' : '<br />') + services + 'Owner: ' + event.owner + '<br />Phone: ' + event.phone + '</div>');
                 }
             }
         });

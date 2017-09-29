@@ -23,10 +23,6 @@ newpet.php/viewpet.php:
     - Add Vaccines2 as an array of 3 dates/names (Rabies - required, Distemper, Parvo). The date is when the vaccine is due
     - Store age as date when dog was born. Display as age.
 
-	
-viewevent.php:
-	Allow manually editing scheduled times by employees
-	
 
 services.php:
 	Allow editing services
