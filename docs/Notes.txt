@@ -1,21 +1,13 @@
-Add viewbreed and viewpet to menu
-Sort viewpet by name
-
 schedule.php:
 	Don't allow users to schedule if Missed field is 1, tell them to call.
 	If a dog requires two people, differentiate bathing time and helping time
     - Add price
     Disable groom services when bath selected
-	- Don't allow scheduling in the past (today)
     - Only allow 2 large dogs at a time
 	If groom price or time is 0, disable groom packages for clients (not employees)
     Make sure bath price and groom price aren't added
 	Warn if bath or groom time or price is 0 when employer is scheduling
-    
-
-bathcalendar/groomcalendar:
-    - On list view, show warnings
-	- On click show warnings (again), notes, services (separated by type), and contact number (lightbox)
+    Should the pickup time be able to overlap lunch time?
     
 	
 search.php:
@@ -25,7 +17,7 @@ search.php:
 	
 newpet.php/viewpet.php:
 	Change time to "clicker" in 15 minute intervals on newpet page (don't allow base editing)
-    - Change "info" to "warnings"
+    - Allow textbox for vaccines
 
 	
 viewevent.php:

@@ -439,6 +439,21 @@ if($_SESSION['authenticated'] < 1) {
                         }
                         break;
                 }
+                
+                var now = new Date();
+                
+                if(now.toDateString() === today.toDateString()) {
+                    var currenttime = now.getHours() * 60 + now.getMinutes();
+                    var pastminutes = Array();
+                    var i = todayminutes[0];
+                    while(i < Math.ceil(currenttime/15)*15) {
+                        pastminutes.push(i);
+                        i++;
+                    }
+                    todayminutes = todayminutes.filter(function(minute) {
+                        return pastminutes.indexOf(minute) === -1;
+                    });
+                }
 
                 for(var i = 0; i < events.length; i++) {
                     

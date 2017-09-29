@@ -144,7 +144,7 @@ if(!empty($_GET['id'])) {
                 <tr><td>Weight:</td><td><?php echo $pet['Weight'] ?></td></tr>
                 <tr><td>Vaccines:</td><td><?php echo ((!empty($pet['Vaccines'])) ? '<a href="' . $pet['Vaccines'] . '">View</a>' : ''); ?></td></tr>
                 <tr><td>Notes:</td><td><?php echo $pet['Notes']; ?></td></tr>
-                <tr><td>Info:</td><td><?php echo $pet['Info']; ?></td></tr>
+                <tr><td>Warnings:</td><td><?php echo $pet['Info']; ?></td></tr>
                 <tr><td>Dog of the Month Date:</td><td><?php echo date('m/d/Y', $pet['DogOfMonth']); ?></td></tr>
                 <tr>
                     <td>Time (In Minutes):</td>
@@ -276,7 +276,7 @@ if(!empty($_GET['id'])) {
                 <label for="Weight">Weight: </label><input type="text" name="Weight" id="Weight" value="<?php echo $pet['Weight']; ?>"><br />
                 <label for="Vaccines">Vaccines: </label><input type="file" name="Vaccines" id="Vaccines"><br />
                 <label for="Notes">Notes: </label><textarea name="Notes" id="Notes"><?php echo $pet['Notes']; ?></textarea><br />
-                <label for="Info">Info: </label><textarea name="Info" id="Info"><?php echo $pet['Info']; ?></textarea><br />
+                <label for="Info">Warnings: </label><textarea name="Info" id="Info"><?php echo $pet['Info']; ?></textarea><br />
                 <label for="Picture">Picture: </label><input type="file" name="Picture" id="Picture"><br />
                 <label for="DogOfMonth">Dog of the Month Date (MM/DD/YYYY): </label><input type="text" name="DogOfMonth" id="DogOfMonth" value="<?php echo date('m/d/Y', $pet['DogOfMonth']); ?>"><br />
                 <label>Time (In Minutes): </label><br />
@@ -305,7 +305,7 @@ if(!empty($_GET['id'])) {
     }
 }
 else {
-    $stmt = $database->query("SELECT * FROM Pets");
+    $stmt = $database->query("SELECT * FROM Pets ORDER BY Name");
     $pets = $stmt->fetchAll();
     if(!empty($pets)) {
         echo '<table><tr><th>ID</th><th>Name</th><th>Owned By</th></tr>';
