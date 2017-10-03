@@ -7,7 +7,6 @@ schedule.php:
 	If groom price or time is 0, disable groom packages for clients (not employees)
     Make sure bath price and groom price aren't added
 	Warn if bath or groom time or price is 0 when employer is scheduling
-    ? Should the pickup time be able to overlap lunch time
     - If dog is under 3 warn if any vaccine is out of date
     - If dog is 3 or over, warn if rabies is out of date
     

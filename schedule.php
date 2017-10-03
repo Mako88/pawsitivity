@@ -266,7 +266,7 @@ if($_SESSION['authenticated'] < 1) {
         else {
             $groomtime = $_SESSION['info']['Time']['Bath']['GroomTime'];
             $bathtime = $_SESSION['info']['Time']['Bath']['BathTime'];
-        }   
+        }
         
         if(!empty($_SESSION['info']['services'])) {
         
@@ -614,7 +614,7 @@ if($_SESSION['authenticated'] < 1) {
                                 // If the current 15 minute start time would make the end time greater than the
                                 // slot's end time, don't add it to littleslots (because it's too long)
                                 // We're also adding an additional 30 minutes to the end of each slot for pickup
-                                if(!(timeslots[today][i]['slots'][j]['start'] + k + x*15 > timeslots[today][i]['slots'][j]['end'])) {
+                                if(!(timeslots[today][i]['slots'][j]['start'] + k + x*15 + 30 > timeslots[today][i]['slots'][j]['end'])) {
                                     index++;
                                     littleslots[index] = Array();
                                     littleslots[index]['start'] = timeslots[today][i]['slots'][j]['start'] + k;
