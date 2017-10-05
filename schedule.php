@@ -345,7 +345,7 @@ if($_SESSION['authenticated'] < 1) {
             var selectedinfo = Array();
             
             // Offset of the Salon's timezone from UTC.
-            var offset = moment.tz.zone("<?php echo $_SESSION['info']['Timezone']; ?>").offset(moment())*60;
+            var offset = moment.tz.zone("<?php echo $_SESSION['Timezone']; ?>").offset(moment())*60;
             
             // Offset of user's local timezone from UTC.
             var localoffset = new Date().getTimezoneOffset();
@@ -754,7 +754,6 @@ if($_SESSION['authenticated'] < 1) {
 			
             $_SESSION['info'] = array();
             $_SESSION['info']['client'] = $pet['OwnedBy'];
-			$_SESSION['info']['Timezone'] = $timezone['Timezone'];
             $_SESSION['info']['Time'] = json_decode($pet['Time'], true);
             $_SESSION['info']['Size'] = $res['Size'];
             $_SESSION['info']['GroomPrice'] = $res['GroomPrice'];

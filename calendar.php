@@ -92,7 +92,7 @@
         }
         
         // Offset of the Salon's timezone from UTC.
-        var offset = moment.tz.zone("<?php echo $_SESSION['info']['Timezone']; ?>").offset(moment())*60;
+        var offset = moment.tz.zone("<?php echo $_SESSION['Timezone']; ?>").offset(moment())*60;
 
         // Offset of user's local timezone from UTC.
         var localoffset = new Date().getTimezoneOffset();
