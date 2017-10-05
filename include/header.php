@@ -42,10 +42,5 @@ else {
     $http = 'http://';
 }
 
-$stmt = $database->query("SELECT Timezone FROM Globals");
-$timezone = $stmt->fetch();
-
-$_SESSION['Timezone'] = $timezone['Timezone'];
-
 
 ?>

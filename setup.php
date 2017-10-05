@@ -158,6 +158,10 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
     $stmt->bindValue(':Password', $password);
     $stmt->execute();
     
+    $stmt = $database->prepare('REPLACE INTO Globals (Timezone) VALUES (:Timezone)');
+    $stmt->bindValue(':Timezone', $_POST['timezone']);
+    $stmt->execute();
+    
     echo 'All Done! Please <a href="login.php">login</a> with the account you just created.</p>';
 }
 // if we haven't already submitted the form, display it.
@@ -168,6 +172,20 @@ else {
         <label for="username">Username: </label><input type="text" name="username" /><br />
         <label for="email">Email: </label><input type="text" name="email" /><br />
         <label for="password">Password: </label><input type="password" name="password" /><br />
+        <label for="timezone">Timezone: </label>
+        <select name="timezone" >
+            <option disabled selected style='display:none;'>Time Zone...</option>
+
+            <option value="America/Puerto_Rico">Puerto Rico (Atlantic)</option>
+            <option value="America/New_York">New York (Eastern)</option>
+            <option value="America/Chicago">Chicago (Central)</option>
+            <option value="America/Denver">Denver (Mountain)</option>
+            <option value="America/Phoenix">Phoenix (MST)</option>
+            <option value="America/Los_Angeles">Los Angeles (Pacific)</option>
+            <option value="America/Anchorage">Anchorage (Alaska)</option>
+            <option value="Pacific/Honolulu">Honolulu (Hawaii)</option>
+
+        </select><br />
         <input type="submit" name="submit" value="Create User">
     </form>
 </body>
