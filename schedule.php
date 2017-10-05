@@ -256,6 +256,19 @@ if($_SESSION['authenticated'] < 1) {
             $groomers = $stmt->fetchAll();
         }
         
+        // Add size of dog to each event
+        foreach($events as $key => $event) {
+            $stmt = $database->prepare("SELECT Breed FROM Pets WHERE ID = :ID");
+            $stmt->bindValue(':ID', $event['PetID']);
+            $stmt->execute();
+            $breed = $stmt->fetch();
+            $stmt = $database->prepare("SELECT Size FROM Breeds WHERE ID = :ID");
+            $stmt->bindValue(':ID', $breed['Breed']);
+            $stmt->execute();
+            $size = $stmt->fetch();
+            $events[$key]['Size'] = $size['Size'];
+        }
+        
         // Calculate time for current pet
         $totaltime = 0;
         
@@ -321,6 +334,7 @@ if($_SESSION['authenticated'] < 1) {
         $(function() {
             
             var events = <?php echo json_encode($events); ?>;
+            var bathtime = <?php echo ceil($bathtime/15)*15; ?>;
             var totaltime = <?php echo $totaltime; ?>;
             var slottime = <?php echo $slottime; ?>;
             var groomers = <?php echo json_encode($groomers); ?>;
@@ -398,6 +412,7 @@ if($_SESSION['authenticated'] < 1) {
             // false if there are none.
             function getavailable(id, today) {
                 var todayminutes = Array();
+                var largedogs = Array();
 
                 // Fill array with minutes spa is open today
                 switch(today.getDay()) {
@@ -442,6 +457,7 @@ if($_SESSION['authenticated'] < 1) {
                 
                 var now = new Date();
                 
+                // Remove time that has already passed
                 if(now.toDateString() === today.toDateString()) {
                     var currenttime = now.getHours() * 60 + now.getMinutes();
                     var pastminutes = Array();
@@ -457,10 +473,6 @@ if($_SESSION['authenticated'] < 1) {
 
                 for(var i = 0; i < events.length; i++) {
                     
-                    if(events[i]['GroomerID'] != id) {
-                        continue;
-                    }
-                    
                     // Creating a date from a UTC timestamp, returns a local date. Subtract the offset
                     // to counteract this.
                     var eventstart = new Date((events[i]['StartTime'] - (offset - localoffset*60)) * 1000);
@@ -474,8 +486,9 @@ if($_SESSION['authenticated'] < 1) {
                             }
                         }
                     }
-
+                    
                     if(eventstart.toDateString() === today.toDateString()) {
+                        
                         // Remove scheduled events' times from today's minutes array
                         var startminutes = (eventstart.getHours() * 60) + (eventstart.getMinutes());
                         startminutes += Math.ceil(events[i]['BathTime']/15)*15;
@@ -485,11 +498,45 @@ if($_SESSION['authenticated'] < 1) {
                             eventminutes.push(startminutes);
                             startminutes++;
                         }
-                        todayminutes = todayminutes.filter(function(minute) {
-                            return eventminutes.indexOf(minute) === -1;
-                        });
+                        // If the event is a large dog, add its time to the largedogs array
+                        if((size == "L" || size == "XL") && (events[i]['Size'] == "L" || events[i]['Size'] == "XL")) {
+                            largedogs.push(eventminutes);
+                        }
+                        // If the event is this groomer's, remove it from the available time
+                        if(events[i]['GroomerID'] == id) {
+                            todayminutes = todayminutes.filter(function(minute) {
+                                return eventminutes.indexOf(minute) === -1;
+                            });
+                        }
                     }
                 }
+                
+                var toremove = Array();
+                
+                // Compare every minute of every event with large dogs to the minutes
+                // of all other events with large dogs. When there are overlaps, add
+                // them to the "toremove" array.
+                for(var i = 0; i < largedogs.length; i++) {
+                    for(var k = 0; k < largedogs[i].length; k++) {
+                        for(var j = 0; j < largedogs.length; j++) {
+                            // Don't compare a set of times to itself
+                            if(largedogs[j] == largedogs[i]) {
+                                continue;
+                            }
+                            for(var l = 0; l < largedogs[j].length; l++) {
+                                if(largedogs[i][k] == largedogs[j][l]) {
+                                    if($.inArray(largedogs[j][l], toremove) == -1) {
+                                        toremove.push(largedogs[j][l]);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                todayminutes = todayminutes.filter(function(minute) {
+                    return toremove.indexOf(minute) === -1;
+                });
                 
                 if(todayminutes.length) {
                     return todayminutes;
@@ -586,6 +633,26 @@ if($_SESSION['authenticated'] < 1) {
                         // at ['slots'] with the available slots for that groomer
                     // littleslots[index]: An array of timeslots the size of the current event to the nearest 15 minutes, taken from a single open period
                     
+                    var opentime;
+                    switch(date.getDay()) {
+                        // Tuesday and Wednesday (0900 - 1700)
+                        case 2:
+                        case 3:
+                            opentime = 540; // 0900 in minutes
+                            break;
+
+                        // Thursday and Friday (0800 - 1800)
+                        case 4:
+                        case 5:
+                            opentime = 480; // 0900 in minutes
+                            break;
+
+                        // Saturday (0900 - 1500)
+                        case 6:
+                            opentime = 540; // 0900 in minutes
+                            break;
+                    }
+                    
                     today = date.getTime();
                     var availablegroomers = Array();
                     
@@ -598,7 +665,7 @@ if($_SESSION['authenticated'] < 1) {
                     var options = $("#slot");
                     options.empty();
                     var littleslots = Array();
-                    var x = Math.ceil(totaltime/15); // The number of 15 minute intervals in the slot being scheduled
+                    var x = Math.ceil(totaltime/15); // The number of 15 minute intervals the event being scheduled will take
                     
                     // Break up the available slots into slots the size of the event.
                     // i = every groomer
@@ -617,12 +684,19 @@ if($_SESSION['authenticated'] < 1) {
                                 if(!(timeslots[today][i]['slots'][j]['start'] + k + x*15 + 30 > timeslots[today][i]['slots'][j]['end'])) {
                                     index++;
                                     littleslots[index] = Array();
-                                    littleslots[index]['start'] = timeslots[today][i]['slots'][j]['start'] + k;
-                                    littleslots[index]['end'] = littleslots[index]['start'] + x*15 + 30;
+                                    // Offset each slot by the bathing time so that the bathing is finished when the grooming slot begins
+                                    // Don't do that if it will push the dropoff time before opening though
+                                    if((timeslots[today][i]['slots'][j]['start'] + k) - bathtime < opentime) {
+                                        continue;
+                                    }
+                                    littleslots[index]['start'] = (timeslots[today][i]['slots'][j]['start'] + k) - bathtime;
+                                    littleslots[index]['end'] = (littleslots[index]['start'] + x*15 + 30) - bathtime;
                                 }
                             }
                         }
                     }
+                    
+                    console.log(timeslots[today]);
                                         
                     for(var i = 0; i < littleslots.length; i++) {
                         var start = littleslots[i]['start'];

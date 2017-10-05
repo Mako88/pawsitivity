@@ -14,6 +14,10 @@ schedule.php:
 search.php:
 	Add advanced search to show all that haven't been dog of the month
 	Make "Owned By" link in search go to client page
+    
+    
+calendar.php:
+    - Show groomer name
 
 	
 newpet.php/viewpet.php:
@@ -21,6 +25,7 @@ newpet.php/viewpet.php:
     - Add Release Form (a file)
     - Add Vaccines2 as an array of 3 dates/names (Rabies - required, Distemper, Parvo). The date is when the vaccine is due
     - Store age as date when dog was born. Display as age.
+    - View recurring visits in "scheduling"
 
 
 services.php:
