@@ -124,7 +124,7 @@ if(!empty($_GET['id'])) {
     }
 }
 else {
-    $stmt = $database->query("SELECT * FROM Owners");
+    $stmt = $database->query("SELECT * FROM Owners ORDER BY LastName");
     $clients = $stmt->fetchAll();
     if(!empty($clients)) {
         echo '<table><tr><th>ID</th><th>First Name</th><th>Last Name</th></tr>';
