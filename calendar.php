@@ -66,6 +66,11 @@
             }
             $allevents[$key]['Services'] = json_encode($services);
         }
+        $stmt = $database->prepare("SELECT Name FROM Users WHERE ID = :ID");
+        $stmt->bindValue(":ID", $event['GroomerID']);
+        $stmt->execute();
+        $groomer = $stmt->fetch();
+        $allevents[$key]['Groomer'] = $groomer['Name'];
     }
     
 ?>
@@ -110,7 +115,7 @@
                 id: events[i]['ID'],
                 start: (events[i]['StartTime'] - offset) * 1000,
                 end: (events[i]['StartTime'] + (events[i]['TotalTime'] * 60) - offset) * 1000,
-                title: pets[index][0]['Name'],
+                title: pets[index][0]['Name'] + ' - ' + events[i]['Groomer'],
                 TwoPeople: events[i]['TwoPeople'],
                 warnings: pets[index][0]['Info'],
                 notes: pets[index][0]['Notes'],

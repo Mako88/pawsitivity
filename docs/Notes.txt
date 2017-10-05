@@ -14,10 +14,6 @@ schedule.php:
 search.php:
 	Add advanced search to show all that haven't been dog of the month
 	Make "Owned By" link in search go to client page
-    
-    
-calendar.php:
-    - Show groomer name
 
 	
 newpet.php/viewpet.php:
