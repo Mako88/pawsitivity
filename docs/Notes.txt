@@ -3,10 +3,9 @@ schedule.php:
 	If a dog requires two people, differentiate bathing time and helping time
     - Add price
     Disable groom services when bath selected
-    - Only allow 2 large dogs at a time
-	If groom price or time is 0, disable groom packages for clients (not employees)
-    Make sure bath price and groom price aren't added
-	Warn if bath or groom time or price is 0 when employer is scheduling
+	- If groom price or time is 0, disable groom packages for clients (not employees)
+    - Make sure bath price and groom price aren't added
+	- Warn if bath or groom time or price is 0 when employer is scheduling
     - If dog is under 3 warn if any vaccine is out of date
     - If dog is 3 or over, warn if rabies is out of date
     
@@ -18,14 +17,11 @@ search.php:
 	
 newpet.php/viewpet.php:
 	Change time to "clicker" in 15 minute intervals on newpet page (don't allow base editing)
-    - Add Release Form (a file)
-    - Add Vaccines2 as an array of 3 dates/names (Rabies - required, Distemper, Parvo). The date is when the vaccine is due
-    - Store age as date when dog was born. Display as age.
     - View recurring visits in "scheduling"
 
 
 services.php:
-	Allow editing services
+	- Allow editing services
 	
 	
 newclient.php/viewclient.php:
@@ -34,12 +30,12 @@ newclient.php/viewclient.php:
     
 
 employeeschedule.php:
-	Add employee scheduling page
-    Select a week first
-    Show a table: Y axis are employees, X axis is days
-    For each day set a starting time/ending time (from drop downs. Also allow setting "off")
-    For each client each day create an event from opening to start time, and from end time to close
-    If a client is off, create an event that lasts the whole day
+	- Add employee scheduling page
+    - Select a week first
+    - Show a table: Y axis are employees, X axis is days
+    - For each day set a starting time/ending time (from drop downs. Also allow setting "off")
+    - For each client each day create an event from opening to start time, and from end time to close
+    - If a client is off, create an event that lasts the whole day
 	
 
 newuser.php:

@@ -32,16 +32,24 @@ else if(!empty($_POST)) {
             goto finish;
         }
         
+        $age = NULL;
+        
+        // Convert age to a year
+        if(!empty($_POST['Age'])) {
+            $age = intval(date("Y")) - $_POST['Age'];
+        }
+        
         (!empty($_POST['TwoPeople'])) ? $two = 1 : $two = 0;
         
         (!empty($_POST['DogOfMonth'])) ? $dom = strtotime($_POST['DogOfMonth']) : $dom = false;
         
         // Create SQL query based on fields recieved
-        $stmt = $database->prepare('INSERT INTO Pets (Name, Breed, Age, Weight, Notes, Info, DogOfMonth, Time, TwoPeople, PreferredGroomer, OwnedBy) VALUES (:Name, :Breed, :Age, :Weight, :Notes, :Info, :DogOfMonth, :Time, :TwoPeople, :PreferredGroomer, :OwnedBy)');
+        $stmt = $database->prepare('INSERT INTO Pets (Name, Breed, Age, Weight, Vaccines2, Notes, Info, DogOfMonth, Time, TwoPeople, PreferredGroomer, OwnedBy) VALUES (:Name, :Breed, :Age, :Weight, :Vaccines2, :Notes, :Info, :DogOfMonth, :Time, :TwoPeople, :PreferredGroomer, :OwnedBy)');
         $stmt->bindValue(':Name', $_POST['Name']);
         $stmt->bindValue(':Breed', $_POST['Breed']);
-        (!empty($_POST['Age'])) ? $stmt->bindValue(':Age', $_POST['Age']) : $stmt->bindValue(':Age', NULL);
+        $stmt->bindValue(':Age', $age);
         (!empty($_POST['Weight'])) ? $stmt->bindValue(':Weight', $_POST['Weight']) : $stmt->bindValue(':Weight', NULL);
+        (is_array($_POST['Vaccines2'])) ? $stmt->bindValue(':Vaccines2', json_encode($_POST['Vaccines2'])) : $stmt->bindValue(':Vaccines2', NULL);
         (!empty($_POST['Notes'])) ? $stmt->bindValue(':Notes', $_POST['Notes']) : $stmt->bindValue(':Notes', NULL);
         (!empty($_POST['Info'])) ? $stmt->bindValue(':Info', $_POST['Info']) : $stmt->bindValue(':Info', NULL);
         ($dom != false) ? $stmt->bindValue(':DogOfMonth', $dom) : $stmt->bindValue(':DogOfMonth', NULL);
@@ -52,8 +60,8 @@ else if(!empty($_POST)) {
         $stmt->execute();
         $id = $database->lastInsertId();
         
-        if(!empty($_FILES['Vaccines']['name']) || !empty($_FILES['Picture']['name'])) {
-            $stmt = $database->prepare('UPDATE Pets SET Vaccines=:Vaccines, Picture=:Picture WHERE ID = :ID');
+        if(!empty($_FILES['Vaccines']['name']) || !empty($_FILES['Picture']['name']) || !empty($_FILES['Release']['name'])) {
+            $stmt = $database->prepare('UPDATE Pets SET Vaccines=:Vaccines, Picture=:Picture, ReleaseForm=:Release WHERE ID = :ID');
             
             if(!empty($_FILES['Vaccines']['name'])) {
                 if(!file_exists('petdocs/' . $id)) { mkdir('petdocs/' . $id, 0777, 1); }
@@ -64,7 +72,7 @@ else if(!empty($_POST)) {
                     $stmt->bindValue(':Vaccines', $vaccines);
                 }
                 else {
-                    echo "Upload failed!";
+                    echo "Vaccine File Upload failed!";
                     $stmt->bindValue(':Vaccines', NULL);
                 }
             }
@@ -81,12 +89,29 @@ else if(!empty($_POST)) {
                     $stmt->bindValue(':Picture', $picture);
                 }
                 else {
-                    echo "Upload failed!";
+                    echo "Picture Upload failed!";
                     $stmt->bindValue(':Picture', NULL);
                 }
             }
             else {
                 $stmt->bindValue(':Picture', NULL);
+            }
+            
+            if(!empty($_FILES['Release']['name'])) {
+                if(!file_exists('petdocs/' . $id)) { mkdir('petdocs/' . $id, 0777, 1); }
+                $uploaddir = 'petdocs/' . $id . '/';
+                $release = $uploaddir . basename($_FILES['Release']['name']);
+                if(move_uploaded_file($_FILES['Release']['tmp_name'], $release)) {
+                    echo "Release Form Uploaded!<br />";
+                    $stmt->bindValue(':Release', $release);
+                }
+                else {
+                    echo "Relase Form Upload failed!";
+                    $stmt->bindValue(':Release', NULL);
+                }
+            }
+            else {
+                $stmt->bindValue(':Release', NULL);
             }
             
             $stmt->bindValue(':ID', $id);
@@ -203,6 +228,11 @@ $(function() {
     <label for="Age">Age: </label><input type="text" name="Age" id="Age"><br />
     <label for="Weight">Weight: </label><input type="text" name="Weight" id="Weight"><br />
     <label for="Vaccines">Vaccines: </label><input type="file" name="Vaccines" id="Vaccines"><br />
+    <label>Vaccine Dates: </label><br />
+        <label for="Rabies">Rabies: </label><input id="Rabies" type="text" name="Vaccines2[Rabies]" /><br />
+        <label for="Distemper">Distemper: </label><input id="Distemper" type="text" name="Vaccines2[Distemper]" /><br />
+        <label for="Parvo">Parvo: </label><input id="Parvo" type="text" name="Vaccines2[Parvo]" /><br />
+    <label for="Release">Release Form: </label><input type="file" name="Release" id="Release"><br />
     <label for="Notes">Notes: </label><textarea name="Notes" id="Notes"></textarea><br />
     <label for="Info">Info: </label><textarea name="Info" id="Info"></textarea><br />
     <label for="Picture">Picture: </label><input type="file" name="Picture" id="Picture"><br />

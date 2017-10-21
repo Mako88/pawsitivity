@@ -700,8 +700,6 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                             }
                         }
                     }
-                    
-                    console.log(timeslots[today]);
                                         
                     for(var i = 0; i < littleslots.length; i++) {
                         var start = littleslots[i]['start'];

@@ -52,6 +52,8 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
             Age TEXT,
             Weight TEXT,
             Vaccines TEXT,
+            Vaccines2 TEXT,
+            ReleaseForm TEXT,
             Notes TEXT,
             Info TEXT,
             Picture TEXT,

@@ -23,7 +23,7 @@ include "include/menu.php";
     
 if(!empty($_GET['id'])) {
     $id = $_GET['id'];
-    $stmt = $database->prepare("SELECT Vaccines, Picture FROM Pets WHERE ID = :ID");
+    $stmt = $database->prepare("SELECT Vaccines, Picture, ReleaseForm FROM Pets WHERE ID = :ID");
     $stmt->bindValue(':ID', $id);
     $stmt->execute();
     $pet = $stmt->fetch();
@@ -33,13 +33,21 @@ if(!empty($_GET['id'])) {
             (!empty($_POST['TwoPeople'])) ? $two = 1 : $two = 0;
 
             (!empty($_POST['DogOfMonth'])) ? $dom = strtotime($_POST['DogOfMonth']) : $dom = false;
-
+            
+            $age = NULL;
+        
+            // Convert age to a year
+            if(!empty($_POST['Age'])) {
+                $age = intval(date("Y")) - $_POST['Age'];
+            }
+            
             // Create SQL query based on fields recieved
-            $stmt = $database->prepare('Update Pets Set Name=:Name, Breed=:Breed, Age=:Age, Weight=:Weight, Notes=:Notes, Info=:Info, DogOfMonth=:DogOfMonth, Time=:Time, PreferredGroomer=:PreferredGroomer, TwoPeople=:TwoPeople WHERE ID=:ID');
+            $stmt = $database->prepare('Update Pets Set Name=:Name, Breed=:Breed, Age=:Age, Weight=:Weight, Vaccines2=:Vaccines2, Notes=:Notes, Info=:Info, DogOfMonth=:DogOfMonth, Time=:Time, PreferredGroomer=:PreferredGroomer, TwoPeople=:TwoPeople WHERE ID=:ID');
             $stmt->bindValue(':Name', $_POST['Name']);
             $stmt->bindValue(':Breed', $_POST['Breed']);
-            (!empty($_POST['Age'])) ? $stmt->bindValue(':Age', $_POST['Age']) : $stmt->bindValue(':Age', NULL);
+            $stmt->bindValue(':Age', $age);
             (!empty($_POST['Weight'])) ? $stmt->bindValue(':Weight', $_POST['Weight']) : $stmt->bindValue(':Weight', NULL);
+            (is_array($_POST['Vaccines2'])) ? $stmt->bindValue(':Vaccines2', json_encode($_POST['Vaccines2'])) : $stmt->bindValue(':Vaccines2', NULL);
             (!empty($_POST['Notes'])) ? $stmt->bindValue(':Notes', $_POST['Notes']) : $stmt->bindValue(':Notes', NULL);
             (!empty($_POST['Info'])) ? $stmt->bindValue(':Info', $_POST['Info']) : $stmt->bindValue(':Info', NULL);
             ($dom != false) ? $stmt->bindValue(':DogOfMonth', $dom) : $stmt->bindValue(':DogOfMonth', NULL);
@@ -51,7 +59,7 @@ if(!empty($_GET['id'])) {
             $id = $_GET['id'];
 
             if(!empty($_FILES['Vaccines']['name']) || !empty($_FILES['Picture']['name'])) {
-                $stmt = $database->prepare('UPDATE Pets SET Vaccines=:Vaccines, Picture=:Picture WHERE ID = :ID');
+                $stmt = $database->prepare('UPDATE Pets SET Vaccines=:Vaccines, Picture=:Picture, ReleaseForm=:Release WHERE ID = :ID');
 
                 if(!empty($_FILES['Vaccines']['name'])) {
                     if(!file_exists('petdocs/' . $id)) { mkdir('petdocs/' . $id, 0777, 1); }
@@ -62,12 +70,12 @@ if(!empty($_GET['id'])) {
                         $stmt->bindValue(':Vaccines', $vaccines);
                     }
                     else {
-                        echo "Upload failed!";
-                        $stmt->bindValue(':Vaccines', $pet['Vaccines']);
+                        echo "Vaccine File Upload failed!";
+                        $stmt->bindValue(':Vaccines', NULL);
                     }
                 }
                 else {
-                    $stmt->bindValue(':Vaccines', $pet['Vaccines']);
+                    $stmt->bindValue(':Vaccines', NULL);
                 }
 
                 if(!empty($_FILES['Picture']['name'])) {
@@ -79,12 +87,29 @@ if(!empty($_GET['id'])) {
                         $stmt->bindValue(':Picture', $picture);
                     }
                     else {
-                        echo "Upload failed!";
-                        $stmt->bindValue(':Picture', $pet['Picture']);
+                        echo "Picture Upload failed!";
+                        $stmt->bindValue(':Picture', NULL);
                     }
                 }
                 else {
-                    $stmt->bindValue(':Picture', $pet['Picture']);
+                    $stmt->bindValue(':Picture', NULL);
+                }
+
+                if(!empty($_FILES['Release']['name'])) {
+                    if(!file_exists('petdocs/' . $id)) { mkdir('petdocs/' . $id, 0777, 1); }
+                    $uploaddir = 'petdocs/' . $id . '/';
+                    $release = $uploaddir . basename($_FILES['Release']['name']);
+                    if(move_uploaded_file($_FILES['Release']['tmp_name'], $release)) {
+                        echo "Release Form Uploaded!<br />";
+                        $stmt->bindValue(':Release', $release);
+                    }
+                    else {
+                        echo "Relase Form Upload failed!";
+                        $stmt->bindValue(':Release', NULL);
+                    }
+                }
+                else {
+                    $stmt->bindValue(':Release', NULL);
                 }
 
                 $stmt->bindValue(':ID', $id);
@@ -100,6 +125,7 @@ if(!empty($_GET['id'])) {
         $stmt->execute();
         $breed = $stmt->fetch();
         $pet['Time'] = json_decode($pet['Time'], true);
+        $pet['Vaccines2'] = json_decode($pet['Vaccines2'], true);
         $stmt = $database->query("SELECT Timezone FROM Globals");
         $temp = $stmt->fetch();
         $timezone = $temp['Timezone'];
@@ -140,9 +166,11 @@ if(!empty($_GET['id'])) {
                 <tr><td>ID:</td><td><?php echo $pet['ID']; ?></td></tr>
                 <tr><td>Name:</td><td><?php echo $pet['Name']; ?></td></tr>
                 <tr><td>Breed:</td><td><a href="viewbreed.php?id=<?php echo $pet['Breed']; ?>"><?php echo $breed['Name']; ?></a></td></tr>
-                <tr><td>Age:</td><td><?php echo $pet['Age']; ?></td></tr>
+                <tr><td>Age:</td><td><?php echo date("Y") - intval($pet['Age']); ?></td></tr>
                 <tr><td>Weight:</td><td><?php echo $pet['Weight'] ?></td></tr>
-                <tr><td>Vaccines:</td><td><?php echo ((!empty($pet['Vaccines'])) ? '<a href="' . $pet['Vaccines'] . '">View</a>' : ''); ?></td></tr>
+                <tr><td>Vaccines:</td><td><?php echo ((!empty($pet['Vaccines'])) ? '<a href="' . $pet['Vaccines'] . '">View</a>' : 'None'); ?></td></tr>
+                <tr><td>Vaccine Dates:</td><td><?php echo "Rabies: " . $pet['Vaccines2']['Rabies'] . "<br />" . "Distemper: " . $pet['Vaccines2']['Distemper'] . "<br />" . "Parvo: " . $pet['Vaccines2']['Parvo']; ?></td></tr>                
+                <tr><td>Release Form:</td><td><?php echo ((!empty($pet['Release'])) ? '<a href="' . $pet['Release'] . '">View</a>' : 'None'); ?></td></tr>
                 <tr><td>Notes:</td><td><?php echo $pet['Notes']; ?></td></tr>
                 <tr><td>Warnings:</td><td><?php echo $pet['Info']; ?></td></tr>
                 <tr><td>Dog of the Month Date:</td><td><?php echo date('m/d/Y', $pet['DogOfMonth']); ?></td></tr>
@@ -157,7 +185,7 @@ if(!empty($_GET['id'])) {
                         Groom Time: <?php echo $pet['Time']['Groom']['GroomTime']; ?><br />
                     </td>
                 </tr>
-                <tr><td>Preferred Groomer:</td><td><?php echo ((!empty($groomername['Name'])) ? $groomername['Name'] : 'None'); ?></td></tr>
+                <tr><td>Preferred Groomer:</td><td><?php echo ((!empty($groomername['Name'])) ? $groomername['Name'] : 'Any'); ?></td></tr>
                 <tr><td>Requires Two People:</td><td><?php echo (($pet['TwoPeople'] == 1) ? 'yes' : 'no'); ?></td></tr>
                 <tr><td>Owned By:</td><td><a href="viewclient.php?id=<?php echo $pet['OwnedBy'] ?>"><?php echo $owner['FirstName'] . ' ' . $owner['LastName'] . ' ' . '(' . $pet['OwnedBy'] . ')'; ?></a></td></tr>
             </table>
@@ -272,9 +300,14 @@ if(!empty($_GET['id'])) {
                         ?>
                     </optgroup>
                 </select><br />
-                <label for="Age">Age: </label><input type="text" name="Age" id="Age" value="<?php echo $pet['Age']; ?>"><br />
+                <label for="Age">Age: </label><input type="text" name="Age" id="Age" value="<?php echo date("Y") - intval($pet['Age']); ?>"><br />
                 <label for="Weight">Weight: </label><input type="text" name="Weight" id="Weight" value="<?php echo $pet['Weight']; ?>"><br />
                 <label for="Vaccines">Vaccines: </label><input type="file" name="Vaccines" id="Vaccines"><br />
+                <label>Vaccine Dates: </label><br />
+                    <label for="Rabies">Rabies: </label><input id="Rabies" type="text" name="Vaccines2[Rabies]" value="<?php echo $pet['Vaccines2']['Rabies']; ?>" /><br />
+                    <label for="Distemper">Distemper: </label><input id="Distemper" type="text" name="Vaccines2[Distemper]" value="<?php echo $pet['Vaccines2']['Distemper']; ?>" /><br />
+                    <label for="Parvo">Parvo: </label><input id="Parvo" type="text" name="Vaccines2[Parvo]" value="<?php echo $pet['Vaccines2']['Parvo']; ?>" /><br />
+                <label for="Release">Release Form: </label><input type="file" name="Release" id="Release"><br />
                 <label for="Notes">Notes: </label><textarea name="Notes" id="Notes"><?php echo $pet['Notes']; ?></textarea><br />
                 <label for="Info">Warnings: </label><textarea name="Info" id="Info"><?php echo $pet['Info']; ?></textarea><br />
                 <label for="Picture">Picture: </label><input type="file" name="Picture" id="Picture"><br />
