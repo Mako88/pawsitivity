@@ -88,8 +88,8 @@ if(!empty($_GET['id'])) {
                     $group = 'Working Group';
                     break;
             }
-            echo '</td>';
-            echo '<td>';
+
+            
             switch($breed['Size']) {
                 case 'P':
                     $size = 'Petite';
@@ -171,6 +171,7 @@ if(!empty($_GET['id'])) {
     }
     else {
         echo "<p>I'm sorry, that ID is unrecognized.</p>";
+        goto finish;
     }
 }
 else {
@@ -234,7 +235,7 @@ else {
             echo '<td><strong>Bath Time: </strong>' . $time['Groom']['BathTime'] . '<br />';
             echo '<strong>Groom Time: </strong>' . $time['Groom']['GroomTime'] . '</td>';
             echo '<td>' . $breed['BathPrice'] . '</td>';
-            echo '<td>' . $breed['GroomPrice'] . '</td>';
+            echo '<td>' . $breed['GroomPrice'] . '</td></tr>';
         }
         echo '</table>';
     }

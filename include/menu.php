@@ -13,6 +13,7 @@ if(!defined('DIRECT')) die(); // Don't allow this file to be called directly
         <li><a href="newbreed.php">New Breed</a></li>
         <li><a href="viewclient.php">View Clients</a></li>
         <li><a href="viewpet.php">View Pets</a></li>
+        <li><a href="viewservice.php">View Services</a></li>
         <li><a href="viewbreed.php">View Breeds</a></li>
         <li><a href="calendar.php">View Calendar</a></li>
         <?php } ?>
