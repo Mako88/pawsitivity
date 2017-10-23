@@ -14,6 +14,12 @@ if($_SESSION['authenticated'] < 2) {
 <head>
 <meta charset="UTF-8">
 <title>View Client</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="js/moment.min.js"></script>
+<script src="js/moment-timezone.min.js"></script>
+<script src="js/pikaday.js"></script>
+<script src="js/pikaday.jquery.js"></script>
+<link rel="stylesheet" type="text/css" href="css/pikaday.css" />
 </head>
 <body>
 <?php
@@ -23,7 +29,7 @@ if($_SESSION['authenticated'] < 2) {
 if(!empty($_GET['id'])) {
     
     if(!empty($_POST['FirstName']) && !empty($_POST['LastName']) && !empty($_POST['Phone'])) {
-        $stmt = $database->prepare('UPDATE Owners SET FirstName=:FirstName, LastName=:LastName, Phone=:Phone, Address1=:Address1, Address2=:Address2, City=:City, State=:State, Zip=:Zip, Country=:Country, Email=:Email, SpouseName=:SpouseName, SpousePhone=:SpousePhone, Emergency=:Emergency, EmergencyPhone=:EmergencyPhone, AuthorizedPickup=:AuthorizedPickup, APPhone=:APPhone, ReferredBy=:ReferredBy WHERE ID=:ID');
+        $stmt = $database->prepare('UPDATE Owners SET FirstName=:FirstName, LastName=:LastName, Phone=:Phone, Address1=:Address1, Address2=:Address2, City=:City, State=:State, Zip=:Zip, Country=:Country, Email=:Email, SpouseName=:SpouseName, SpousePhone=:SpousePhone, Emergency=:Emergency, EmergencyPhone=:EmergencyPhone, AuthorizedPickup=:AuthorizedPickup, APPhone=:APPhone, ReferredBy=:ReferredBy, DateCreated=:DateCreated WHERE ID=:ID');
         $stmt->bindValue(':ID', $_GET['id']);
         (!empty($_POST['FirstName'])) ? $stmt->bindValue(':FirstName', $_POST['FirstName']) : $stmt->bindValue(':FirstName', NULL);
         (!empty($_POST['LastName'])) ? $stmt->bindValue(':LastName', $_POST['LastName']) : $stmt->bindValue(':LastName', NULL);
@@ -42,6 +48,7 @@ if(!empty($_GET['id'])) {
         (!empty($_POST['AuthorizedPickup'])) ? $stmt->bindValue(':AuthorizedPickup', $_POST['AuthorizedPickup']) : $stmt->bindValue(':AuthorizedPickup', NULL);
         (!empty($_POST['APPhone'])) ? $stmt->bindValue(':APPhone', $_POST['APPhone']) : $stmt->bindValue(':APPhone', NULL);
         (!empty($_POST['ReferredBy'])) ? $stmt->bindValue(':ReferredBy', $_POST['ReferredBy']) : $stmt->bindValue(':ReferredBy', NULL);
+        (!empty($_POST['DateCreated'])) ? $stmt->bindValue(':DateCreated', $_POST['DateCreated']) : $stmt->bindValue(':DateCreated', NULL);
         $stmt->execute();
     }
     
@@ -77,6 +84,7 @@ if(!empty($_GET['id'])) {
             echo '<tr><td>Authorized Pickup</td><td>' . $client['AuthorizedPickup'] . '</td></tr>';
             echo '<tr><td>Authorized Pickup Phone Number</td><td>' . $client['APPhone'] . '</td></tr>';
             echo '<tr><td>Referred By</td><td>' . $client['ReferredBy'] . '</td></tr>';
+            echo '<tr><td>Client Since</td><td>' . $client['DateCreated'] . '</td></tr>';
             echo '</table>';
             echo '<h2>Pets:</h2>';
             if(!empty($pets)) {
@@ -115,6 +123,7 @@ if(!empty($_GET['id'])) {
             echo '<label for="AuthorizedPickup">Authorized Pickup Name: </label><input type="text" name="AuthorizedPickup" id="AuthorizedPickup" value="' . $client['AuthorizedPickup'] . '"><br />';
             echo '<label for="APPhone">Authorized Pickup Phone Number: </label><input type="text" name="APPhone" id="APPhone" value="' . $client['APPhone'] . '"><br />';
             echo '<label for="ReferredBy">Referred By: </label><input type="text" name="ReferredBy" id="ReferredBy" value="' . $client['ReferredBy'] . '"><br />';
+            echo '<label for="DateCreated">Client Since: </label><input type="text" name="DateCreated" id="DateCreated" value="' . $client['DateCreated'] . '"><br />';
             echo '<input type="submit" value="Submit">';
             echo '</form>';
         }
@@ -139,6 +148,12 @@ else {
 }
 
 ?>
-    
+<script>
+$(function() {
+    $('#DateCreated').pikaday({
+        format: 'MM/DD/YYYY'
+    });
+});
+</script>
 </body>
 </html>

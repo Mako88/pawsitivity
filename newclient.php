@@ -14,6 +14,12 @@ if($_SESSION['authenticated'] < 2) {
 <head>
 <meta charset="UTF-8">
 <title>Add Client</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="js/moment.min.js"></script>
+<script src="js/moment-timezone.min.js"></script>
+<script src="js/pikaday.js"></script>
+<script src="js/pikaday.jquery.js"></script>
+<link rel="stylesheet" type="text/css" href="css/pikaday.css" />
 </head>
 <body>
 <?php include "include/menu.php"; ?>
@@ -41,7 +47,7 @@ if(!empty($_POST['FirstName']) && !empty($_POST['LastName']) && !empty($_POST['P
     $password = password_hash($password, PASSWORD_DEFAULT);
 
     // Create SQL query based on fields recieved
-    $stmt = $database->prepare('INSERT INTO Owners (FirstName, LastName, Phone, Address1, Address2, City, State, Zip, Country, Email, SpouseName, SpousePhone, Emergency, EmergencyPhone, AuthorizedPickup, APPhone, ReferredBy) VALUES (:FirstName, :LastName, :Phone, :Address1, :Address2, :City, :State, :Zip, :Country, :Email, :SpouseName, :SpousePhone, :Emergency, :EmergencyPhone, :AuthorizedPickup, :APPhone, :ReferredBy)');
+    $stmt = $database->prepare('INSERT INTO Owners (FirstName, LastName, Phone, Address1, Address2, City, State, Zip, Country, Email, SpouseName, SpousePhone, Emergency, EmergencyPhone, AuthorizedPickup, APPhone, ReferredBy, DateCreated) VALUES (:FirstName, :LastName, :Phone, :Address1, :Address2, :City, :State, :Zip, :Country, :Email, :SpouseName, :SpousePhone, :Emergency, :EmergencyPhone, :AuthorizedPickup, :APPhone, :ReferredBy, :DateCreated)');
     (!empty($_POST['FirstName'])) ? $stmt->bindValue(':FirstName', $_POST['FirstName']) : $stmt->bindValue(':FirstName', NULL);
     (!empty($_POST['LastName'])) ? $stmt->bindValue(':LastName', $_POST['LastName']) : $stmt->bindValue(':LastName', NULL);
     (!empty($_POST['Phone'])) ? $stmt->bindValue(':Phone', $_POST['Phone']) : $stmt->bindValue(':Phone', NULL);
@@ -59,6 +65,8 @@ if(!empty($_POST['FirstName']) && !empty($_POST['LastName']) && !empty($_POST['P
     (!empty($_POST['AuthorizedPickup'])) ? $stmt->bindValue(':AuthorizedPickup', $_POST['AuthorizedPickup']) : $stmt->bindValue(':AuthorizedPickup', NULL);
     (!empty($_POST['APPhone'])) ? $stmt->bindValue(':APPhone', $_POST['APPhone']) : $stmt->bindValue(':APPhone', NULL);
     (!empty($_POST['ReferredBy'])) ? $stmt->bindValue(':ReferredBy', $_POST['ReferredBy']) : $stmt->bindValue(':ReferredBy', NULL);
+    (!empty($_POST['DateCreated'])) ? $stmt->bindValue(':DateCreated', $_POST['DateCreated']) : $stmt->bindValue(':DateCreated', NULL);
+
     $stmt->execute();
     $id = $database->lastInsertId();
 
@@ -97,8 +105,18 @@ if(isset($newpass)) {
         <label for="AuthorizedPickup">Authorized Pickup Name: </label><input type="text" name="AuthorizedPickup" id="AuthorizedPickup"><br />
         <label for="APPhone">Authorized Pickup Phone Number: </label><input type="text" name="APPhone" id="APPhone"><br />
         <label for="ReferredBy">Referred By: </label><input type="text" name="ReferredBy" id="ReferredBy"><br />
+        <label for="DateCreated">Client Since: </label><input type="text" name="DateCreated" id="DateCreated"><br />
         <input type="submit" value="Submit">
     </form>
 <?php } ?>
+<script>
+$(function() {
+    $('#DateCreated').pikaday({
+        format: 'MM/DD/YYYY',
+        defaultDate: new Date(),
+        setDefaultDate: true
+    });
+});
+</script>
 </body>
 </html>

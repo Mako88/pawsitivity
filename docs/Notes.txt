@@ -26,7 +26,6 @@ services.php:
 	
 newclient.php/viewclient.php:
 	Allow resetting the "missed" field on client pages
-	- Add date created for each client
     
 
 employeeschedule.php:
@@ -53,4 +52,4 @@ Misc:
 	Figure out text/email reminders with scheduling
     Automatically remove events the age from global settings
     Prevent infinite redirect when user doesn't have permission to access page
-    
+    Add exporting events as CSV for import into Quickbooks
