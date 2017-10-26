@@ -776,9 +776,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                 
                 echo '<label for="package">Select Package: </label><select id="package" name="package">';
                 echo '<option value="1">Basic Bath</option>';
-                echo '<option value="2">Basic Spa</option>';
-                echo '<option value="3">Signature Bath</option>';
-                echo '<option value="4">Signature Spa</option>';
+                echo '<option value="2">Basic Groom</option>';
                 echo '</select><br />';
                 
                 echo '<p>Select which services you would like to schedule: </p>';
