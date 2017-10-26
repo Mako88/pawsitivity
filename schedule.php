@@ -615,7 +615,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                         
                         // Correct slottime for each groomer's tier
                         var temp = groomers[i]['Tier'];
-                        var groomerslottime = slottime + tiers[temp][size];
+                        var groomerslottime = slottime + parseInt(tiers[temp][size]);
                         var slots = slotfits(minutes, groomerslottime);
                         if(slots) {
                             
@@ -687,20 +687,20 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                                 // slot's end time, don't add it to littleslots (because it's too long)
                                 // We're also adding an additional 30 minutes to the end of each slot for pickup
                                 if(!(timeslots[today][i]['slots'][j]['start'] + k + x*15 + 30 > timeslots[today][i]['slots'][j]['end'])) {
-                                    index++;
-                                    littleslots[index] = Array();
                                     // Offset each slot by the bathing time so that the bathing is finished when the grooming slot begins
                                     // Don't do that if it will push the dropoff time before opening though
                                     if((timeslots[today][i]['slots'][j]['start'] + k) - bathtime < opentime) {
                                         continue;
                                     }
+                                    index++;
+                                    littleslots[index] = Array();
                                     littleslots[index]['start'] = (timeslots[today][i]['slots'][j]['start'] + k) - bathtime;
                                     littleslots[index]['end'] = (littleslots[index]['start'] + x*15 + 30) - bathtime;
                                 }
                             }
                         }
                     }
-                                        
+                    
                     for(var i = 0; i < littleslots.length; i++) {
                         var start = littleslots[i]['start'];
                         var end = littleslots[i]['end'];
