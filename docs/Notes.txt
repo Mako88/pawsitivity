@@ -9,6 +9,7 @@ schedule.php:
     - If dog is 3 or over, warn if rabies is out of date
     Don't allow clicking next if no date is set
     If they're just getting a bath, are we handling it right?
+    Store price in database
     
 	
 search.php:
