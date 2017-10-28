@@ -1,7 +1,6 @@
 schedule.php:
 	Don't allow users to schedule if Missed field is 1, tell them to call.
 	If a dog requires two people, differentiate bathing time and helping time
-    - Add price
     Disable groom services when bath selected
     - If groom price or time is 0, disable groom packages for clients (not employees)
     - Make sure bath price and groom price aren't added
@@ -37,6 +36,10 @@ employeeschedule.php:
 
 newuser.php:
 	Add viewuser.php to allow editing a user
+    
+    
+settings.php:
+    Allow setting business hours (update on schedule and employeeschedule)
 
 	
 Misc:

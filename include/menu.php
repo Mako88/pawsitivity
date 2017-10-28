@@ -17,6 +17,9 @@ if(!defined('DIRECT')) die(); // Don't allow this file to be called directly
         <li><a href="viewbreed.php">View Breeds</a></li>
         <li><a href="calendar.php">View Calendar</a></li>
         <?php } ?>
+        <?php if($_SESSION['authenticated'] == 5) { ?>
+        <li><a href="employeeschedule.php">Schedule Employees</a></li>
+        <?php } ?>
     </ul>
     <?php if($_SESSION['authenticated'] > 1) { ?>
     <form action="search.php" method="post">

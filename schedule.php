@@ -864,10 +864,10 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                     echo '<option value="' . $groomer['ID'] . '" ' . (($groomer['ID'] == $pet['PreferredGroomer']) ? 'selected' : '' ) . '>' . $groomer['Name'] . '</option>';
                 }
                 echo '</select><br />';
+                echo '<div id="price"></div>';
                 echo '<input type="submit" value="Next" />';
                 echo '</form>'; ?>
-                
-                <div id="price"></div>
+    
                 <script>
                     
                 var price = 0;
@@ -905,7 +905,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                         price += Number(selectedservices[i]);
                     }
                     
-                    $("#price").text(price);
+                    $("#price").text("Price: $" + price);
                 }
                 
                 $(function() {
