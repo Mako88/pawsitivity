@@ -3,9 +3,9 @@ schedule.php:
 	If a dog requires two people, differentiate bathing time and helping time
     - Add price
     Disable groom services when bath selected
-	- If groom price or time is 0, disable groom packages for clients (not employees)
+    - If groom price or time is 0, disable groom packages for clients (not employees)
     - Make sure bath price and groom price aren't added
-	- Warn if bath or groom time or price is 0 when employer is scheduling
+    - Warn if bath or groom time or price is 0 when employer is scheduling
     - If dog is under 3 warn if any vaccine is out of date
     - If dog is 3 or over, warn if rabies is out of date
     Don't allow clicking next if no date is set

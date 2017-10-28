@@ -696,7 +696,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                             // Even if a groomer has time, if they would have to arrive before the current time in order to be done on time, don't count this groomer.
                             var now = new Date();
                             var currenttime = now.getHours() * 60 + now.getMinutes();
-                            if(openclose[dayindex]['close'] - 30 - groomerslottime - bathtime < currenttime) {
+                            if((now.toDateString() === today.toDateString()) && openclose[dayindex]['close'] - 30 - groomerslottime - bathtime < currenttime) {
                                 continue;
                             }
                             timeslots[index].push(Array());
@@ -762,7 +762,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                                 if(!(timeslots[today][i]['slots'][j]['start'] + k + x*15 + 30 > timeslots[today][i]['slots'][j]['end'])) {
                                     // Offset each slot by the bathing time so that the bathing is finished when the grooming slot begins
                                     // Don't do that if it will push the dropoff time before opening, or before the current time, or past the end of the day
-                                    if((timeslots[today][i]['slots'][j]['start'] + k) - bathtime < openclose[dayindex]['open'] || (timeslots[today][i]['slots'][j]['start'] + k) - bathtime < currenttime || timeslots[today][i]['slots'][j]['start'] + k + x*15 + 30 > openclose[dayindex]['close']) {
+                                    if((timeslots[today][i]['slots'][j]['start'] + k) - bathtime < openclose[dayindex]['open'] || (now.toDateString() === date.toDateString() && timeslots[today][i]['slots'][j]['start'] + k - bathtime < currenttime) || timeslots[today][i]['slots'][j]['start'] + k + x*15 + 30 > openclose[dayindex]['close']) {
                                         continue;
                                     }
                                     index++;
@@ -865,8 +865,64 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                 }
                 echo '</select><br />';
                 echo '<input type="submit" value="Next" />';
-                echo '</form>';
-            }
+                echo '</form>'; ?>
+                
+                <div id="price"></div>
+                <script>
+                    
+                var price = 0;
+                var groom = <?php echo $_SESSION['info']['GroomPrice']; ?>;
+                var bath = <?php echo $_SESSION['info']['BathPrice']; ?>;
+                var services = <?php echo json_encode($services); ?>;
+                var size = "<?php echo $_SESSION['info']['Size'] ?>";
+                
+                for(var i = 0; i < services.length; i++) {
+                    services[i]['Price'] = JSON.parse(services[i]['Price'], true);
+                }
+                
+                function updatePrice() {
+                    price = 0;
+                    selectedservices = Array();
+                    var package = parseInt($("#package").val());
+                    switch(package) {
+                        case 1:
+                            price += bath;
+                            break;
+                        case 2:
+                            price += groom;
+                            break;
+                    }
+                    
+                    $("input:checkbox:checked").each(function() {
+                        for(var i = 0; i < services.length; i++) {
+                            if($(this).attr("id") == services[i]['ID']) {
+                                selectedservices.push(services[i]['Price'][size]);
+                            }
+                        }
+                    });
+                    
+                    for(var i = 0; i < selectedservices.length; i++) {
+                        price += Number(selectedservices[i]);
+                    }
+                    
+                    $("#price").text(price);
+                }
+                
+                $(function() {
+                    updatePrice();
+                    $("#package").change(function() {
+                        updatePrice();
+                    });
+                    
+                    $("input:checkbox").change(function() {
+                        updatePrice();
+                    });
+                });
+                    
+                
+                </script>            
+    
+            <?php }
             else {
                 echo '<p>We\'re sorry, there are no services stored yet.</p>';
             }
