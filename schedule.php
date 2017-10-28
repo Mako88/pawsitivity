@@ -192,6 +192,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                         echo "None";
                     }
                     echo "</ul></td></tr><tr>";
+                    echo "<td>Price: </td><td>$" . $_SESSION['info']['Price'] . "</td></tr><tr>";
                     echo "<td>Groomer: </td><td>" . $groomername . "</td></tr><tr>";
                     echo "<td>Date: </td><td>" . $_POST['date'] . "</td></tr><tr>";
                     echo "<td>Dropoff Time: </td><td>" . $start . "</td></tr><tr>";
@@ -324,6 +325,45 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
         
         $stmt = $database->query("SELECT Tiers FROM Globals");
         $tiers = $stmt->fetch();
+        
+        // Calculate price
+        switch($_SESSION['info']['package']) {
+            case 1:
+                $pricetype = "BathPrice";
+                break;
+            case 2:
+                $pricetype = "GroomPrice";
+                break;
+            default:
+                $pricetype = "BathPrice";
+                break;
+        }
+        
+        $sql = "SELECT " . $pricetype . " FROM Breeds WHERE ID = :ID";
+        $stmt = $database->prepare("SELECT Breed FROM Pets WHERE ID = :ID");
+        $stmt->bindValue(':ID', $_SESSION['info']['pet']);
+        $stmt->execute();
+        $breed = $stmt->fetch();
+        $stmt = $database->prepare($sql);
+        $stmt->bindValue(':ID', $breed['Breed']);
+        $stmt->execute();
+        $price = $stmt->fetch();
+        $price = $price[$pricetype];
+        
+        if(!empty($_SESSION['info']['services'])) {
+        
+            foreach($_SESSION['info']['services'] as $service) {
+                $stmt = $database->prepare("SELECT Price FROM Services WHERE ID = :ID");
+                $stmt->bindValue(':ID', $service);
+                $stmt->execute();
+                $result = $stmt->fetch();
+                $serviceprice = json_decode($result['Price'], true);
+                
+                $price += $serviceprice[$_SESSION['info']['Size']];
+            }
+        }
+        
+        $_SESSION['info']['Price'] = $price;
 ?>
     <form action="schedule.php" method="post" id="day">
         <label for="datepicker">Please pick a day to schedule your pet: </label>
@@ -345,6 +385,33 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
             var groomers = <?php echo json_encode($groomers); ?>;
             var tiers = <?php echo $tiers['Tiers']; ?>;
             var size = "<?php echo $_SESSION['info']['Size']; ?>";
+            
+            // Set open and close times for each day of the week
+            var openclose = Array();
+            for(var i = 0; i < 7; i++) {
+                openclose[i] = Array();
+                switch(i) {
+                    // Tuesday and Wednesday (0900 - 1700)
+                    case 2:
+                    case 3:
+                        openclose[i]['open'] = 540; // 0900 in minutes
+                        openclose[i]['close'] = 1020; // 1700 in minutes
+                        break;
+
+                    // Thursday and Friday (0800 - 1800)
+                    case 4:
+                    case 5:
+                        openclose[i]['open'] = 480; // 0800 in minutes
+                        openclose[i]['close'] = 1080; // 1800 in minutes
+                        break;
+
+                    // Saturday (0900 - 1500)
+                    case 6:
+                        openclose[i]['open'] = 540; // 0900 in minutes
+                        openclose[i]['close'] = 900; // 1500 in minutes
+                        break;
+                }
+            }
             
             var timeslots = Array();
             var selectedinfo = Array();
@@ -421,11 +488,11 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
 
                 // Fill array with minutes spa is open today
                 switch(today.getDay()) {
-                    // Tuesday and Wednesday (0900 - 1700)
+                    // Tuesday and Wednesday
                     case 2:
                     case 3:
-                        var i = 540; // 0900 in minutes
-                        while(i <= 1020) { // 1700 in minutes
+                        var i = openclose[2]['open'];
+                        while(i <= openclose[2]['close']) {
                             if(i == 780) {
                                 i = 810; // Add a break from 1:00 - 1:30
                             }
@@ -434,11 +501,11 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                         }
                         break;
 
-                    // Thursday and Friday (0800 - 1800)
+                    // Thursday and Friday
                     case 4:
                     case 5:
-                        var i = 480; // 0900 in minutes
-                        while(i <= 1080) { // 1800 in minutes
+                        var i = openclose[4]['open'];
+                        while(i <= openclose[4]['close']) {
                             if(i == 780) {
                                 i = 810; // Add a break from 1:00 - 1:30
                             }
@@ -449,8 +516,8 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
 
                     // Saturday (0900 - 1500)
                     case 6:
-                        var i = 540; // 0900 in minutes
-                        while(i <= 900) { // 1500 in minutes
+                        var i = openclose[6]['open'];
+                        while(i <= openclose[6]['close']) {
                             if(i == 780) {
                                 i = 810; // Add a break from 1:00 - 1:30
                             }
@@ -575,13 +642,19 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                         slots[step]['end'] = todayminutes[i];
                     }
                 }
+                
+                var index = Array();
 
                 for(var i = 0; i < slots.length; i++) {
                     if(slots[i]['length'] < time) {
-                        var index = slots.indexOf(i);
-                        slots.splice(index, 1);
+                        index.push(i);
                     }
                 }
+                for(var i = 0; i < index.length; i++) {
+                    var temp = slots.indexOf(index[i]);
+                    slots.splice(temp, 1);
+                }
+
                 if(slots.length > 0) {
                     return slots;
                 }
@@ -596,8 +669,10 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                 minDate: new Date(),
                 disableDayFn: function(today) {
                     
+                    var dayindex = today.getDay();
+                    
                     // Disable Sundays and Mondays
-                    if(today.getDay() == 0 || today.getDay() == 1) {
+                    if(dayindex == 0 || dayindex == 1) {
                         return true;
                     }
                     
@@ -618,7 +693,12 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                         var groomerslottime = slottime + parseInt(tiers[temp][size]);
                         var slots = slotfits(minutes, groomerslottime);
                         if(slots) {
-                            
+                            // Even if a groomer has time, if they would have to arrive before the current time in order to be done on time, don't count this groomer.
+                            var now = new Date();
+                            var currenttime = now.getHours() * 60 + now.getMinutes();
+                            if(openclose[dayindex]['close'] - 30 - groomerslottime - bathtime < currenttime) {
+                                continue;
+                            }
                             timeslots[index].push(Array());
                             var last = timeslots[index].length - 1;
                             timeslots[index][last]['groomer'] = groomers[i];
@@ -638,25 +718,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                         // at ['slots'] with the available slots for that groomer
                     // littleslots[index]: An array of timeslots the size of the current event to the nearest 15 minutes, taken from a single open period
                     
-                    var opentime;
-                    switch(date.getDay()) {
-                        // Tuesday and Wednesday (0900 - 1700)
-                        case 2:
-                        case 3:
-                            opentime = 540; // 0900 in minutes
-                            break;
-
-                        // Thursday and Friday (0800 - 1800)
-                        case 4:
-                        case 5:
-                            opentime = 480; // 0900 in minutes
-                            break;
-
-                        // Saturday (0900 - 1500)
-                        case 6:
-                            opentime = 540; // 0900 in minutes
-                            break;
-                    }
+                    var dayindex = date.getDay();
                     
                     today = date.getTime();
                     var availablegroomers = Array();
@@ -666,11 +728,22 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                     }
                     
                     var groomer = pickgroomer(date, availablegroomers);
+                    var groomerslottime;
+                    var now = new Date();
+                    var currenttime = now.getHours() * 60 + now.getMinutes();
+                    
+                     // Correct slottime for the selected groomer
+                    for(var i = 0; i < groomers.length; i++) {
+                        if(groomers[i]['ID'] == groomer) {
+                            var temp = groomers[i]['Tier'];
+                            groomerslottime = slottime + parseInt(tiers[temp][size]);
+                        }
+                    }
                     
                     var options = $("#slot");
                     options.empty();
                     var littleslots = Array();
-                    var x = Math.ceil(totaltime/15); // The number of 15 minute intervals the event being scheduled will take
+                    var x = Math.ceil(groomerslottime/15); // The number of 15 minute intervals the event being scheduled will take for the groomer
                     
                     // Break up the available slots into slots the size of the event.
                     // i = every groomer
@@ -688,14 +761,14 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                                 // We're also adding an additional 30 minutes to the end of each slot for pickup
                                 if(!(timeslots[today][i]['slots'][j]['start'] + k + x*15 + 30 > timeslots[today][i]['slots'][j]['end'])) {
                                     // Offset each slot by the bathing time so that the bathing is finished when the grooming slot begins
-                                    // Don't do that if it will push the dropoff time before opening though
-                                    if((timeslots[today][i]['slots'][j]['start'] + k) - bathtime < opentime) {
+                                    // Don't do that if it will push the dropoff time before opening, or before the current time, or past the end of the day
+                                    if((timeslots[today][i]['slots'][j]['start'] + k) - bathtime < openclose[dayindex]['open'] || (timeslots[today][i]['slots'][j]['start'] + k) - bathtime < currenttime || timeslots[today][i]['slots'][j]['start'] + k + x*15 + 30 > openclose[dayindex]['close']) {
                                         continue;
                                     }
                                     index++;
                                     littleslots[index] = Array();
                                     littleslots[index]['start'] = (timeslots[today][i]['slots'][j]['start'] + k) - bathtime;
-                                    littleslots[index]['end'] = (littleslots[index]['start'] + x*15 + 30) - bathtime;
+                                    littleslots[index]['end'] = littleslots[index]['start'] + x*15 + 30 + bathtime;
                                 }
                             }
                         }

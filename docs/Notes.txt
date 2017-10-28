@@ -8,6 +8,8 @@ schedule.php:
 	- Warn if bath or groom time or price is 0 when employer is scheduling
     - If dog is under 3 warn if any vaccine is out of date
     - If dog is 3 or over, warn if rabies is out of date
+    Don't allow clicking next if no date is set
+    If they're just getting a bath, are we handling it right?
     
 	
 search.php:

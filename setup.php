@@ -101,7 +101,8 @@ if(!empty($_POST['username']) && !empty($_POST['password']) && !empty($_POST['em
             RecInterval INT(2),
             EndDate INT(11) UNSIGNED,
             Package INT(1),
-            Services TEXT
+            Services TEXT,
+            Price DECIMAL(5, 2)
     )";
     $sql[3] = "
         CREATE TABLE IF NOT EXISTS Users(
