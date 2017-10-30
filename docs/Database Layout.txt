@@ -49,6 +49,7 @@ Scheduling Table:
 	EndDate (a unix timestamp of the end of recurring. If -1, then recur indefinitely)
 	Package (which package 1 - basic bath, 2 - basic spa, 3 - sig bath, 4 - sig spa)
 	Services (array of selected services)
+    Price
 	
 Users Table:
 	ID

@@ -392,9 +392,7 @@ $_SESSION['Hours'] = $hours;
             
             // Set open and close times for each day of the week
             var openclose = <?php echo $_SESSION['Hours']; ?>;
-            
-            console.log(openclose);
-            
+                        
             var timeslots = Array();
             var selectedinfo = Array();
             
