@@ -19,6 +19,7 @@ if(!defined('DIRECT')) die(); // Don't allow this file to be called directly
         <?php } ?>
         <?php if($_SESSION['authenticated'] == 5) { ?>
         <li><a href="employeeschedule.php">Schedule Employees</a></li>
+        <li><a href="settings.php">Global Settings</a></li>
         <?php } ?>
     </ul>
     <?php if($_SESSION['authenticated'] > 1) { ?>

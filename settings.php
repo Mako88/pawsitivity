@@ -26,24 +26,27 @@ if($_SESSION['authenticated'] != 5) {
     if(!empty($settings)) {
         $set = true;
         $tiers = json_decode($settings['Tiers'], true);
+        $hours = json_decode($settings['Hours'], true);
+
     }
     else {
         $set = false;
     }
 
-if(!empty($_POST['timezone']) && !empty($_POST['eventsage']) && !empty($_POST['sigupcharge']) && !empty($_POST['sigprice']) && !empty($_POST['tiers'])) {
-    if(is_array($_POST['tiers'])) {
-        $stmt = $database->prepare('REPLACE INTO Globals (Timezone, EventsAge, SigUpcharge, SigPrice, Tiers) VALUES (:Timezone, :EventsAge, :SigUpcharge, :SigPrice, :Tiers)');
+if(!empty($_POST['timezone']) && !empty($_POST['eventsage']) && !empty($_POST['sigupcharge']) && !empty($_POST['sigprice']) && !empty($_POST['tiers']) && !empty($_POST['hours'])) {
+    if(is_array($_POST['tiers']) && is_array($_POST['hours'])) {
+        $stmt = $database->prepare('REPLACE INTO Globals (Timezone, EventsAge, SigUpcharge, SigPrice, Tiers, Hours) VALUES (:Timezone, :EventsAge, :SigUpcharge, :SigPrice, :Tiers, :Hours)');
         $stmt->bindValue(':Timezone', $_POST['timezone']);
         $stmt->bindValue(':EventsAge', $_POST['eventsage']);
         $stmt->bindValue(':SigUpcharge', $_POST['sigupcharge']);
         $stmt->bindValue(':SigPrice', $_POST['sigprice']);
         $stmt->bindValue(':Tiers', json_encode($_POST['tiers']));
+        $stmt->bindValue(':Hours', json_encode($_POST['hours'], JSON_NUMERIC_CHECK));
         $stmt->execute();
         echo "<p>Global Settings Set!</p>";
     }
     else {
-        echo "<p>Could not set settings. The tiers information was corrupted.</p>";
+        echo "<p>Could not set settings. The tiers or the hours information was corrupted.</p>";
     }
 }
 else {
@@ -85,6 +88,50 @@ else {
                 <label for="dm">Medium Dogs: </label><input id="dm" type="text" name="tiers[2][M]" value="<?php if($set) echo $tiers[2]['M']; ?>" /><br />
                 <label for="dl">Large Dogs: </label><input id="dl" type="text" name="tiers[2][L]" value="<?php if($set) echo $tiers[2]['L']; ?>" /><br />
                 <label for="dx">Extra Large Dogs: </label><input id="dx" type="text" name="tiers[2][XL]" value="<?php if($set) echo $tiers[2]['XL']; ?>" /><br />
+        <label>Store Hours:</label>
+        <table>
+            <tr><td>Sunday</td><td>Monday</td><td>Tuesday</td><td>Wednesday</td><td>Thursday</td><td>Friday</td><td>Saturday</td></tr>
+            <tr>
+            <?php
+                for($i = 0; $i < 7; $i++) {
+                    echo '<td>';
+                    echo 'Open: <select name="hours[' . $i . '][open]"><option value="closed">Closed</option>';
+                    for($j = 0; $j < 1440; $j += 15) {
+                        $time = $j;
+                        $min = $time % 60;
+                        $hour = ($time - $min) / 60;
+                        $s = "AM";
+                        if($hour >= 12) {
+                            $hour = $hour - 12;
+                            $s = "PM";
+                        }
+                        if($hour == 0) {
+                            $hour = 12;
+                        }
+                        echo '<option' . ($hours[$i]['open'] === $j ? " selected " : " ") . 'value="' . $j . '">' . $hour . ":" . ($min < 10 ? '0' . $min : $min) . $s . '</option>';
+                    }
+                    echo '</select><br />';
+                    echo 'Close: <select name="hours[' . $i . '][close]"><option value="closed">Closed</option>';
+                    for($j = 0; $j < 1440; $j += 15) {
+                        $time = $j;
+                        $min = $time % 60;
+                        $hour = ($time - $min) / 60;
+                        $s = "AM";
+                        if($hour >= 12) {
+                            $hour = $hour - 12;
+                            $s = "PM";
+                        }
+                        if($hour == 0) {
+                            $hour = 12;
+                        }
+                        echo '<option' . ($hours[$i]['close'] === $j ? " selected " : " ") . 'value="' . $j . '">' . $hour . ":" . ($min < 10 ? '0' . $min : $min) . $s . '</option>';
+                    }
+                    echo '</select>';
+                    echo '</td>';
+                }
+            ?>
+            </tr>
+        </table>
         <input type="submit" name="submit" value="Save Settings">
     </form>
 

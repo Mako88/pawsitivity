@@ -7,10 +7,13 @@ if($_SESSION['authenticated'] < 1) {
     die();
 }
 
-$stmt = $database->query("SELECT Timezone FROM Globals");
-$timezone = $stmt->fetch();
+$stmt = $database->query("SELECT Timezone, Hours FROM Globals");
+$res = $stmt->fetch();
+$timezone = $res['Timezone'];
+$hours = $res['Hours'];
 
-$_SESSION['Timezone'] = $timezone['Timezone'];
+$_SESSION['Timezone'] = $timezone;
+$_SESSION['Hours'] = $hours;
 
 ?>
 
@@ -33,7 +36,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
     include 'include/menu.php';
     
     if(!empty($_POST['confirm'])) {
-        $stmt = $database->prepare('INSERT INTO Scheduling (PetID, StartTime, GroomTime, BathTime, TotalTime, GroomerID, Recurring, RecInterval, EndDate, Package, Services) VALUES (:PetID, :StartTime, :GroomTime, :BathTime, :TotalTime, :GroomerID, :Recurring, :RecInterval, :EndDate, :Package, :Services)');
+        $stmt = $database->prepare('INSERT INTO Scheduling (PetID, StartTime, GroomTime, BathTime, TotalTime, GroomerID, Recurring, RecInterval, EndDate, Package, Services, Price) VALUES (:PetID, :StartTime, :GroomTime, :BathTime, :TotalTime, :GroomerID, :Recurring, :RecInterval, :EndDate, :Package, :Services, :Price)');
         $stmt->bindValue(':PetID', $_SESSION['info']['pet']);
         $stmt->bindValue(':StartTime', $_SESSION['info']['timestamp']);
         $stmt->bindValue(':GroomTime', $_SESSION['info']['GroomTime']);
@@ -44,6 +47,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
         $stmt->bindValue(':RecInterval', $_SESSION['info']['RecInterval']);
         $stmt->bindValue(':EndDate', $_SESSION['info']['EndDate']);
         $stmt->bindValue(':Package', $_SESSION['info']['package']);
+        $stmt->bindValue(':Price', $_SESSION['info']['Price']);
         (!empty($_SESSION['info']['services']) ? $stmt->bindValue(':Services', json_encode($_SESSION['info']['services'])) : $stmt->bindValue(':Services', NULL));
         $stmt->execute();
         
@@ -387,31 +391,9 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
             var size = "<?php echo $_SESSION['info']['Size']; ?>";
             
             // Set open and close times for each day of the week
-            var openclose = Array();
-            for(var i = 0; i < 7; i++) {
-                openclose[i] = Array();
-                switch(i) {
-                    // Tuesday and Wednesday (0900 - 1700)
-                    case 2:
-                    case 3:
-                        openclose[i]['open'] = 540; // 0900 in minutes
-                        openclose[i]['close'] = 1020; // 1700 in minutes
-                        break;
-
-                    // Thursday and Friday (0800 - 1800)
-                    case 4:
-                    case 5:
-                        openclose[i]['open'] = 480; // 0800 in minutes
-                        openclose[i]['close'] = 1080; // 1800 in minutes
-                        break;
-
-                    // Saturday (0900 - 1500)
-                    case 6:
-                        openclose[i]['open'] = 540; // 0900 in minutes
-                        openclose[i]['close'] = 900; // 1500 in minutes
-                        break;
-                }
-            }
+            var openclose = <?php echo $_SESSION['Hours']; ?>;
+            
+            console.log(openclose);
             
             var timeslots = Array();
             var selectedinfo = Array();
