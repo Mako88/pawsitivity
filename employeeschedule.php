@@ -143,7 +143,8 @@ var employees = <?php echo json_encode($employees); ?>;
 function updateTable() {
     var week = $("#week").val().split(' - ');
     var date = week[0].split('/');
-    date = date[2] + '-' + date[0] + '-' + date[1] + " 00:00:00";
+    date = date[2] + '-' + date[0] + '-' + date[1];
+    console.log(date);
     var day = moment.tz(date, timezone);
     $("#timestamp").val(day.unix());
     $("#days").children('td').each(function(index) {
@@ -223,9 +224,9 @@ $(function() {
         pickWholeWeek: true,
         onSelect: function (date) {
             var sundayDate = date.getDate() - date.getDay();
-            var sunday = new Date(date.setDate(sundayDate));
-            var saturday = new Date(date.setDate(sundayDate + 6));
-            $("#week").val(sunday.toLocaleDateString() + ' - ' + saturday.toLocaleDateString());
+            var sunday = moment(date.setDate(sundayDate));
+            var saturday = moment(date.setDate(sundayDate + 6));
+            $("#week").val(sunday.format("MM/DD/YYYY") + ' - ' + saturday.format("MM/DD/YYYY"));
             updateTable();
         }
     });

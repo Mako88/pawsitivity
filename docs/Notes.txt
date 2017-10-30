@@ -27,13 +27,10 @@ newclient.php/viewclient.php:
     
 
 employeeschedule.php:
-	- Add employee scheduling page
-    - Select a week first
-    - Show a table: Y axis are employees, X axis is days
-    - For each day set a starting time/ending time (from drop downs. Also allow setting "off")
-    - For each client each day create an event from opening to start time, and from end time to close
-    - If a client is off, create an event that lasts the whole day
-	
+	- Add checks for when a groomer works the whole day
+    - Automatically reselect week after updating schedule
+    - Disable past weeks
+    
 
 newuser.php:
 	Add viewuser.php to allow editing a user
