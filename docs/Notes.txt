@@ -26,12 +26,6 @@ newclient.php/viewclient.php:
 	Allow resetting the "missed" field on client pages
     
 
-employeeschedule.php:
-	- Add checks for when a groomer works the whole day
-    - Automatically reselect week after updating schedule
-    - Disable past weeks
-    
-
 newuser.php:
 	Add viewuser.php to allow editing a user
     

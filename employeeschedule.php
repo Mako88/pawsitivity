@@ -35,6 +35,12 @@ include "include/menu.php";
     
     $stmt = $database->query("SELECT ID, Name FROM Users WHERE Access = 2");
     $employees = $stmt->fetchAll();
+    
+    $defaultdate = "false";
+    
+    if(!empty($_POST['defaultdate'])) {
+        $defaultdate = htmlspecialchars($_POST['defaultdate']);
+    }
         
     if(!empty($_POST['schedule']) && is_numeric($_POST['timestamp'])) {
         if(is_array($_POST['schedule'])) {
@@ -93,7 +99,7 @@ include "include/menu.php";
     
 ?>
 
-    <form action="employeeschedule.php" method="post">
+    <form action="employeeschedule.php" method="post" id="scheduleform">
         <input type="text" id="week" />
         <table id="schedule" style="display: none">
             <tr id="days"><td>Groomer</td><td>Sunday</td><td>Monday</td><td>Tuesday</td><td>Wednesday</td><td>Thursday</td><td>Friday</td><td>Saturday</td></tr>
@@ -115,6 +121,9 @@ include "include/menu.php";
         <input type="hidden" id="timestamp" name="timestamp" />
         <input type="submit" value="Save" />
     </form>
+    <form id="cancel" action="employeeschedule.php" method="post">
+        <input type="submit" value="Cancel" />
+    </form>
     
 <script>
     
@@ -126,12 +135,12 @@ var timeslots = Array();
 for(var i = 0; i < 7; i++) {
     timeslots[i] = Array();
     timeslots[i]['open'] = Array();
-    for(var j = openclose[i]['open']; j <= openclose[i]['close'] - 15; j += 15) {
-        timeslots[i]['open'].push(j);
-    }
     timeslots[i]['close'] = Array();
-    for(var j = openclose[i]['open'] + 15; j <= openclose[i]['close']; j += 15) {
-        timeslots[i]['close'].push(j);
+    if(openclose[i]['open'] != "closed" || openclose[i]['close'] != "closed") {
+        for(var j = openclose[i]['open']; j <= openclose[i]['close']; j += 15) {
+            timeslots[i]['open'].push(j);
+            timeslots[i]['close'].push(j);
+        }
     }
 }
 
@@ -139,12 +148,12 @@ moment.tz.setDefault("America/New_York");
     
 var events = <?php echo json_encode($events); ?>;
 var employees = <?php echo json_encode($employees); ?>;
+var defaultdate = "<?php echo $defaultdate; ?>";
 
 function updateTable() {
     var week = $("#week").val().split(' - ');
     var date = week[0].split('/');
     date = date[2] + '-' + date[0] + '-' + date[1];
-    console.log(date);
     var day = moment.tz(date, timezone);
     $("#timestamp").val(day.unix());
     $("#days").children('td').each(function(index) {
@@ -162,17 +171,25 @@ function updateTable() {
             if(index == 0) {
                 return;
             }
+            var selected = " ";
+            var off = false;
             $(this).children(".open").empty();
-            $(this).children(".open").append($("<option />").val("off").text("Off"));
+            loop1:
             for(var j = 0; j < timeslots[index-1]['open'].length; j++) {
                 var time = timeslots[index-1]['open'][j];
-                var selected = " ";
+                selected = " ";
                 
                 for(var k = 0; k < events.length; k++) {
                     if(events[k]['GroomerID'] != employees[i]['ID']) {
                         continue;
                     }
                     if(day.unix() + moment.tz.zone(timezone).offset(moment())*60 + ((index-1) * 86400) + time*60 == events[k]['StartTime'] + events[k]['TotalTime']*60) {
+                        if(j+1 == timeslots[index-1]['open'].length) {
+                            if(events[k]['StartTime'] != day.unix() + moment.tz.zone(timezone).offset(moment())*60 + ((index-1) * 86400) + openclose[index-1]['open']*60) {
+                                continue;
+                            }
+                            off = true;
+                        }
                         selected = " selected ";
                     }
                 }
@@ -189,18 +206,23 @@ function updateTable() {
                 }
                 $(this).children(".open").append($("<option" + selected + "/>").val(time).text(hour + ":" + (min < 10 ? "0" + min : min) + " " + s));
             }
+            $(this).children(".open").append($("<option" + selected + "/>").val("off").text("Off"));
             $(this).children(".close").empty();
-            $(this).children(".close").append($("<option />").val("off").text("Off"));
+            var anyselected = false;
             for(var j = 0; j < timeslots[index-1]['close'].length; j++) {
                 var time = timeslots[index-1]['close'][j];
-                var selected = " ";
+                selected = " ";
                 
                 for(var k = 0; k < events.length; k++) {
                     if(events[k]['GroomerID'] != employees[i]['ID']) {
                         continue;
                     }
                     if(day.unix() + moment.tz.zone(timezone).offset(moment())*60 + ((index-1) * 86400) + time*60 == events[k]['StartTime']) {
+                        if(j == 0) {
+                            continue;
+                        }
                         selected = " selected ";
+                        anyselected = true;
                     }
                 }
                 var min = time % 60;
@@ -214,7 +236,14 @@ function updateTable() {
                     hour = 12;
                 }
                 $(this).children(".close").append($("<option" + selected + "/>").val(timeslots[index-1]['close'][j]).text(hour + ":" + (min < 10 ? "0" + min : min) + " " + s));
+                if(j+1 == timeslots[index-1]['close'].length && anyselected == false) {
+                    $(this).children(".close").children("option").last().prop("selected", true);
+                }
             }
+            if(off) {
+                selected = " selected ";
+            }
+            $(this).children(".close").append($("<option" + selected + "/>").val("off").text("Off"));
         });
     }
 }
@@ -234,6 +263,71 @@ $(function() {
     $("#week").change(function() {
         $("#schedule").css("display", "block");
     });
+    
+    $("form").submit(function(eventObj) {
+        $(this).append('<input type="hidden" name="defaultdate" id="defaultdate" />');
+        $("#defaultdate").val($("#week").val());
+        return true;
+    });
+    
+    if(defaultdate != "false") {
+        $("#week").val(defaultdate);
+        updateTable();
+        $("#schedule").css("display", "block");
+    }
+    
+    $(".open").change(function() {
+        var time = $(this).val();
+        var off = false;
+        if(time != "off") {
+            time = parseInt(time);
+        }
+        else {
+            off = true;
+        }
+        $(this).parent("td").children(".close").children("option").each(function() {
+            $(this).prop("disabled", false);
+            if(off) {
+                if($(this).val() == "off") {
+                    $(this).prop("selected", true);
+                }
+                else {
+                    $(this).prop("selected", false);
+                }
+            }
+            else if($(this).val() <= time) {
+                $(this).prop("disabled", true);
+                $(this).prop("selected", false);
+            }
+        });
+    });
+    
+    $(".close").change(function() {
+        var time = $(this).val();
+        var off = false;
+        if(time != "off") {
+            time = parseInt(time);
+        }
+        else {
+            off = true;
+        }
+        $(this).parent("td").children(".open").children("option").each(function() {
+            $(this).prop("disabled", false);
+            if(off) {
+                if($(this).val() == "off") {
+                    $(this).prop("selected", true);
+                }
+                else {
+                    $(this).prop("selected", false);
+                }
+            }
+            else if($(this).val() >= time) {
+                $(this).prop("disabled", true);
+                $(this).prop("selected", false);
+            }
+        });
+    });
+    
 });  
 </script>
 </body>
