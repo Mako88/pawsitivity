@@ -630,9 +630,9 @@ $_SESSION['Hours'] = $hours;
                         index.push(i);
                     }
                 }
-                for(var i = 0; i < index.length; i++) {
-                    var temp = slots.indexOf(index[i]);
-                    slots.splice(temp, 1);
+                // Remove in reverse order so it doesn't mess up the indices
+                for(var i = index.length - 1; i >= 0; i--) {
+                    slots.splice(index[i], 1);
                 }
 
                 if(slots.length > 0) {

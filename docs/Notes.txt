@@ -20,6 +20,7 @@ search.php:
 newpet.php/viewpet.php:
 	Change time to "clicker" in 15 minute intervals on newpet page (don't allow base editing)
     - View recurring visits in "scheduling"
+    - Add coloring line
 	
 	
 newclient.php/viewclient.php:
