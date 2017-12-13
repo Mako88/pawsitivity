@@ -245,7 +245,7 @@ if(!empty($_GET['id'])) {
                         <?php
                             $stmt = $database->query("SELECT ID, Name FROM Breeds WHERE BreedGroup = 0 ORDER BY Name");
                             foreach($stmt->fetchAll() as $breed) {
-                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['ID']) ? 'selected' : '') . '>' . $breed['Name'] . '</option>';
+                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['Breed']) ? 'selected' : '') . '>' . $breed['Name'] . '</option>';
                             }
                         ?>
                     </optgroup>
@@ -253,7 +253,7 @@ if(!empty($_GET['id'])) {
                         <?php
                             $stmt = $database->query("SELECT ID, Name FROM Breeds WHERE BreedGroup = 1 ORDER BY Name");
                             foreach($stmt->fetchAll() as $breed) {
-                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['ID']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
+                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['Breed']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
                             }
                         ?>
                     </optgroup>
@@ -261,7 +261,7 @@ if(!empty($_GET['id'])) {
                         <?php
                             $stmt = $database->query("SELECT ID, Name FROM Breeds WHERE BreedGroup = 2 ORDER BY Name");
                             foreach($stmt->fetchAll() as $breed) {
-                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['ID']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
+                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['Breed']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
                             }
                         ?>
                     </optgroup>
@@ -269,7 +269,7 @@ if(!empty($_GET['id'])) {
                         <?php
                             $stmt = $database->query("SELECT ID, Name FROM Breeds WHERE BreedGroup = 3 ORDER BY Name");
                             foreach($stmt->fetchAll() as $breed) {
-                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['ID']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
+                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['Breed']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
                             }
                         ?>
                     </optgroup>
@@ -277,7 +277,7 @@ if(!empty($_GET['id'])) {
                         <?php
                             $stmt = $database->query("SELECT ID, Name FROM Breeds WHERE BreedGroup = 4 ORDER BY Name");
                             foreach($stmt->fetchAll() as $breed) {
-                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['ID']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
+                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['Breed']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
                             }
                         ?>
                     </optgroup>
@@ -285,7 +285,7 @@ if(!empty($_GET['id'])) {
                         <?php
                             $stmt = $database->query("SELECT ID, Name FROM Breeds WHERE BreedGroup = 5 ORDER BY Name");
                             foreach($stmt->fetchAll() as $breed) {
-                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['ID']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
+                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['Breed']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
                             }
                         ?>
                     </optgroup>
@@ -293,7 +293,7 @@ if(!empty($_GET['id'])) {
                         <?php
                             $stmt = $database->query("SELECT ID, Name FROM Breeds WHERE BreedGroup = 6 ORDER BY Name");
                             foreach($stmt->fetchAll() as $breed) {
-                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['ID']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
+                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['Breed']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
                             }
                         ?>
                     </optgroup>
@@ -301,7 +301,7 @@ if(!empty($_GET['id'])) {
                         <?php
                             $stmt = $database->query("SELECT ID, Name FROM Breeds WHERE BreedGroup = 7 ORDER BY Name");
                             foreach($stmt->fetchAll() as $breed) {
-                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['ID']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
+                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['Breed']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
                             }
                         ?>
                     </optgroup>
