@@ -19,6 +19,7 @@ schedule.php:
     Make two dropdowns for times: one for full blocks, and one for split
     Have the number of daycare hours in parentheses after the split time slot
     Allow moving appointments (but not changing the services)
+    Allow searching for the next open slot at a certain time for a certain dog or group of dogs
     
     
 	
