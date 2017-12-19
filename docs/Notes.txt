@@ -10,6 +10,16 @@ schedule.php:
     Don't allow clicking next if no date is set
     If they're just getting a bath, are we handling it right?
     Store price in database
+    Allow scheduling multiple dogs in one go (select from owned dogs)
+    Allow splitting a single dog's time between multiple slots
+        Any dog can have a single 15 minute split
+        No dog should have more than 1 15 minutes split (Except with a group)
+        A dog can have as many 30 minute splits after the single 15 minute split
+    If there are multiple dogs have no limits on splits
+    Make two dropdowns for times: one for full blocks, and one for split
+    Have the number of daycare hours in parentheses after the split time slot
+    Allow moving appointments (but not changing the services)
+    
     
 	
 search.php:
@@ -47,3 +57,5 @@ Misc:
     Automatically remove events the age from global settings
     Prevent infinite redirect when user doesn't have permission to access page
     Add exporting events as CSV for import into Quickbooks
+    Add daily backups
+    When marking a client as missed, delete the scheduled event
