@@ -35,200 +35,166 @@ $_SESSION['Hours'] = $hours;
     
     include 'include/menu.php';
     
-    if(!empty($_POST['confirm'])) {
-        $stmt = $database->prepare('INSERT INTO Scheduling (PetID, StartTime, GroomTime, BathTime, TotalTime, GroomerID, Recurring, RecInterval, EndDate, Package, Services, Price) VALUES (:PetID, :StartTime, :GroomTime, :BathTime, :TotalTime, :GroomerID, :Recurring, :RecInterval, :EndDate, :Package, :Services, :Price)');
-        $stmt->bindValue(':PetID', $_SESSION['info']['pet']);
-        $stmt->bindValue(':StartTime', $_SESSION['info']['timestamp']);
-        $stmt->bindValue(':GroomTime', $_SESSION['info']['GroomTime']);
-        $stmt->bindValue(':BathTime', $_SESSION['info']['BathTime']);
-        $stmt->bindValue(':TotalTime', $_SESSION['info']['TotalTime']);
-        $stmt->bindValue(':GroomerID', $_SESSION['info']['groomer']);
-        $stmt->bindValue(':Recurring', $_SESSION['info']['Recurring']);
-        $stmt->bindValue(':RecInterval', $_SESSION['info']['RecInterval']);
-        $stmt->bindValue(':EndDate', $_SESSION['info']['EndDate']);
-        $stmt->bindValue(':Package', $_SESSION['info']['package']);
-        $stmt->bindValue(':Price', $_SESSION['info']['Price']);
-        (!empty($_SESSION['info']['services']) ? $stmt->bindValue(':Services', json_encode($_SESSION['info']['services'])) : $stmt->bindValue(':Services', NULL));
-        $stmt->execute();
+    if(empty($_POST) && empty($_GET['pet'])) {
         
-        echo "<p>Your pet has been scheduled. Thanks!</p>";
-    }
-    else if(!empty($_POST['slot'])) {
-        if(empty($_POST['date'])) {
-            echo "<p>We're sorry, but there was no date entered.</p>";
+        $_SESSION['page'] = 'package';
+        
+        // Only allow employees or admins to schedule other people's pets
+        if(!empty($_GET['id']) && $_SESSION['authenticated'] > 1) {
+            $id = $_GET['id'];
         }
         else {
-            $slotinfo = explode("-", $_POST['slot']);
-            if(!is_numeric($slotinfo[1])) {
-                echo "<p>We're sorry, but the timestamp could not be verified.</p>";
+            $id = $_SESSION['ID'];
+        }
+
+        $stmt = $database->prepare("SELECT * FROM Pets WHERE OwnedBy = :ID");
+        $stmt->bindValue(':ID', $id);
+        $stmt->execute();
+        $pets = $stmt->fetchAll();
+
+        if(!empty($pets)) {
+            
+            echo '<form action="schedule.php" method="post">';
+            echo '<label for="pet">Select which pet you would like to schedule: </label>';
+            echo '<select id="pet" name="pet">';
+            foreach($pets as $pet) {
+                echo '<option value="' . $pet['ID'] . '">' . $pet['Name'] . '</option>';
             }
-            else {
-                $stmt = $database->prepare("SELECT Name FROM Users WHERE ID = :ID");
-                $stmt->bindValue(':ID', $slotinfo[0]);
-                $stmt->execute();
-                $groomername = $stmt->fetch();
-                if(empty($groomername)) {
-                    echo "<p>We're sorry, but the groomer ID could not be found.</p>";
-                }
-                else {
-                    
-                    $_SESSION['info']['timestamp'] = $slotinfo[1];
-                    $_SESSION['info']['groomer'] = $slotinfo[0];
-                    
-                    if(!empty($_POST['recurring']) && $_POST['recurring'] != 1) {
-                        echo "<p>We're sorry, but the checkbox couldn't be verified.</p>";
-                        goto finish;
-                    }
-                    
-                    if(!empty($_POST['recurring'])) {
-                        
-                        $_SESSION['info']['Recurring'] = $_POST['recurring'];
-                        
-                        if(!is_numeric($_POST['weeks']) || $_POST['weeks'] < 1) {
-                            echo "<p>We're sorry but the number of weeks must be a positive number.</p>";
-                            goto finish;
-                        }
-                        
-                        $_SESSION['info']['RecInterval'] = $_POST['weeks'];
-                        
-                        $enddate = DateTime::createFromFormat('!m/d/Y', $_POST['enddate']);
-                        if($enddate === false) {
-                            echo "<p>The end date was incorrectly formatted.</p>";
-                            goto finish;
-                        }
-                        
-                        
-                        
-                        // Set the enddate to the end of the day (local) of the last instance
-                        // In the for loop, compare the current instance to the END of the enddate day
-                        for($i = $_SESSION['info']['timestamp']; $i < strtotime("tomorrow", $enddate->getTimestamp()) - 1; $i += $_SESSION['info']['RecInterval']*604800) {
-                            $lastinstance = $i;
-                        }
-                        $_SESSION['info']['EndDate'] = strtotime("tomorrow", $lastinstance) - 1;
-                        
-                        $stmt = $database->query("SELECT * FROM Scheduling WHERE PetID > 0");
-                        $events = $stmt->fetchAll();
-
-                        // Check if making this recurring will conflict with anything. $i is the timestamp of each reccurance
-                        for($i = $_SESSION['info']['timestamp']; $i < $_SESSION['info']['EndDate']; $i += $_SESSION['info']['RecInterval']*604800) {
-                            foreach($events as $event) {
-                                if($event['Recurring'] != 1) {
-                                    // Check if the current recurrance is between the start and end of each non-recurring event
-                                    if(($i >= $event['StartTime'] && $i < $event['StartTime'] + $event['GroomTime'] * 60) || ($i + $_SESSION['info']['GroomTime'] * 60 > $event['StartTime'] && $i + $_SESSION['info']['GroomTime'] * 60 <= $event['StartTime'] + $event['GroomTime'] * 60)) {
-                                        $finalevent = $i - $_SESSION['info']['RecInterval']*604800; // Make the last instance the one before it conflicted
-                                        break 2;
-                                    }
-                                }
-                                else {
-                                    // For recurring events, check every recurrence of what we're scheduling with every recurrence of each scheduled event
-                                    for($k = $event['StartTime']; $k < $event['EndDate']; $k += $event['RecInterval']*604800) {
-                                        
-                                        // Check if the current recurrance of our event ($i) overlaps with the current recurrance of the stored event ($k)
-                                        if(($i >= $k && $i < $k + $event['GroomTime'] * 60) || ($i + $_SESSION['info']['GroomTime'] * 60 > $k && $i + $_SESSION['info']['GroomTime'] * 60 <= $k + $event['GroomTime'] * 60)) {
-                                            $finalevent = $i - $_SESSION['info']['RecInterval']*604800; // Make the last instance the one before it conflicted
-                                            break 3;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        if(isset($finalevent)) {
-                            $_SESSION['info']['EndDate'] = strtotime("tomorrow", $finalevent) - 1;
-                        }
-                    }
-                    else {
-                        $_SESSION['info']['Recurring'] = $_SESSION['info']['RecInterval'] = $_SESSION['info']['EndDate'] = 0;
-                    }
-                    
-                    $groomername = $groomername['Name'];
-
-                    $stmt = $database->prepare("SELECT Name FROM Pets WHERE ID = :ID");
-                    $stmt->bindValue(':ID', $_SESSION['info']['pet']);
-                    $stmt->execute();
-                    $petname = $stmt->fetch();
-                    $petname = $petname['Name'];
-
-                    switch($_SESSION['info']['package']) {
-                        case 1:
-                            $package = "Basic Bath";
-                            break;
-                        case 2:
-                            $package = "Basic Spa";
-                            break;
-                        case 3:
-                            $package = "Signature Bath";
-                            break;
-                        case 4:
-                            $package = "Signature Spa";
-                            break;
-                    }
-                    
-                    if(!empty($_SESSION['info']['services'])) {
-                        $services = array();
-
-                        foreach($_SESSION['info']['services'] as $service) {
-                            $stmt = $database->prepare("SELECT Name FROM Services WHERE ID = :ID");
-                            $stmt->bindValue(':ID', $service);
-                            $stmt->execute();
-                            $temp = $stmt->fetch();
-                            $services[] = $temp['Name'];
-                        }
-                    }
-
-                    $start = $slotinfo[2];
-                    $end = $slotinfo[3];
-
-                    echo "<h1>Summary</h1>";
-
-                    echo "<table><tr>";
-                    echo "<td>Pet: </td><td>" . $petname . "</td></tr><tr>";
-                    echo "<td>Package: </td><td>" . $package . "</td></tr><tr>";
-                    echo "<td>Services: </td><td>";
-                    if(!empty($_SESSION['info']['services'])) {
-                        echo "<ul>";
-                        foreach($services as $service) {
-                            echo "<li>" . $service . "</li>";
-                        }
-                        echo "</ul>";
-                    }
-                    else {
-                        echo "None";
-                    }
-                    echo "</ul></td></tr><tr>";
-                    echo "<td>Price: </td><td>$" . $_SESSION['info']['Price'] . "</td></tr><tr>";
-                    echo "<td>Groomer: </td><td>" . $groomername . "</td></tr><tr>";
-                    echo "<td>Date: </td><td>" . $_POST['date'] . "</td></tr><tr>";
-                    echo "<td>Dropoff Time: </td><td>" . $start . "</td></tr><tr>";
-                    echo "<td>Pickup Time: </td><td>" . $end . "</td></tr></table>";
-                    
-                    echo "<br />";
-                    
-                    
-                    if(!empty($_POST['recurring'])) {
-                        $enddate = new DateTime('@'.$_SESSION['info']['EndDate']);
-                        echo "<h3>Automatic Rescheduling:</h3>";
-                        echo "<p>Your pet is automatically scheduled at this time every " . $_SESSION['info']['RecInterval'] . " week(s). Your final appointment will be on " . $enddate->format("l, m/d/Y");
-                    }
-                    if(isset($finalevent)) {
-                        echo '<p style="color: red">NOTE: The ending date is different from what you set due to a conflict.<br />';
-                        echo 'You can manually re-schedule for dates after ' . $enddate->format("m/d/Y") . '</p>';
-                    }
-                    
-                    echo '<form action="schedule.php" method="post" id="confirm">';
-                    echo '<input type="hidden" name="confirm" value="1" />';
-                    echo '<button type="submit" form="confirm">Confirm</button>';
-                    echo '</form>';
-                    echo '<form id="cancel" action="schedule.php" method="get">';
-                    echo '<input type="hidden" name="id" value="' . $_SESSION['info']['client'] . '" />';
-                    echo '<button type="submit" form="cancel">Cancel</button>';
-                    echo '</form>';
-                }
-            }
+            echo '</select>';
+            echo '<input type="submit" value="Next" />';
+            echo '</form>';
+            goto finish;
+        }
+        else {
+            echo '<p>We\'re sorry, that client has no pets.</p>';
+            goto finish;
         }
     }
+    else if((!empty($_GET['pet']) && $_SESSION['authenticated'] > 1) || $_SESSION['page'] == 'package') {
+        $_SESSION['page'] = 'date';        
+        $petid = (!empty($_GET['pet']) ? $_GET['pet'] : $_POST['pet']);
+        $stmt = $database->prepare("SELECT * FROM Pets WHERE ID = :ID");
+        $stmt->bindValue(':ID', $petid);
+        $stmt->execute();
+        $pet = $stmt->fetch();
+        if(!empty($pet)) {
+            $stmt = $database->prepare("SELECT Size, GroomPrice, BathPrice FROM Breeds WHERE ID = :ID");
+            $stmt->bindValue(':ID', $pet['Breed']);
+            $stmt->execute();
+            $res = $stmt->fetch();
+			
+			$stmt = $database->query("SELECT Timezone FROM Globals");
+			$timezone = $stmt->fetch();
+			
+            $_SESSION['info'] = array();
+            $_SESSION['info']['client'] = $pet['OwnedBy'];
+            $_SESSION['info']['Time'] = json_decode($pet['Time'], true);
+            $_SESSION['info']['Size'] = $res['Size'];
+            $_SESSION['info']['GroomPrice'] = $res['GroomPrice'];
+            $_SESSION['info']['BathPrice'] = $res['BathPrice'];
+            
+            $stmt = $database->query("SELECT * FROM Services");
+            $services = $stmt->fetchAll();
+            if(!empty($services)) {
+                $_SESSION['info']['pet'] = $pet['ID'];
+                $stmt = $database->query("SELECT Name, ID, Tier FROM Users WHERE Access = 2");
+                $groomers = $stmt->fetchAll();
+                
+                $stmt = $database->query("SELECT SigUpcharge, SigPrice FROM Globals");
+                $globals = $stmt->fetch();
+                
+                echo '<form action="schedule.php" method="post">';
+                
+                echo '<label for="package">Select Package: </label><select id="package" name="package">';
+                echo '<option value="1">Basic Bath</option>';
+                echo '<option value="2">Basic Groom</option>';
+                echo '</select><br />';
+                
+                echo '<p>Select which services you would like to schedule: </p>';
+                foreach($services as $service) {
+                    echo '<input type="checkbox" name="services[]" id="' . $service['ID'] . '" value="' . $service['ID'] . '" />';
+                    echo '<label for="' . $service['ID'] . '">' . $service['Name'] . '</label><br />';
+                }
+
+                echo '<label for="groomer">Preferred Groomer: </label><select id="groomer" name="groomer">';
+                echo '<option value="NULL">Any</option>';
+                foreach($groomers as $groomer) {
+                    echo '<option value="' . $groomer['ID'] . '" ' . (($groomer['ID'] == $pet['PreferredGroomer']) ? 'selected' : '' ) . '>' . $groomer['Name'] . '</option>';
+                }
+                echo '</select><br />';
+                echo '<div id="price"></div>';
+                echo '<input type="submit" value="Next" />';
+                echo '</form>'; ?>
     
-    else if(!empty($_POST['package'])) {
+                <script>
+                    
+                var price = 0;
+                var groom = <?php echo $_SESSION['info']['GroomPrice']; ?>;
+                var bath = <?php echo $_SESSION['info']['BathPrice']; ?>;
+                var services = <?php echo json_encode($services); ?>;
+                var size = "<?php echo $_SESSION['info']['Size'] ?>";
+                
+                for(var i = 0; i < services.length; i++) {
+                    services[i]['Price'] = JSON.parse(services[i]['Price'], true);
+                }
+                
+                function updatePrice() {
+                    price = 0;
+                    selectedservices = Array();
+                    var package = parseInt($("#package").val());
+                    switch(package) {
+                        case 1:
+                            price += bath;
+                            break;
+                        case 2:
+                            price += groom;
+                            break;
+                    }
+                    
+                    $("input:checkbox:checked").each(function() {
+                        for(var i = 0; i < services.length; i++) {
+                            if($(this).attr("id") == services[i]['ID']) {
+                                selectedservices.push(services[i]['Price'][size]);
+                            }
+                        }
+                    });
+                    
+                    for(var i = 0; i < selectedservices.length; i++) {
+                        price += Number(selectedservices[i]);
+                    }
+                    
+                    $("#price").text("Price: $" + price);
+                }
+                
+                $(function() {
+                    updatePrice();
+                    $("#package").change(function() {
+                        updatePrice();
+                    });
+                    
+                    $("input:checkbox").change(function() {
+                        updatePrice();
+                    });
+                });
+                    
+                
+                </script>            
+                
+            <?php goto finish; }
+            else {
+                echo '<p>We\'re sorry, there are no services stored yet.</p>';
+                goto finish;
+            }
+        }
+        else {
+            echo '<p>We\'re sorry, you submitted an invalid pet ID.</p>';
+            goto finish;
+        }
+    }
+    else if($_SESSION['page'] == 'date') {
+        
+        $_SESSION['page'] = 'summary';
+        
         if($_POST['package'] == 1 || $_POST['package'] == 2 || $_POST['package'] == 3 || $_POST['package'] == 4) {
             $_SESSION['info']['package'] = $_POST['package'];
         }
@@ -793,154 +759,205 @@ $_SESSION['Hours'] = $hours;
     </script>
 <?php
     }
-    else if(!empty($_POST['pet']) || (!empty($_GET['pet']) && $_SESSION['authenticated'] > 1)) {
-        $petid = (!empty($_GET['pet']) ? $_GET['pet'] : $_POST['pet']);
-        $stmt = $database->prepare("SELECT * FROM Pets WHERE ID = :ID");
-        $stmt->bindValue(':ID', $petid);
-        $stmt->execute();
-        $pet = $stmt->fetch();
-        if(!empty($pet)) {
-            $stmt = $database->prepare("SELECT Size, GroomPrice, BathPrice FROM Breeds WHERE ID = :ID");
-            $stmt->bindValue(':ID', $pet['Breed']);
-            $stmt->execute();
-            $res = $stmt->fetch();
-			
-			$stmt = $database->query("SELECT Timezone FROM Globals");
-			$timezone = $stmt->fetch();
-			
-            $_SESSION['info'] = array();
-            $_SESSION['info']['client'] = $pet['OwnedBy'];
-            $_SESSION['info']['Time'] = json_decode($pet['Time'], true);
-            $_SESSION['info']['Size'] = $res['Size'];
-            $_SESSION['info']['GroomPrice'] = $res['GroomPrice'];
-            $_SESSION['info']['BathPrice'] = $res['BathPrice'];
-            
-            $stmt = $database->query("SELECT * FROM Services");
-            $services = $stmt->fetchAll();
-            if(!empty($services)) {
-                $_SESSION['info']['pet'] = $pet['ID'];
-                $stmt = $database->query("SELECT Name, ID, Tier FROM Users WHERE Access = 2");
-                $groomers = $stmt->fetchAll();
-                
-                $stmt = $database->query("SELECT SigUpcharge, SigPrice FROM Globals");
-                $globals = $stmt->fetch();
-                
-                echo '<form action="schedule.php" method="post">';
-                
-                echo '<label for="package">Select Package: </label><select id="package" name="package">';
-                echo '<option value="1">Basic Bath</option>';
-                echo '<option value="2">Basic Groom</option>';
-                echo '</select><br />';
-                
-                echo '<p>Select which services you would like to schedule: </p>';
-                foreach($services as $service) {
-                    echo '<input type="checkbox" name="services[]" id="' . $service['ID'] . '" value="' . $service['ID'] . '" />';
-                    echo '<label for="' . $service['ID'] . '">' . $service['Name'] . '</label><br />';
+    else if($_SESSION['page'] == 'summary') {
+        
+        $_SESSION['page'] = 'submit';
+        
+        if(empty($_POST['date'])) {
+            echo "<p>We're sorry, but there was no date entered.</p>";
+            goto finish;
+        }
+        else {
+            $slotinfo = explode("-", $_POST['slot']);
+            if(!is_numeric($slotinfo[1])) {
+                echo "<p>We're sorry, but the timestamp could not be verified.</p>";
+                goto finish;
+            }
+            else {
+                $stmt = $database->prepare("SELECT Name FROM Users WHERE ID = :ID");
+                $stmt->bindValue(':ID', $slotinfo[0]);
+                $stmt->execute();
+                $groomername = $stmt->fetch();
+                if(empty($groomername)) {
+                    echo "<p>We're sorry, but the groomer ID could not be found.</p>";
+                    goto finish;
                 }
-
-                echo '<label for="groomer">Preferred Groomer: </label><select id="groomer" name="groomer">';
-                echo '<option value="NULL">Any</option>';
-                foreach($groomers as $groomer) {
-                    echo '<option value="' . $groomer['ID'] . '" ' . (($groomer['ID'] == $pet['PreferredGroomer']) ? 'selected' : '' ) . '>' . $groomer['Name'] . '</option>';
-                }
-                echo '</select><br />';
-                echo '<div id="price"></div>';
-                echo '<input type="submit" value="Next" />';
-                echo '</form>'; ?>
-    
-                <script>
+                else {
                     
-                var price = 0;
-                var groom = <?php echo $_SESSION['info']['GroomPrice']; ?>;
-                var bath = <?php echo $_SESSION['info']['BathPrice']; ?>;
-                var services = <?php echo json_encode($services); ?>;
-                var size = "<?php echo $_SESSION['info']['Size'] ?>";
-                
-                for(var i = 0; i < services.length; i++) {
-                    services[i]['Price'] = JSON.parse(services[i]['Price'], true);
-                }
-                
-                function updatePrice() {
-                    price = 0;
-                    selectedservices = Array();
-                    var package = parseInt($("#package").val());
-                    switch(package) {
-                        case 1:
-                            price += bath;
-                            break;
-                        case 2:
-                            price += groom;
-                            break;
+                    $_SESSION['info']['timestamp'] = $slotinfo[1];
+                    $_SESSION['info']['groomer'] = $slotinfo[0];
+                    
+                    if(!empty($_POST['recurring']) && $_POST['recurring'] != 1) {
+                        echo "<p>We're sorry, but the checkbox couldn't be verified.</p>";
+                        goto finish;
                     }
                     
-                    $("input:checkbox:checked").each(function() {
-                        for(var i = 0; i < services.length; i++) {
-                            if($(this).attr("id") == services[i]['ID']) {
-                                selectedservices.push(services[i]['Price'][size]);
+                    if(!empty($_POST['recurring'])) {
+                        
+                        $_SESSION['info']['Recurring'] = $_POST['recurring'];
+                        
+                        if(!is_numeric($_POST['weeks']) || $_POST['weeks'] < 1) {
+                            echo "<p>We're sorry but the number of weeks must be a positive number.</p>";
+                            goto finish;
+                        }
+                        
+                        $_SESSION['info']['RecInterval'] = $_POST['weeks'];
+                        
+                        $enddate = DateTime::createFromFormat('!m/d/Y', $_POST['enddate']);
+                        if($enddate === false) {
+                            echo "<p>The end date was incorrectly formatted.</p>";
+                            goto finish;
+                        }
+                        
+                        
+                        
+                        // Set the enddate to the end of the day (local) of the last instance
+                        // In the for loop, compare the current instance to the END of the enddate day
+                        for($i = $_SESSION['info']['timestamp']; $i < strtotime("tomorrow", $enddate->getTimestamp()) - 1; $i += $_SESSION['info']['RecInterval']*604800) {
+                            $lastinstance = $i;
+                        }
+                        $_SESSION['info']['EndDate'] = strtotime("tomorrow", $lastinstance) - 1;
+                        
+                        $stmt = $database->query("SELECT * FROM Scheduling WHERE PetID > 0");
+                        $events = $stmt->fetchAll();
+
+                        // Check if making this recurring will conflict with anything. $i is the timestamp of each reccurance
+                        for($i = $_SESSION['info']['timestamp']; $i < $_SESSION['info']['EndDate']; $i += $_SESSION['info']['RecInterval']*604800) {
+                            foreach($events as $event) {
+                                if($event['Recurring'] != 1) {
+                                    // Check if the current recurrance is between the start and end of each non-recurring event
+                                    if(($i >= $event['StartTime'] && $i < $event['StartTime'] + $event['GroomTime'] * 60) || ($i + $_SESSION['info']['GroomTime'] * 60 > $event['StartTime'] && $i + $_SESSION['info']['GroomTime'] * 60 <= $event['StartTime'] + $event['GroomTime'] * 60)) {
+                                        $finalevent = $i - $_SESSION['info']['RecInterval']*604800; // Make the last instance the one before it conflicted
+                                        break 2;
+                                    }
+                                }
+                                else {
+                                    // For recurring events, check every recurrence of what we're scheduling with every recurrence of each scheduled event
+                                    for($k = $event['StartTime']; $k < $event['EndDate']; $k += $event['RecInterval']*604800) {
+                                        
+                                        // Check if the current recurrance of our event ($i) overlaps with the current recurrance of the stored event ($k)
+                                        if(($i >= $k && $i < $k + $event['GroomTime'] * 60) || ($i + $_SESSION['info']['GroomTime'] * 60 > $k && $i + $_SESSION['info']['GroomTime'] * 60 <= $k + $event['GroomTime'] * 60)) {
+                                            $finalevent = $i - $_SESSION['info']['RecInterval']*604800; // Make the last instance the one before it conflicted
+                                            break 3;
+                                        }
+                                    }
+                                }
                             }
                         }
-                    });
-                    
-                    for(var i = 0; i < selectedservices.length; i++) {
-                        price += Number(selectedservices[i]);
+
+                        if(isset($finalevent)) {
+                            $_SESSION['info']['EndDate'] = strtotime("tomorrow", $finalevent) - 1;
+                        }
+                    }
+                    else {
+                        $_SESSION['info']['Recurring'] = $_SESSION['info']['RecInterval'] = $_SESSION['info']['EndDate'] = 0;
                     }
                     
-                    $("#price").text("Price: $" + price);
+                    $groomername = $groomername['Name'];
+
+                    $stmt = $database->prepare("SELECT Name FROM Pets WHERE ID = :ID");
+                    $stmt->bindValue(':ID', $_SESSION['info']['pet']);
+                    $stmt->execute();
+                    $petname = $stmt->fetch();
+                    $petname = $petname['Name'];
+
+                    switch($_SESSION['info']['package']) {
+                        case 1:
+                            $package = "Basic Bath";
+                            break;
+                        case 2:
+                            $package = "Basic Spa";
+                            break;
+                        case 3:
+                            $package = "Signature Bath";
+                            break;
+                        case 4:
+                            $package = "Signature Spa";
+                            break;
+                    }
+                    
+                    if(!empty($_SESSION['info']['services'])) {
+                        $services = array();
+
+                        foreach($_SESSION['info']['services'] as $service) {
+                            $stmt = $database->prepare("SELECT Name FROM Services WHERE ID = :ID");
+                            $stmt->bindValue(':ID', $service);
+                            $stmt->execute();
+                            $temp = $stmt->fetch();
+                            $services[] = $temp['Name'];
+                        }
+                    }
+
+                    $start = $slotinfo[2];
+                    $end = $slotinfo[3];
+
+                    echo "<h1>Summary</h1>";
+
+                    echo "<table><tr>";
+                    echo "<td>Pet: </td><td>" . $petname . "</td></tr><tr>";
+                    echo "<td>Package: </td><td>" . $package . "</td></tr><tr>";
+                    echo "<td>Services: </td><td>";
+                    if(!empty($_SESSION['info']['services'])) {
+                        echo "<ul>";
+                        foreach($services as $service) {
+                            echo "<li>" . $service . "</li>";
+                        }
+                        echo "</ul>";
+                    }
+                    else {
+                        echo "None";
+                    }
+                    echo "</ul></td></tr><tr>";
+                    echo "<td>Price: </td><td>$" . $_SESSION['info']['Price'] . "</td></tr><tr>";
+                    echo "<td>Groomer: </td><td>" . $groomername . "</td></tr><tr>";
+                    echo "<td>Date: </td><td>" . $_POST['date'] . "</td></tr><tr>";
+                    echo "<td>Dropoff Time: </td><td>" . $start . "</td></tr><tr>";
+                    echo "<td>Pickup Time: </td><td>" . $end . "</td></tr></table>";
+                    
+                    echo "<br />";
+                    
+                    
+                    if(!empty($_POST['recurring'])) {
+                        $enddate = new DateTime('@'.$_SESSION['info']['EndDate']);
+                        echo "<h3>Automatic Rescheduling:</h3>";
+                        echo "<p>Your pet is automatically scheduled at this time every " . $_SESSION['info']['RecInterval'] . " week(s). Your final appointment will be on " . $enddate->format("l, m/d/Y");
+                    }
+                    if(isset($finalevent)) {
+                        echo '<p style="color: red">NOTE: The ending date is different from what you set due to a conflict.<br />';
+                        echo 'You can manually re-schedule for dates after ' . $enddate->format("m/d/Y") . '</p>';
+                    }
+                    
+                    echo '<form action="schedule.php" method="post" id="confirm">';
+                    echo '<input type="hidden" name="confirm" value="1" />';
+                    echo '<button type="submit" form="confirm">Confirm</button>';
+                    echo '</form>';
+                    echo '<form id="cancel" action="schedule.php" method="get">';
+                    echo '<input type="hidden" name="id" value="' . $_SESSION['info']['client'] . '" />';
+                    echo '<button type="submit" form="cancel">Cancel</button>';
+                    echo '</form>';
+                    goto finish;
                 }
-                
-                $(function() {
-                    updatePrice();
-                    $("#package").change(function() {
-                        updatePrice();
-                    });
-                    
-                    $("input:checkbox").change(function() {
-                        updatePrice();
-                    });
-                });
-                    
-                
-                </script>            
-    
-            <?php }
-            else {
-                echo '<p>We\'re sorry, there are no services stored yet.</p>';
             }
-        }
-        else {
-            echo '<p>We\'re sorry, you submitted an invalid pet ID.</p>';
         }
     }
-    else {
-        
-        // Only allow employees or admins to schedule other people's pets
-        if(!empty($_GET['id']) && $_SESSION['authenticated'] > 1) {
-            $id = $_GET['id'];
-        }
-        else {
-            $id = $_SESSION['ID'];
-        }
-
-        $stmt = $database->prepare("SELECT * FROM Pets WHERE OwnedBy = :ID");
-        $stmt->bindValue(':ID', $id);
+    else if($_SESSION['page'] == 'submit') {
+        $stmt = $database->prepare('INSERT INTO Scheduling (PetID, StartTime, GroomTime, BathTime, TotalTime, GroomerID, Recurring, RecInterval, EndDate, Package, Services, Price) VALUES (:PetID, :StartTime, :GroomTime, :BathTime, :TotalTime, :GroomerID, :Recurring, :RecInterval, :EndDate, :Package, :Services, :Price)');
+        $stmt->bindValue(':PetID', $_SESSION['info']['pet']);
+        $stmt->bindValue(':StartTime', $_SESSION['info']['timestamp']);
+        $stmt->bindValue(':GroomTime', $_SESSION['info']['GroomTime']);
+        $stmt->bindValue(':BathTime', $_SESSION['info']['BathTime']);
+        $stmt->bindValue(':TotalTime', $_SESSION['info']['TotalTime']);
+        $stmt->bindValue(':GroomerID', $_SESSION['info']['groomer']);
+        $stmt->bindValue(':Recurring', $_SESSION['info']['Recurring']);
+        $stmt->bindValue(':RecInterval', $_SESSION['info']['RecInterval']);
+        $stmt->bindValue(':EndDate', $_SESSION['info']['EndDate']);
+        $stmt->bindValue(':Package', $_SESSION['info']['package']);
+        $stmt->bindValue(':Price', $_SESSION['info']['Price']);
+        (!empty($_SESSION['info']['services']) ? $stmt->bindValue(':Services', json_encode($_SESSION['info']['services'])) : $stmt->bindValue(':Services', NULL));
         $stmt->execute();
-        $pets = $stmt->fetchAll();
-
-        if(!empty($pets)) {
-            
-            echo '<form action="schedule.php" method="post">';
-            echo '<label for="pet">Select which pet you would like to schedule: </label>';
-            echo '<select id="pet" name="pet">';
-            foreach($pets as $pet) {
-                echo '<option value="' . $pet['ID'] . '">' . $pet['Name'] . '</option>';
-            }
-            echo '</select>';
-            echo '<input type="submit" value="Next" />';
-            echo '</form>';
-        }
-        else {
-            echo '<p>We\'re sorry, that client has no pets.</p>';
-        }
+        
+        echo "<p>Your pet has been scheduled. Thanks!</p>";
+        goto finish;
     }
     
     finish:

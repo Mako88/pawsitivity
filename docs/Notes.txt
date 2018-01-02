@@ -8,18 +8,10 @@ schedule.php:
     - If dog is under 3 warn if any vaccine is out of date
     - If dog is 3 or over, warn if rabies is out of date
     Don't allow clicking next if no date is set
-    If they're just getting a bath, are we handling it right?
     Store price in database
-    Allow scheduling multiple dogs in one go (select from owned dogs)
-    Allow splitting a single dog's time between multiple slots
-        Any dog can have a single 15 minute split
-        No dog should have more than 1 15 minutes split (Except with a group)
-        A dog can have as many 30 minute splits after the single 15 minute split
-    If there are multiple dogs have no limits on splits
-    Make two dropdowns for times: one for full blocks, and one for split
-    Have the number of daycare hours in parentheses after the split time slot
     Allow moving appointments (but not changing the services)
-    
+    Allow searching for the next open slot at a certain time for a certain dog or group of dogs
+    Add error if someone skips to page 2 but doesn't have permission to schedule.
     
 	
 search.php:
