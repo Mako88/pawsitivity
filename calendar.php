@@ -63,7 +63,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
             $services = array();
             $event['Services'] = json_decode($event['Services'], true);
             foreach($event['Services'] as $service) {
-                $stmt = $database->prepare("SELECT Name, Type FROM Services WHERE ID = :ID");
+                $stmt = $database->prepare("SELECT ID, Name, Type FROM Services WHERE ID = :ID");
                 $stmt->bindValue(":ID", $service);
                 $stmt->execute();
                 $serv = $stmt->fetch();
@@ -128,7 +128,11 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                 phone: clients[index2][0]['Phone'],
                 url: events[i]['URL'],
                 view: 'all',
-                owner: clients[index2][0]['FirstName'] + ' ' + clients[index2][0]['LastName']
+                owner: clients[index2][0]['FirstName'] + ' ' + clients[index2][0]['LastName'],
+                petID: index,
+                package: events[i]['Package'],
+                groomer: events[i]['GroomerID'],
+                starttime: events[i]['StartTime']
             };
 
 
@@ -213,6 +217,11 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                     return false;
                 }
                 else if(view.name === "listDay") {
+                    if($(jsEvent.target).attr('type') == 'submit') {
+                        var form = $(jsEvent.target).parents('form:first');
+                        form.submit();
+                        return false;
+                    }
                     $.fancybox.open({
                         src: '#' + event.url,
                         type: 'inline'
@@ -225,6 +234,16 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                     if(event.warnings != null) {
                         element.children().last().append('<span class="warning">' + event.warnings + '</span>');
                     }
+                    element.children().last().append('\
+                        <form action="schedule.php" method="get" class="edit">\
+                        <input type="hidden" value="' + event.petID + '" name="pet" />\
+                        <input type="hidden" value="' + btoa(JSON.stringify(event.services)) + '" name="services" />\
+                        <input type="hidden" value="' + event.groomer + '" name="groomer" />\
+                        <input type="hidden" value="' + event.package + '" name="package" />\
+                        <input type="hidden" value="' + event.starttime + '" name="starttime" />\
+                        <input type="submit" value="Edit" />\
+                        </form>\
+                    ');
                     var services = 'No Services<br />';
                     var bathservices = '';
                     var groomservices = '';

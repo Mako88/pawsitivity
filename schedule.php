@@ -103,23 +103,50 @@ $_SESSION['Hours'] = $hours;
                 $stmt = $database->query("SELECT SigUpcharge, SigPrice FROM Globals");
                 $globals = $stmt->fetch();
                 
+                $servicelist = Array();
+                $package = $prevgroomer = '';
+                
+                if(!empty($_GET['services'])) {
+                    $prevservices = json_decode(base64_decode($_GET['services']), true);
+                    foreach($prevservices as $service) {
+                        array_push($servicelist, $service['ID']);
+                    }
+                }
+                
+                if(!empty($_GET['groomer'])) {
+                    $prevgroomer = $_GET['groomer'];
+                }
+                
+                if(!empty($_GET['package'])) {
+                    $package = $_GET['package'];
+                }
+                
+                if(!empty($_GET['starttime'])) {
+                    $_SESSION['info']['prevstart'] = $_GET['starttime'];
+                }
+                
                 echo '<form action="schedule.php" method="post">';
                 
                 echo '<label for="package">Select Package: </label><select id="package" name="package">';
-                echo '<option value="1">Basic Bath</option>';
-                echo '<option value="2">Basic Groom</option>';
+                echo '<option value="1" ' . (intval($package) == 1 ? 'selected' : '') . '>Basic Bath</option>';
+                echo '<option value="2" ' . (intval($package) == 2 ? 'selected' : '') . '>Basic Groom</option>';
                 echo '</select><br />';
                 
                 echo '<p>Select which services you would like to schedule: </p>';
                 foreach($services as $service) {
-                    echo '<input type="checkbox" name="services[]" id="' . $service['ID'] . '" value="' . $service['ID'] . '" />';
+                    echo '<input type="checkbox" name="services[]" id="' . $service['ID'] . '" value="' . $service['ID'] . '" ' . (in_array($service['ID'], $servicelist) ? 'checked' : '') . '/>';
                     echo '<label for="' . $service['ID'] . '">' . $service['Name'] . '</label><br />';
                 }
 
                 echo '<label for="groomer">Preferred Groomer: </label><select id="groomer" name="groomer">';
                 echo '<option value="NULL">Any</option>';
                 foreach($groomers as $groomer) {
-                    echo '<option value="' . $groomer['ID'] . '" ' . (($groomer['ID'] == $pet['PreferredGroomer']) ? 'selected' : '' ) . '>' . $groomer['Name'] . '</option>';
+                    if(!empty($prevgroomer)) {
+                        echo '<option value="' . $groomer['ID'] . '" ' . (($groomer['ID'] == intval($prevgroomer)) ? 'selected' : '' ) . '>' . $groomer['Name'] . '</option>';
+                    }
+                    else {
+                        echo '<option value="' . $groomer['ID'] . '" ' . (($groomer['ID'] == $pet['PreferredGroomer']) ? 'selected' : '' ) . '>' . $groomer['Name'] . '</option>';
+                    }
                 }
                 echo '</select><br />';
                 echo '<div id="price"></div>';

@@ -5,3 +5,8 @@ nav ul {
 .warning {
     margin-left: 25px;
 }
+
+.edit {
+    float: right;
+    z-index: 99;
+}
