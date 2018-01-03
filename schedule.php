@@ -108,9 +108,17 @@ $_SESSION['Hours'] = $hours;
                 
                 if(!empty($_GET['services'])) {
                     $prevservices = json_decode(base64_decode($_GET['services']), true);
-                    foreach($prevservices as $service) {
-                        array_push($servicelist, $service['ID']);
+                    if(!empty($prevservices)) {
+                        foreach($prevservices as $service) {
+                            array_push($servicelist, $service['ID']);
+                        }
                     }
+                }
+                
+                if(!empty($_GET['eventid']) && $_SESSION['authenticated'] > 1) {
+                    $stmt = $database->prepare("DELETE FROM Scheduling WHERE ID = :ID");
+                    $stmt->bindValue(':ID', $_GET['eventid']);
+                    $stmt->execute();
                 }
                 
                 if(!empty($_GET['groomer'])) {
@@ -142,7 +150,7 @@ $_SESSION['Hours'] = $hours;
                 echo '<option value="NULL">Any</option>';
                 foreach($groomers as $groomer) {
                     if(!empty($prevgroomer)) {
-                        echo '<option value="' . $groomer['ID'] . '" ' . (($groomer['ID'] == intval($prevgroomer)) ? 'selected' : '' ) . '>' . $groomer['Name'] . '</option>';
+                        echo '<option value="' . $groomer['ID'] . '" ' . (($groomer['ID'] == $prevgroomer) ? 'selected' : '' ) . '>' . $groomer['Name'] . '</option>';
                     }
                     else {
                         echo '<option value="' . $groomer['ID'] . '" ' . (($groomer['ID'] == $pet['PreferredGroomer']) ? 'selected' : '' ) . '>' . $groomer['Name'] . '</option>';
@@ -361,6 +369,11 @@ $_SESSION['Hours'] = $hours;
         }
         
         $_SESSION['info']['Price'] = $price;
+        
+        $prevstart = "false";
+        if(!empty($_SESSION['info']['prevstart'])) {
+            $prevstart = $_SESSION['info']['prevstart'];
+        }
 ?>
     <form action="schedule.php" method="post" id="day">
         <label for="datepicker">Please pick a day to schedule your pet: </label>
@@ -382,6 +395,7 @@ $_SESSION['Hours'] = $hours;
             var groomers = <?php echo json_encode($groomers); ?>;
             var tiers = <?php echo $tiers['Tiers']; ?>;
             var size = "<?php echo $_SESSION['info']['Size']; ?>";
+            var prevstart = <?php echo $prevstart ?>;
             
             // Set open and close times for each day of the week
             var openclose = <?php echo $_SESSION['Hours']; ?>;
@@ -636,52 +650,56 @@ $_SESSION['Hours'] = $hours;
                 }
             }
             
+            function disableDay(today) {
+                var dayindex = today.getDay();
+                    
+                // Disable Sundays and Mondays
+                if(dayindex == 0 || dayindex == 1) {
+                    return true;
+                }
 
-            $('#datepicker').pikaday({
+                // Check availability of each groomer
+                var available = false;
+
+                var index = today.getTime();
+                timeslots[index] = Array();
+
+                for(var i = 0; i < groomers.length; i++) {
+                    var minutes = getavailable(groomers[i]['ID'], today);
+                    if(!minutes) {
+                        continue;
+                    }
+
+                    // Correct slottime for each groomer's tier
+                    var temp = groomers[i]['Tier'];
+                    var groomerslottime = slottime + parseInt(tiers[temp][size]);
+                    var slots = slotfits(minutes, groomerslottime);
+                    if(slots) {
+                        // Even if a groomer has time, if they would have to arrive before the current time in order to be done on time, don't count this groomer.
+                        var now = new Date();
+                        var currenttime = now.getHours() * 60 + now.getMinutes();
+                        if((now.toDateString() === today.toDateString()) && openclose[dayindex]['close'] - 30 - groomerslottime - bathtime < currenttime) {
+                            continue;
+                        }
+                        timeslots[index].push(Array());
+                        var last = timeslots[index].length - 1;
+                        timeslots[index][last]['groomer'] = groomers[i];
+                        timeslots[index][last]['slots'] = slots;
+                        available = true;
+                    }
+                }
+                if(!available) {
+                    return true;
+                }
+            }
+            
+
+            var picker = new Pikaday({
+                field: document.getElementById('datepicker'),
                 format: 'MM/DD/YYYY',
                 minDate: new Date(),
                 disableDayFn: function(today) {
-                    
-                    var dayindex = today.getDay();
-                    
-                    // Disable Sundays and Mondays
-                    if(dayindex == 0 || dayindex == 1) {
-                        return true;
-                    }
-                    
-                    // Check availability of each groomer
-                    var available = false;
-                    
-                    var index = today.getTime();
-                    timeslots[index] = Array();
-                    
-                    for(var i = 0; i < groomers.length; i++) {
-                        var minutes = getavailable(groomers[i]['ID'], today);
-                        if(!minutes) {
-                            continue;
-                        }
-                        
-                        // Correct slottime for each groomer's tier
-                        var temp = groomers[i]['Tier'];
-                        var groomerslottime = slottime + parseInt(tiers[temp][size]);
-                        var slots = slotfits(minutes, groomerslottime);
-                        if(slots) {
-                            // Even if a groomer has time, if they would have to arrive before the current time in order to be done on time, don't count this groomer.
-                            var now = new Date();
-                            var currenttime = now.getHours() * 60 + now.getMinutes();
-                            if((now.toDateString() === today.toDateString()) && openclose[dayindex]['close'] - 30 - groomerslottime - bathtime < currenttime) {
-                                continue;
-                            }
-                            timeslots[index].push(Array());
-                            var last = timeslots[index].length - 1;
-                            timeslots[index][last]['groomer'] = groomers[i];
-                            timeslots[index][last]['slots'] = slots;
-                            available = true;
-                        }
-                    }
-                    if(!available) {
-                        return true;
-                    }
+                    disableDay(today);
                 },
                 onSelect: function(date) {
                     
@@ -773,7 +791,7 @@ $_SESSION['Hours'] = $hours;
                         
                         
                         var timestamp = (start*60) + (today/1000) + (offset - localoffset*60);
-                        options.append($("<option />").val(groomer + "-" + timestamp + "-" + starthour + ":" + (startmin < 10 ? "0" + startmin : startmin) + " " + s + "-" + endhour + ":" + (endmin < 10 ? "0" + endmin : endmin) + " " + e).text(starthour + ":" + (startmin < 10 ? "0" + startmin : startmin) + " " + s + " - " + endhour + ":" + (endmin < 10 ? "0" + endmin : endmin) + " " + e));
+                        options.append($("<option />").val(groomer + "-" + timestamp + "-" + starthour + ":" + (startmin < 10 ? "0" + startmin : startmin) + " " + s + "-" + endhour + ":" + (endmin < 10 ? "0" + endmin : endmin) + " " + e).prop('selected', (timestamp == prevstart ? true : false)).text(starthour + ":" + (startmin < 10 ? "0" + startmin : startmin) + " " + s + " - " + endhour + ":" + (endmin < 10 ? "0" + endmin : endmin) + " " + e));
                     }
                 }
             });
@@ -782,6 +800,13 @@ $_SESSION['Hours'] = $hours;
                 format: 'MM/DD/YYYY',
                 minDate: new Date()
             });
+            
+            if(prevstart != false) {
+                var prevDate = moment.unix(prevstart).startOf('day');
+                disableDay(new Date(prevDate.format()));
+                picker.setMinDate(false);
+                picker.setMoment(prevDate);
+            }
         });
     </script>
 <?php

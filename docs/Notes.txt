@@ -13,6 +13,7 @@ schedule.php:
     Allow searching for the next open slot at a certain time for a certain dog or group of dogs
     Add error if someone skips to page 2 but doesn't have permission to schedule.
     Change from number of dogs/seniority when picking the groomer, to whichever has the earliest dog.
+    Fix deleting event when editing a recurring instance
     
 	
 search.php:

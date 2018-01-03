@@ -129,7 +129,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                 url: events[i]['URL'],
                 view: 'all',
                 owner: clients[index2][0]['FirstName'] + ' ' + clients[index2][0]['LastName'],
-                petID: index,
+                petID: events[i]['PetID'],
                 package: events[i]['Package'],
                 groomer: events[i]['GroomerID'],
                 starttime: events[i]['StartTime']
@@ -241,6 +241,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                         <input type="hidden" value="' + event.groomer + '" name="groomer" />\
                         <input type="hidden" value="' + event.package + '" name="package" />\
                         <input type="hidden" value="' + event.starttime + '" name="starttime" />\
+                        <input type="hidden" value="' + event.id + '" name="eventid" />\
                         <input type="submit" value="Edit" />\
                         </form>\
                     ');
