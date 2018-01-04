@@ -14,6 +14,7 @@ schedule.php:
     Add error if someone skips to page 2 but doesn't have permission to schedule.
     Change from number of dogs/seniority when picking the groomer, to whichever has the earliest dog.
     Fix deleting event when editing a recurring instance
+    Fix FREAKING DAYLIGHT SAVINGS TIME!!!
     
 	
 search.php:
