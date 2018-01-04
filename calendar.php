@@ -132,7 +132,10 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                 petID: events[i]['PetID'],
                 package: events[i]['Package'],
                 groomer: events[i]['GroomerID'],
-                starttime: events[i]['StartTime']
+                starttime: events[i]['StartTime'],
+                recurring: events[i]['Recurring'],
+                recinterval: events[i]['RecInterval'],
+                enddate: events[i]['EndDate']
             };
 
 
@@ -237,9 +240,6 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                     element.children().last().append('\
                         <form action="schedule.php" method="get" class="edit">\
                         <input type="hidden" value="' + event.petID + '" name="pet" />\
-                        <input type="hidden" value="' + btoa(JSON.stringify(event.services)) + '" name="services" />\
-                        <input type="hidden" value="' + event.groomer + '" name="groomer" />\
-                        <input type="hidden" value="' + event.package + '" name="package" />\
                         <input type="hidden" value="' + event.starttime + '" name="starttime" />\
                         <input type="hidden" value="' + event.id + '" name="eventid" />\
                         <input type="submit" value="Edit" />\

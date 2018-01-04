@@ -102,36 +102,51 @@ $_SESSION['Hours'] = $hours;
                 
                 $stmt = $database->query("SELECT SigUpcharge, SigPrice FROM Globals");
                 $globals = $stmt->fetch();
-                
-                $servicelist = Array();
                 $package = $prevgroomer = '';
+                $servicelist = Array();
                 
-                if(!empty($_GET['services'])) {
-                    $prevservices = json_decode(base64_decode($_GET['services']), true);
-                    if(!empty($prevservices)) {
-                        foreach($prevservices as $service) {
-                            array_push($servicelist, $service['ID']);
+                if(!empty($_GET['eventid']) && $_SESSION['authenticated'] > 1) {
+                    $stmt = $database->prepare("SELECT * FROM Scheduling WHERE ID = :ID");
+                    $stmt->bindValue(':ID', $_GET['eventid']);
+                    $stmt->execute();
+                    $prevevent = $stmt->fetch();
+                    $servicelist = json_decode($prevevent['Services'], true);
+                    if(empty($servicelist)) {
+                        $servicelist = Array();
+                    }
+                    $prevgroomer = $prevevent['GroomerID'];
+                    $package = $prevevent['Package'];
+                    if(!empty($_GET['starttime'])) {
+                        $_SESSION['info']['prevstart'] = $_GET['starttime'];
+                    }
+                    else {
+                        $_SESSION['info']['prevstart'] = $prevevent['StartTime'];
+                    }
+                    
+                    if($prevevent['Recurring'] == 1) {
+                        $difference = abs($_SESSION['info']['prevstart'] - $prevevent['StartTime']);
+                        if($difference > 0) {
+                            
                         }
+                    }
+                    else {
+                        $stmt = $database->prepare("DELETE FROM Scheduling WHERE ID = :ID");
+                        $stmt->bindValue(':ID', $_GET['eventid']);
+                        $stmt->execute(); 
                     }
                 }
                 
                 if(!empty($_GET['eventid']) && $_SESSION['authenticated'] > 1) {
+                    $stmt = $database->prepare("SELECT * FROM Scheduling WHERE ID = :ID");
+                    $stmt->bindValue(':ID', $_GET['eventid']);
+                    $stmt->execute();
+                    $recevent = $stmt->fetch();
+                    if($recevent['Recurring'] == 1)
                     $stmt = $database->prepare("DELETE FROM Scheduling WHERE ID = :ID");
                     $stmt->bindValue(':ID', $_GET['eventid']);
                     $stmt->execute();
                 }
                 
-                if(!empty($_GET['groomer'])) {
-                    $prevgroomer = $_GET['groomer'];
-                }
-                
-                if(!empty($_GET['package'])) {
-                    $package = $_GET['package'];
-                }
-                
-                if(!empty($_GET['starttime'])) {
-                    $_SESSION['info']['prevstart'] = $_GET['starttime'];
-                }
                 
                 echo '<form action="schedule.php" method="post">';
                 
