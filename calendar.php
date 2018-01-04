@@ -182,6 +182,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
 
         $('#calendar').fullCalendar({
             events: objects,
+            eventLimit: true,
             customButtons: {
                 viewAll: {
                     text: 'All',
