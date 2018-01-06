@@ -663,6 +663,9 @@ $_SESSION['Hours'] = $hours;
             // or false if there is none. Each slot has indexes 'start',
             // 'end', and 'length'
             function slotfits(todayminutes, time) {
+                if(time == 0) {
+                    return false;
+                }
                 var slots = Array();
                 var step = 0;
                 slots[step] = Array();
@@ -803,7 +806,7 @@ $_SESSION['Hours'] = $hours;
                                 // If the current 15 minute start time would make the end time greater than the
                                 // slot's end time, don't add it to littleslots (because it's too long)
                                 // We're also adding an additional 30 minutes to the end of each slot for pickup
-                                if(!(timeslots[today][i]['slots'][j]['start'] + k + x*15 + 30 > timeslots[today][i]['slots'][j]['end'])) {
+                                if(!(timeslots[today][i]['slots'][j]['start'] + k + x*15 > timeslots[today][i]['slots'][j]['end'])) {
                                     // Offset each slot by the bathing time so that the bathing is finished when the grooming slot begins
                                     // Don't do that if it will push the dropoff time before opening, or before the current time, or past the end of the day
                                     if((timeslots[today][i]['slots'][j]['start'] + k) - bathtime < openclose[dayindex]['open'] || (now.toDateString() === date.toDateString() && timeslots[today][i]['slots'][j]['start'] + k - bathtime < currenttime) || timeslots[today][i]['slots'][j]['start'] + k + x*15 + 30 > openclose[dayindex]['close']) {

@@ -15,6 +15,7 @@ schedule.php:
     Change from number of dogs/seniority when picking the groomer, to whichever has the earliest dog.
     Fix deleting event when editing a recurring instance
     Fix FREAKING DAYLIGHT SAVINGS TIME!!!
+    Check whether a groomer is scheduled to work or not in pickgroomer
     
 	
 search.php:
