@@ -15,7 +15,9 @@ schedule.php:
     Change from number of dogs/seniority when picking the groomer, to whichever has the earliest dog.
     Fix deleting event when editing a recurring instance
     Fix FREAKING DAYLIGHT SAVINGS TIME!!!
+<<<<<<< HEAD
     Check whether a groomer is scheduled to work or not in pickgroomer
+=======
     Don't allow end dates before start dates
     Change summary page to popup box
     
@@ -29,6 +31,7 @@ calendar.php:
     Add missed button on popup. When button is pushed, delete that event and set Missed flag.
     Make owner and pet names links to their info
     Show price on popup
+>>>>>>> ea55c107fc4bf64b9b519bc8973ca6256982b4ae
     
 	
 search.php:
