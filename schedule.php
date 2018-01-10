@@ -1048,7 +1048,8 @@ $_SESSION['Hours'] = $hours;
             }
         }
     }
-    else if($_SESSION['page'] == 'submit') {
+    else if($_SESSION['page'] == 'submit' && intval($_POST['confirm']) == 1) {
+        $_SESSION['page'] = null;
         $stmt = $database->prepare('INSERT INTO Scheduling (PetID, StartTime, GroomTime, BathTime, TotalTime, GroomerID, Recurring, RecInterval, EndDate, Package, Services, Price) VALUES (:PetID, :StartTime, :GroomTime, :BathTime, :TotalTime, :GroomerID, :Recurring, :RecInterval, :EndDate, :Package, :Services, :Price)');
         $stmt->bindValue(':PetID', $_SESSION['info']['pet']);
         $stmt->bindValue(':StartTime', $_SESSION['info']['timestamp']);
