@@ -18,8 +18,10 @@ schedule.php:
     Check whether a groomer is scheduled to work or not in pickgroomer
     Don't allow end dates before start dates
     Change summary page to popup box
+    Check if scheduling a slot before the last one ends is the result of rounding, or an actual issue.
+    Fix issue when a groomer is selected but has no available slots
     Add "Signature Package" checkbox. When selected add $15 and only allow 3 other selections.
-    
+
     
 calendar.php:
     In bathing view remove edit button
