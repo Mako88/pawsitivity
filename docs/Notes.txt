@@ -18,6 +18,7 @@ schedule.php:
     Check whether a groomer is scheduled to work or not in pickgroomer
     Don't allow end dates before start dates
     Change summary page to popup box
+    Add "Signature Package" checkbox. When selected add $15 and only allow 3 other selections.
     
     
 calendar.php:
