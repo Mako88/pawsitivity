@@ -462,11 +462,11 @@ $_SESSION['Hours'] = $hours;
             // Offset of user's local timezone from UTC.
             var localoffset = new Date().getTimezoneOffset();
             
-            // Function that given a day and array of groomers
-            // returns the ID of the groomer with the fewest scheduled
-            // dogs that day. If two groomers tie, it will return the most senior.
-            function pickgroomer(today, groomers) {
+            // Function that given a day and a groomer ID returns the number
+            // of dogs scheduled for that groomer that day.
+            function getcount(groomer, today) {
                 
+                var count = 0;
                 var id;
                 
                 today = moment(today);
@@ -489,33 +489,13 @@ $_SESSION['Hours'] = $hours;
 
                     if(event.isSame(today, "day")) {
                         id = events[i]['GroomerID'];
-                        for(var j = 0; j < groomers.length; j++) {
-                            if(!groomers[j].hasOwnProperty('count')) {
-                                groomers[j]['count'] = 0;
-                            }
-                            if(groomers[j]['ID'] == id) {
-                                groomers[j]['count']++;
-                            }
+                        if(id == groomer) {
+                            count++;
                         }
                     }
                 }
                 
-                groomer = groomers[0];
-                
-                if(groomers.length > 1) {
-                    for(var i = 1; i < groomers.length; i++) {
-                        if(groomers[i]['count'] < groomer['count']) {
-                            groomer = groomers[i];
-                        }
-                        else if(groomers[i]['count'] == groomer['count']) {
-                            if(groomers[i]['Seniority'] < groomer['Seniority']) {
-                                groomer = groomers[i];
-                            }
-                        }
-                    }
-                }
-                
-                return groomer['ID'];
+                return count;
                 
             }
             
@@ -706,23 +686,83 @@ $_SESSION['Hours'] = $hours;
                 }
             }
             
+            // Given an array of slots with start and end times, this splits them up into
+            // slots the length of the groom time, beginning every 15 minutes.
+            // If, because of the timing of the big slot, there are no little slots, return false.
+            function splitslots(bigslots, time, today) {
+                var littleslots = Array();
+                var dayindex = today.getDay();
+                var now = new Date();
+                var currenttime = now.getHours() * 60 + now.getMinutes();
+                var index = -1;
+                
+                // i = Every big slot
+                for(var i = 0; i < bigslots.length; i++) {
+                    // j = The beginning of every little slot (in 15 minute increments)
+                    for(var j = 0; j < bigslots[i]['length']; j += 15) {
+                        // If the current 15 minute start time would make the end time greater than the
+                        // slot's end time, don't add it to littleslots (because it's too long)
+                        if(bigslots[i]['start'] + j + time > bigslots[i]['end']) {
+                           break;
+                        }
+                        // If the current 15 minute start time would push the bathing time
+                        // before opening, don't add it (but check the next start time)
+                        if(bigslots[i]['start'] + j - bathtime < openclose[dayindex]['open']) {
+                            continue;
+                        }
+                        // If the current 15 minute start time would push the bathing time
+                        // before the current time (on the current day), don't add it
+                        if(now.toDateString() === today.toDateString() && bigslots[i]['start'] + j - bathtime < currenttime) {
+                            continue;
+                        }
+                        // If the current 15 minute start time would push the end time past
+                        // closing, don't add it.
+                        if(bigslots[i]['start'] + j + time > openclose[dayindex]['close']) {
+                            break;
+                        }
+                        
+                        index++;
+                        littleslots[index] = Array();
+                        littleslots[index]['start'] = bigslots[i]['start'] + j - bathtime;
+                        // Add 30 minutes to the pickup time
+                        littleslots[index]['end'] = littleslots[index]['start'] + time + bathtime + 30;
+                        // If adding 30 minutes pushed us past closing time, set pickup time to closing time.
+                        if(littleslots[index]['end'] > openclose[dayindex]['close']) {
+                            littleslots[index]['end'] = openclose[dayindex]['close'];
+                        }
+                    }
+                }
+                
+                if(littleslots.length > 0) {
+                    return littleslots;
+                }
+                else {
+                    return false;
+                }
+            }
+            
             function disableDay(today) {
                 var dayindex = today.getDay();
+                var allslots = Array();
                     
                 // Disable Sundays and Mondays
                 if(dayindex == 0 || dayindex == 1) {
                     return true;
                 }
 
-                // Check availability of each groomer
-                var available = false;
-
                 var index = today.getTime();
                 timeslots[index] = Array();
+                timeslots[index]['slots'] = Array();
+                timeslots[index]['groomers'] = Array();
 
                 for(var i = 0; i < groomers.length; i++) {
+                    allslots[i] = Array();
+                    allslots[i]['groomer'] = groomers[i]['ID'];
+                    allslots[i]['count'] = getcount(groomers[i]['ID'], today);
+                    allslots[i]['seniority'] = groomers[i]['Seniority'];
                     var minutes = getavailable(groomers[i]['ID'], today);
                     if(!minutes) {
+                        allslots[i]['slots'] = Array();
                         continue;
                     }
 
@@ -731,20 +771,112 @@ $_SESSION['Hours'] = $hours;
                     var groomerslottime = slottime + parseInt(tiers[temp][size]);
                     var slots = slotfits(minutes, groomerslottime);
                     if(slots) {
-                        // Even if a groomer has time, if they would have to arrive before the current time in order to be done on time, don't count this groomer.
-                        var now = new Date();
-                        var currenttime = now.getHours() * 60 + now.getMinutes();
-                        if((now.toDateString() === today.toDateString()) && openclose[dayindex]['close'] - 30 - groomerslottime - bathtime < currenttime) {
+                        var littleslots = splitslots(slots, groomerslottime, today);
+                        if(!littleslots) {
                             continue;
                         }
-                        timeslots[index].push(Array());
-                        var last = timeslots[index].length - 1;
-                        timeslots[index][last]['groomer'] = groomers[i];
-                        timeslots[index][last]['slots'] = slots;
-                        available = true;
+                        
+                        allslots[i]['slots'] = littleslots;
                     }
                 }
-                if(!available) {
+                
+                
+                // Sort the slots so that the lowest priority is first (based on count and seniority)
+                var sortedslots = Array();
+                sortedslots.push(allslots[0]);
+                
+                for(var i = 1; i < allslots.length; i++) {
+                    sorted:
+                    for(var j = 0; j < sortedslots.length; j++) {
+                        if(j == sortedslots.length - 1) {
+                            if(allslots[i]['count'] < sortedslots[j]['count']) {
+                                sortedslots.push(allslots[i]);
+                                break sorted;
+                            }
+                            else if(allslots[i]['count'] == sortedslots[j]['count']) {
+                                if(allslots[i]['seniority'] <= sortedslots[j]['seniority']) {
+                                    sortedslots.splice(j, 0, allslots[i]);
+                                    break sorted;
+                                }
+                                else {
+                                    sortedslots.splice(j+1, 0, allslots[i]);
+                                    break sorted;
+                                }
+                            }
+                            else {
+                                sortedslots.splice(j, 0, allslots[i]);
+                                break sorted;
+                            }
+                        }
+                        if(allslots[i]['count'] < sortedslots[j]['count']) {
+                            continue sorted;
+                        }
+                        else if(allslots[i]['count'] == sortedslots[j]['count']) {
+                            if(allslots[i]['seniority'] <= sortedslots[j]['seniority']) {
+                                sortedslots.splice(j+1, 0, allslots[i]);
+                                break sorted;
+                            }
+                            else {
+                                sortedslots.splice(j, 0, allslots[i]);
+                                break sorted;
+                            }
+                        }
+                        else {
+                            sortedslots.splice(j, 0, allslots[i]);
+                            break sorted;
+                        }
+                    }
+                }
+                
+                for(var i = 0; i < sortedslots[0]['slots'].length; i++) {
+                    timeslots[index]['slots'].push(sortedslots[0]['slots'][i]);
+                    timeslots[index]['groomers'].push(sortedslots[0]['groomer']);
+                }
+                
+                for(var i = 1; i < sortedslots.length; i++) {
+                    for(var j = 0; j < sortedslots[i]['slots'].length; j++) {
+                        reset:
+                        for(var k = 0; k < timeslots[index]['slots'].length; k++) {
+                            if(k == timeslots[index]['slots'].length - 1) {
+                                if(sortedslots[i]['slots'][j]['start'] > timeslots[index]['slots'][k]['start']) {
+                                    timeslots[index]['slots'].push(sortedslots[i]['slots'][j]);
+                                    timeslots[index]['groomers'].push(sortedslots[i]['groomer']);
+                                    break reset;
+                                }
+                                else if(sortedslots[i]['slots'][j]['start'] == timeslots[index]['slots'][k]['start']) {
+                                    timeslots[index]['slots'].splice(k, 1, sortedslots[i]['slots'][j]);
+                                    timeslots[index]['groomers'].splice(k, 1, sortedslots[i]['groomer']);
+                                    break reset;
+                                }
+                                else {
+                                    timeslots[index]['slots'].splice(k, 0, sortedslots[i]['slots'][j]);
+                                    timeslots[index]['groomers'].splice(k, 0, sortedslots[i]['groomer']);
+                                    break reset;
+                                }
+                            }
+                            if(sortedslots[i]['slots'][j]['start'] > timeslots[index]['slots'][k]['start']) {
+                                continue reset;
+                            }
+                            else if(sortedslots[i]['slots'][j]['start'] == timeslots[index]['slots'][k]['start']) {
+                                timeslots[index]['slots'].splice(k, 1, sortedslots[i]['slots'][j]);
+                                timeslots[index]['groomers'].splice(k, 1, sortedslots[i]['groomer']);
+                                break reset;
+                            }
+                            else {
+                                timeslots[index]['slots'].splice(k, 0, sortedslots[i]['slots'][j]);
+                                timeslots[index]['groomers'].splice(k, 0, sortedslots[i]['groomer']);
+                                break reset;
+                            }
+                        }
+                    }
+                }
+                
+                
+                
+                if(timeslots[index]['slots'].length > 0) {
+                    return false;
+                }
+                else {
                     return true;
                 }
             }
@@ -755,75 +887,18 @@ $_SESSION['Hours'] = $hours;
                 format: 'MM/DD/YYYY',
                 minDate: new Date(),
                 disableDayFn: function(today) {
-                    disableDay(today);
+                    return disableDay(today);
                 },
                 onSelect: function(date) {
                     
-                    // timeslots[today]: An array of groomers available today
-                    // timeslots[today][i]: One of today's groomers (inside a for loop). This has
-                        // an array at ['groomer'] with all the groomer's info, and an array
-                        // at ['slots'] with the available slots for that groomer
-                    // littleslots[index]: An array of timeslots the size of the current event to the nearest 15 minutes, taken from a single open period
-                    
-                    var dayindex = date.getDay();
-                    
-                    today = date.getTime();
-                    var availablegroomers = Array();
-                    
-                    for(var i = 0; i < timeslots[today].length; i++) {
-                        availablegroomers.push(timeslots[today][i]['groomer']);
-                    }
-                    
-                    var groomer = pickgroomer(date, availablegroomers);
-                    var groomerslottime;
-                    var now = new Date();
-                    var currenttime = now.getHours() * 60 + now.getMinutes();
-                    
-                     // Correct slottime for the selected groomer
-                    for(var i = 0; i < groomers.length; i++) {
-                        if(groomers[i]['ID'] == groomer) {
-                            var temp = groomers[i]['Tier'];
-                            groomerslottime = slottime + parseInt(tiers[temp][size]);
-                        }
-                    }
-                    
                     var options = $("#slot");
                     options.empty();
-                    var littleslots = Array();
-                    var x = Math.ceil(groomerslottime/15); // The number of 15 minute intervals the event being scheduled will take for the groomer
                     
-                    // Break up the available slots into slots the size of the event.
-                    // i = every groomer
-                    for(var i = 0; i < timeslots[today].length; i++) {
-                        
-                        if(timeslots[today][i]['groomer']['ID'] != groomer) {
-                            continue;
-                        }
-                        var index = -1;
-                        // j = every slot for the chosen groomer
-                        for(var j = 0; j < timeslots[today][i]['slots'].length; j++) {
-                            for(var k = 0; k < timeslots[today][i]['slots'][j]['length']; k += 15) {
-                                // If the current 15 minute start time would make the end time greater than the
-                                // slot's end time, don't add it to littleslots (because it's too long)
-                                // We're also adding an additional 30 minutes to the end of each slot for pickup
-                                if(!(timeslots[today][i]['slots'][j]['start'] + k + x*15 > timeslots[today][i]['slots'][j]['end'])) {
-                                    // Offset each slot by the bathing time so that the bathing is finished when the grooming slot begins
-                                    // Don't do that if it will push the dropoff time before opening, or before the current time, or past the end of the day
-                                    if((timeslots[today][i]['slots'][j]['start'] + k) - bathtime < openclose[dayindex]['open'] || (now.toDateString() === date.toDateString() && timeslots[today][i]['slots'][j]['start'] + k - bathtime < currenttime) || timeslots[today][i]['slots'][j]['start'] + k + x*15 + 30 > openclose[dayindex]['close']) {
-                                        continue;
-                                    }
-                                    index++;
-                                    littleslots[index] = Array();
-                                    littleslots[index]['start'] = (timeslots[today][i]['slots'][j]['start'] + k) - bathtime;
-                                    littleslots[index]['end'] = littleslots[index]['start'] + x*15 + 30 + bathtime;
-                                }
-                            }
-                        }
-                    }
+                    today = date.getTime();
                     
-                    for(var i = 0; i < littleslots.length; i++) {
-                        var start = littleslots[i]['start'];
-                        var end = littleslots[i]['end'];
+                    for(var i = 0; i < timeslots[today]['slots'].length; i++) {
+                        var start = timeslots[today]['slots'][i]['start'];
+                        var end = timeslots[today]['slots'][i]['end'];
                         var startmin = start % 60;
                         var starthour = (start - startmin) / 60;
                         var endmin = end % 60;
@@ -845,6 +920,7 @@ $_SESSION['Hours'] = $hours;
                             endhour = 12;
                         }
                         
+                        var groomer = timeslots[today]['groomers'][i];
                         
                         var timestamp = (start*60) + (today/1000) + (offset - localoffset*60);
                         options.append($("<option />").val(groomer + "-" + timestamp + "-" + starthour + ":" + (startmin < 10 ? "0" + startmin : startmin) + " " + s + "-" + endhour + ":" + (endmin < 10 ? "0" + endmin : endmin) + " " + e).prop('selected', (timestamp == prevstart ? true : false)).text(starthour + ":" + (startmin < 10 ? "0" + startmin : startmin) + " " + s + " - " + endhour + ":" + (endmin < 10 ? "0" + endmin : endmin) + " " + e));
