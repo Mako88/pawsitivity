@@ -24,6 +24,7 @@ calendar.php:
     Add missed button on popup. When button is pushed, delete that event and set Missed flag.
     Make owner and pet names links to their info
     Show price on popup
+    Add a "disable day" checkbox to prevent a day from having any more scheduled
     
 	
 search.php:

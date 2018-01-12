@@ -239,7 +239,7 @@ $(function() {
         <label for="Parvo">Parvo: </label><input id="Parvo" type="text" name="Vaccines2[Parvo]" /><br />
     <label for="Release">Release Form: </label><input type="file" name="Release" id="Release"><br />
     <label for="Notes">Notes: </label><textarea name="Notes" id="Notes"></textarea><br />
-    <label for="Info">Info: </label><textarea name="Info" id="Info"></textarea><br />
+    <label for="Info">Warnings: </label><textarea name="Info" id="Info"></textarea><br />
     <label for="Picture">Picture: </label><input type="file" name="Picture" id="Picture"><br />
     <label for="DogOfMonth">Dog of the Month Date (MM/DD/YYYY): </label><input type="text" name="DogOfMonth" id="DogOfMonth"><br />
     <label>Time (In Minutes): </label><br />
