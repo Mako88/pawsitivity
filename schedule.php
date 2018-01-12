@@ -834,7 +834,6 @@ $_SESSION['Hours'] = $hours;
                 }
                 
                 for(var i = 1; i < sortedslots.length; i++) {
-                    if(sortedslots)
                     for(var j = 0; j < sortedslots[i]['slots'].length; j++) {
                         reset:
                         for(var k = 0; k < timeslots[index]['slots'].length; k++) {
