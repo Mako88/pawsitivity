@@ -26,6 +26,7 @@ $_SESSION['Hours'] = $hours;
     <script src="js/pikaday.js"></script>
     <script src="js/pikaday.jquery.js"></script>
     <link rel="stylesheet" type="text/css" href="css/pikaday.css" />
+    <link rel="stylesheet" type="text/css" href="css/styles.css" />
     <meta charset="UTF-8">
     <title>Scheduling</title>
 </head>
@@ -184,7 +185,6 @@ $_SESSION['Hours'] = $hours;
                         $stmt->execute(); 
                     }
                 }
-                
                 
                 echo '<form action="schedule.php" method="post">';
                 
@@ -426,6 +426,16 @@ $_SESSION['Hours'] = $hours;
         $prevstart = "false";
         if(!empty($_SESSION['info']['prevstart'])) {
             $prevstart = $_SESSION['info']['prevstart'];
+        }
+        
+        if($_SESSION['info']['Price'] == 0) {
+            echo '<p class="error">WARNING: Price is &#36;0</p>';
+        }
+        if($_SESSION['info']['BathTime'] == 0) {
+            echo '<p class="error">WARNING: Bathing time is &#36;0</p>';
+        }
+        if($_SESSION['info']['GroomTime'] == 0) {
+            echo '<p class="error">WARNING: Grooming time is &#36;0</p>';
         }
 ?>
     <form action="schedule.php" method="post" id="day">
@@ -977,6 +987,33 @@ $_SESSION['Hours'] = $hours;
                     $_SESSION['info']['timestamp'] = $slotinfo[1];
                     $_SESSION['info']['groomer'] = $slotinfo[0];
                     
+                    $stmt = $database->prepare("SELECT Name, Vaccines2, Age FROM Pets WHERE ID = :ID");
+                    $stmt->bindValue(':ID', $_SESSION['info']['pet']);
+                    $stmt->execute();
+                    $res = $stmt->fetch();
+                    $petname = $res['Name'];
+                    
+                    $vaccines = json_decode($res['Vaccines2'], true);
+                    $rabies = false;
+                    $distemper = false;
+                    $parvo = false;
+                    $recvaccine = false;
+                
+                    $age = date("Y") - intval($res['Age']);
+                    
+
+                    if($age < 3) {
+                        if($_SESSION['info']['timestamp'] > strtotime("tomorrow", strtotime($vaccines['Distemper']))) {
+                            $distemper = true;
+                        }
+                        if($_SESSION['info']['timestamp'] > strtotime("tomorrow", strtotime($vaccines['Parvo']))) {
+                            $parvo = true;
+                        }
+                    }
+                    if($_SESSION['info']['timestamp'] > strtotime("tomorrow", strtotime($vaccines['Rabies']))) {
+                        $rabies = true;
+                    }
+                    
                     if(!empty($_POST['recurring']) && $_POST['recurring'] != 1) {
                         echo "<p>We're sorry, but the checkbox couldn't be verified.</p>";
                         goto finish;
@@ -993,11 +1030,20 @@ $_SESSION['Hours'] = $hours;
                         
                         $_SESSION['info']['RecInterval'] = $_POST['weeks'];
                         
-                        $enddate = DateTime::createFromFormat('!m/d/Y', $_POST['enddate']);
-                        if($enddate === false) {
-                            echo "<p>The end date was incorrectly formatted.</p>";
-                            goto finish;
+                        // If enddate was not set, set it to one year from the start date
+                        if(!empty($_POST['enddate'])) {
+                            $enddate = DateTime::createFromFormat('!m/d/Y', $_POST['enddate']);
+                            if($enddate === false) {
+                                echo "<p>The end date was incorrectly formatted.</p>";
+                                goto finish;
+                            }
                         }
+                        else {
+                            $oneyearend = $_SESSION['info']['timestamp'] + 31536000;
+                            $enddate = DateTime::createFromFormat('U', $oneyearend);
+                        }
+                        
+                        
                         
                         
                         
@@ -1038,18 +1084,58 @@ $_SESSION['Hours'] = $hours;
                         if(isset($finalevent)) {
                             $_SESSION['info']['EndDate'] = strtotime("tomorrow", $finalevent) - 1;
                         }
+                        
+                        for($i = $_SESSION['info']['timestamp']; $i < $_SESSION['info']['EndDate']; $i += $_SESSION['info']['RecInterval']*604800) {
+                            if($age < 3) {
+                                if($i > strtotime("tomorrow", strtotime($vaccines['Distemper']))) {
+                                    $distemper = true;
+                                    $recvaccine = true;
+                                }
+                                if($i > strtotime("tomorrow", strtotime($vaccines['Parvo']))) {
+                                    $parvo = true;
+                                    $recvaccine = true;
+                                }
+                            }
+                            if($i > strtotime("tomorrow", strtotime($vaccines['Rabies']))) {
+                                $rabies = true;
+                                $recvaccine = true;
+                            }
+                        }
+                        
                     }
                     else {
                         $_SESSION['info']['Recurring'] = $_SESSION['info']['RecInterval'] = $_SESSION['info']['EndDate'] = 0;
                     }
                     
+                    if($rabies) {
+                        echo '<p class="error">WARNING: The Rabies vaccine expires on ' . $vaccines['Rabies'] . ' which is before ';
+                        if($recvaccine) {
+                            echo 'the last scheduled appointment.</p>';
+                        }
+                        else {
+                            echo 'the scheduled appointment.</p>';
+                        }
+                    }
+                    if($parvo) {
+                        echo '<p class="error">WARNING: The Parvo vaccine expires on ' . $vaccines['Parvo'] . ' which is before ';
+                        if($recvaccine) {
+                            echo 'the last scheduled appointment.</p>';
+                        }
+                        else {
+                            echo 'the scheduled appointment.</p>';
+                        }
+                    }
+                    if($distemper) {
+                        echo '<p class="error">WARNING: The Distemper vaccine expires on ' . $vaccines['Distemper'] . ' which is before ';
+                        if($recvaccine) {
+                            echo 'the last scheduled appointment.</p>';
+                        }
+                        else {
+                            echo 'the scheduled appointment.</p>';
+                        }
+                    }
+                    
                     $groomername = $groomername['Name'];
-
-                    $stmt = $database->prepare("SELECT Name FROM Pets WHERE ID = :ID");
-                    $stmt->bindValue(':ID', $_SESSION['info']['pet']);
-                    $stmt->execute();
-                    $petname = $stmt->fetch();
-                    $petname = $petname['Name'];
 
                     switch($_SESSION['info']['package']) {
                         case 1:
@@ -1113,7 +1199,7 @@ $_SESSION['Hours'] = $hours;
                         echo "<p>Your pet is automatically scheduled at this time every " . $_SESSION['info']['RecInterval'] . " week(s). Your final appointment will be on " . $enddate->format("l, m/d/Y");
                     }
                     if(isset($finalevent)) {
-                        echo '<p style="color: red">NOTE: The ending date is different from what you set due to a conflict.<br />';
+                        echo '<p class="error">NOTE: The ending date is different from what you set due to a conflict.<br />';
                         echo 'You can manually re-schedule for dates after ' . $enddate->format("m/d/Y") . '</p>';
                     }
                     

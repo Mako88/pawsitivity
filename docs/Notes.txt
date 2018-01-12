@@ -1,57 +1,56 @@
 schedule.php:
 	Don't allow users to schedule if Missed field is 1, tell them to call / inform receptionist.
     Disable groom services when bath selected
-    - If groom price or time is 0, disable groom packages for clients (not employees)
-    - Make sure bath price and groom price aren't added
-    - Warn if bath or groom time or price is 0 when employer is scheduling
-    - If dog is under 3 warn if any vaccine is out of date
-    - If dog is 3 or over, warn if rabies is out of date
+    If groom price or time is 0, disable groom packages for clients (not employees)
+    Make sure bath price and groom price aren't added
     Don't allow clicking next if no date is set
-    Allow searching for the next open slot at a certain time for a certain dog or group of dogs
     Add error if someone skips to page 2 but doesn't have permission to schedule.
-    Fix FREAKING DAYLIGHT SAVINGS TIME!!!
+    - Fix FREAKING DAYLIGHT SAVINGS TIME!!!
     Don't allow end dates before start dates
     Change summary page to popup box
     Check if scheduling a slot before the last one ends is the result of rounding, or an actual issue.
-    Add "Signature Package" checkbox. When selected add $15 and only allow 3 other selections.
+    - Add "Signature Package" checkbox. When selected add $15 and only allow 3 other selections.
+    - Add back button
+    - Don't delete appointments on edit
 
     
 calendar.php:
-    In bathing view remove edit button
-    In bathing view show enhancements
+    - In bathing view remove edit button
+    - In bathing view show enhancements
     Different colors in month view for bath-only and groom-only
     Add check in/out button on popup (edit status in database)
     Add missed button on popup. When button is pushed, delete that event and set Missed flag.
-    Make owner and pet names links to their info
-    Show price on popup
-    Add a "disable day" checkbox to prevent a day from having any more scheduled
+    - Make owner and pet names links to their info
+    - Show price on popup
+    - Add a "disable day" checkbox to prevent a day from having any more scheduled
+    - Add notes on a dog for the day in popup
     
 	
 search.php:
 	Add advanced search to show all that haven't been dog of the month
-	Make "Owned By" link in search go to client page
+	- Make "Owned By" link in search go to client page
 
 	
 newpet.php/viewpet.php:
 	Change time to "clicker" in 15 minute intervals on newpet page (don't allow base editing)
-    - View recurring visits in "scheduling"
+    View recurring visits in "scheduling"
     - Add coloring line
-    Remove delete button on past visits
-    Sort visits by date, not ID
-    Move Owned By under Name
-    Add vet line
+    - Remove delete button on past visits
+    - Sort visits by date, not ID
+    - Move Owned By under Name
+    - Add vet line
 	
 	
 newclient.php/viewclient.php:
 	Allow resetting the "missed" field on client pages
-    Add link to add pet under "User added" page
-    Change password to only numbers and letters
-    If visited is 0, display initial password
-    Allow deleting clients
+    - Add link to add pet under "User added" page
+    - Change password to only numbers and letters
+    - If visited is 0, display initial password
+    - Allow deleting clients
     
 
 newuser.php:
-	Add viewuser.php to allow editing a user
+	- Add viewuser.php to allow editing a user
 
 	
 Misc:
