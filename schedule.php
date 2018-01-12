@@ -766,9 +766,15 @@ $_SESSION['Hours'] = $hours;
                         continue;
                     }
 
-                    // Correct slottime for each groomer's tier
+                    // Correct slottime for each groomer's tier. If doing so makes it 0 or less, make it 15.
                     var temp = groomers[i]['Tier'];
                     var groomerslottime = slottime + parseInt(tiers[temp][size]);
+                    if(slottime > 0 && groomerslottime <= 0) {
+                        groomerslottime = 15;
+                    }
+                    if(slottime == 0) {
+                        groomerslottime = 0;
+                    }
                     var slots = slotfits(minutes, groomerslottime);
                     if(slots) {
                         var littleslots = splitslots(slots, groomerslottime, today);
@@ -776,7 +782,7 @@ $_SESSION['Hours'] = $hours;
                             continue;
                         }
                         
-                        allslots[i]['slots'] = littleslots;
+                        allslots[i]['slots'] = littleslots.slice(0);
                     }
                 }
                 
