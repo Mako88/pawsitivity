@@ -40,25 +40,10 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
     
     $stmt = $database->query("SELECT * FROM Scheduling WHERE PetID != -1");
     $events = $stmt->fetchAll();
-    $allevents = array();
     
-    foreach($events as $event) {
-        if($event['Recurring'] == 1) {
-            for($i = $event['StartTime']; $i < $event['EndDate']; $i += $event['RecInterval']*604800) {                      
-                $event['StartTime'] = $i;
-                $event['TwoPeople'] = $pets[$event['PetID']][0]['TwoPeople'];
-                $event['URL'] = $event['ID'] . "-" . $i;
-                array_push($allevents, $event);
-            }
-        }
-        else {
-            $event['TwoPeople'] = $pets[$event['PetID']][0]['TwoPeople'];
-            $event['URL'] = $event['ID'];
-            array_push($allevents, $event);
-        }
-    }
-    
-    foreach($allevents as $key => $event) {
+    foreach($events as $key => $event) {
+        $event['TwoPeople'] = $pets[$event['PetID']][0]['TwoPeople'];
+        $event['URL'] = $event['ID'];
         if(!empty($event['Services'])) {
             $services = array();
             $event['Services'] = json_decode($event['Services'], true);
@@ -69,13 +54,13 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                 $serv = $stmt->fetch();
                 array_push($services, $serv);
             }
-            $allevents[$key]['Services'] = json_encode($services);
+            $events[$key]['Services'] = json_encode($services);
         }
         $stmt = $database->prepare("SELECT Name FROM Users WHERE ID = :ID");
         $stmt->bindValue(":ID", $event['GroomerID']);
         $stmt->execute();
         $groomer = $stmt->fetch();
-        $allevents[$key]['Groomer'] = $groomer['Name'];
+        $events[$key]['Groomer'] = $groomer['Name'];
     }
     
 ?>
@@ -96,13 +81,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
             return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ '<br />' +'$2');
         }
         
-        // Offset of the Salon's timezone from UTC.
-        var offset = moment.tz.zone("<?php echo $_SESSION['Timezone']; ?>").offset(moment())*60;
-
-        // Offset of user's local timezone from UTC.
-        var localoffset = new Date().getTimezoneOffset();
-        
-        var events = <?php echo json_encode($allevents); ?>;
+        var oldevents = <?php echo json_encode($events); ?>;
         
         var pets = <?php echo json_encode($pets); ?>;
         
@@ -110,16 +89,38 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
         
         var objects = Array();
         
+        events = Array();
+        
+        // Split recurring events
+        for(var i = 0; i < oldevents.length; i++) {
+            if(oldevents[i]['Recurring'] == 1) {
+                var firststart = moment.unix(oldevents[i]['StartTime']);
+                for(var j = oldevents[i]['StartTime']; j < oldevents[i]['EndDate']; j += oldevents[i]['RecInterval']*604800) {
+                    firststart.add(oldevents[i]['RecInterval'], "weeks");
+                    var temp = oldevents[i];
+                    temp['StartTime'] = firststart.unix();
+                    // Make sure we're doing a deep push instead of just the reference
+                    events.push(JSON.parse(JSON.stringify(temp)));
+                }
+            }
+            else {
+                events.push(oldevents[i]);
+            }
+        }
+                
         // Create array of event objects for fullCalendar
         for(var i = 0; i < events.length; i++) {
             
             var index = events[i]['PetID'];
             var index2 = pets[index][0]['OwnedBy'];
+                        
+            // Offset of the Salon's timezone from UTC (on the date of the event).
+            var offset = moment.tz(events[i]['StartTime']*1000, "<?php echo $_SESSION['Timezone']; ?>").utcOffset()*60;
             
             var event = {
                 id: events[i]['ID'],
-                start: (events[i]['StartTime'] - offset) * 1000,
-                end: (events[i]['StartTime'] + (events[i]['TotalTime'] * 60) - offset) * 1000,
+                start: (events[i]['StartTime'] + offset) * 1000,
+                end: (events[i]['StartTime'] + (events[i]['TotalTime'] * 60) + offset) * 1000,
                 title: pets[index][0]['Name'] + ' - ' + events[i]['Groomer'],
                 TwoPeople: events[i]['TwoPeople'],
                 warnings: pets[index][0]['Info'],
@@ -137,6 +138,8 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                 recinterval: events[i]['RecInterval'],
                 enddate: events[i]['EndDate']
             };
+            
+            
 
 
             objects.push(event);
@@ -150,26 +153,26 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
             switch(view) {
                 case 'all':
                     for(var i = 0; i < objects.length; i++) {
-                        objects[i]['start'] = (events[i]['StartTime'] - offset) * 1000;
-                        objects[i]['end'] = (events[i]['StartTime'] + (events[i]['TotalTime'] * 60) - offset) * 1000;
+                        objects[i]['start'] = (events[i]['StartTime'] + offset) * 1000;
+                        objects[i]['end'] = (events[i]['StartTime'] + (events[i]['TotalTime'] * 60) + offset) * 1000;
                         objects[i].view = 'all';
                     }
                     break;
                 case 'groom':
                     for(var i = 0; i < events.length; i++) {
-                        objects[i]['start'] = (events[i]['StartTime'] - offset + Math.ceil(events[i]['BathTime']/15)*15 * 60) * 1000;
-                        objects[i]['end'] = (events[i]['StartTime'] - offset + events[i]['TotalTime'] * 60) * 1000;
+                        objects[i]['start'] = (events[i]['StartTime'] + offset + Math.ceil(events[i]['BathTime']/15)*15 * 60) * 1000;
+                        objects[i]['end'] = (events[i]['StartTime'] + offset + events[i]['TotalTime'] * 60) * 1000;
                         objects[i].view = 'groom';
                     }
                     break;
                 case 'bath':
                     for(var i = 0; i < events.length; i++) {
-                        objects[i]['start'] = (events[i]['StartTime'] - offset) * 1000;
+                        objects[i]['start'] = (events[i]['StartTime'] + offset) * 1000;
                         if(objects[i]['TwoPeople'] == 1) {
-                            objects[i]['end'] = (events[i]['StartTime'] - offset + events[i]['TotalTime'] * 60) * 1000;
+                            objects[i]['end'] = (events[i]['StartTime'] + offset + events[i]['TotalTime'] * 60) * 1000;
                         }
                         else {
-                            objects[i]['end'] = (events[i]['StartTime'] + (Math.ceil(events[i]['BathTime']/15)*15 * 60) - offset) * 1000;
+                            objects[i]['end'] = (events[i]['StartTime'] + (Math.ceil(events[i]['BathTime']/15)*15 * 60) + offset) * 1000;
                         }
                         objects[i].view = 'bath';
                     }

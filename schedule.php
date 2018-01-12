@@ -466,16 +466,10 @@ $_SESSION['Hours'] = $hours;
             var timeslots = Array();
             var selectedinfo = Array();
             
-            // Offset of the Salon's timezone from UTC.
-            var offset = moment.tz.zone("<?php echo $_SESSION['Timezone']; ?>").offset(moment())*60;
-            
-            // Offset of user's local timezone from UTC.
-            var localoffset = new Date().getTimezoneOffset();
-            
             // Function that given a day and a groomer ID returns the number
             // of dogs scheduled for that groomer that day.
             function getcount(groomer, today) {
-                
+
                 var count = 0;
                 var id;
                 
@@ -487,8 +481,8 @@ $_SESSION['Hours'] = $hours;
                         continue;
                     }
 
-                    var event = moment((events[i]['StartTime'] - (offset - localoffset*60)) * 1000);
-                    if((!event.isSame(today, "day")) && events[i]['Recurring'] == 1 && (events[i]['EndDate'] != null ? today.isSameOrBefore(moment((events[i]['EndDate'] - (offset - localoffset*60)) * 1000), "day") : 1)) {
+                    var event = moment.unix(events[i]['StartTime']);
+                    if((!event.isSame(today, "day")) && events[i]['Recurring'] == 1 && (events[i]['EndDate'] != null ? today.isSameOrBefore(moment.unix(events[i]['EndDate']), "day") : 1)) {
                         while(event.isSameOrBefore(today, "day")) {
                             event.add(events[i]['RecInterval'], 'weeks'); // Add the number of weeks as an interval
                             if(event.isSame(today, "day")) {
@@ -515,9 +509,11 @@ $_SESSION['Hours'] = $hours;
             function getavailable(id, today) {
                 var todayminutes = Array();
                 var largedogs = Array();
+                
+                today = moment(today);
 
                 // Fill array with minutes spa is open today
-                switch(today.getDay()) {
+                switch(today.day()) {
                     // Tuesday and Wednesday
                     case 2:
                     case 3:
@@ -557,11 +553,11 @@ $_SESSION['Hours'] = $hours;
                         break;
                 }
                 
-                var now = new Date();
+                var now = moment();
                 
                 // Remove time that has already passed
-                if(now.toDateString() === today.toDateString()) {
-                    var currenttime = now.getHours() * 60 + now.getMinutes();
+                if(now.isSame(today, "day")) {
+                    var currenttime = now.hours() * 60 + now.minutes();
                     var pastminutes = Array();
                     var i = todayminutes[0];
                     while(i < Math.ceil(currenttime/15)*15) {
@@ -575,24 +571,21 @@ $_SESSION['Hours'] = $hours;
 
                 for(var i = 0; i < events.length; i++) {
                     
-                    // Creating a date from a UTC timestamp, returns a local date. Subtract the offset
-                    // to counteract this.
-                    var eventstart = new Date((events[i]['StartTime'] - (offset - localoffset*60)) * 1000);
-
-
-                    if(events[i]['Recurring'] == 1 && (events[i]['EndDate'] != null ? today <= new Date((events[i]['EndDate'] - (offset - localoffset*60)) * 1000) : 1)) {
-                        while(eventstart <= today) {
-                            eventstart = new Date(eventstart.getTime() + (604800000 * events[i]['RecInterval'])); // Add the number of weeks as an interval
-                            if(eventstart.toDateString() === today.toDateString()) {
+                    var event = moment.unix(events[i]['StartTime']);
+                    
+                    if((!event.isSame(today, "day")) && events[i]['Recurring'] == 1 && (events[i]['EndDate'] != null ? today.isSameOrBefore(moment.unix(events[i]['EndDate']), "day") : 1)) {
+                        while(event.isSameOrBefore(today, "day")) {
+                            event.add(events[i]['RecInterval'], 'weeks'); // Add the number of weeks as an interval
+                            if(event.isSame(today, "day")) {
                                 break;
                             }
                         }
                     }
                     
-                    if(eventstart.toDateString() === today.toDateString()) {
+                    if(event.isSame(today, "day")) {
                         
                         // Remove scheduled events' times from today's minutes array
-                        var startminutes = (eventstart.getHours() * 60) + (eventstart.getMinutes());
+                        var startminutes = (event.hours() * 60) + (event.minutes());
                         startminutes += Math.ceil(events[i]['BathTime']/15)*15;
                         var endminutes = Math.ceil(events[i]['GroomTime']/15)*15 + startminutes - 1;
                         var eventminutes = Array();
@@ -700,11 +693,13 @@ $_SESSION['Hours'] = $hours;
             // slots the length of the groom time, beginning every 15 minutes.
             // If, because of the timing of the big slot, there are no little slots, return false.
             function splitslots(bigslots, time, today) {
+                today = moment(today);
                 var littleslots = Array();
-                var dayindex = today.getDay();
-                var now = new Date();
-                var currenttime = now.getHours() * 60 + now.getMinutes();
+                var dayindex = today.day();
+                var now = moment();
+                var currenttime = now.hours() * 60 + now.minutes();
                 var index = -1;
+                
                 
                 // i = Every big slot
                 for(var i = 0; i < bigslots.length; i++) {
@@ -722,7 +717,7 @@ $_SESSION['Hours'] = $hours;
                         }
                         // If the current 15 minute start time would push the bathing time
                         // before the current time (on the current day), don't add it
-                        if(now.toDateString() === today.toDateString() && bigslots[i]['start'] + j - bathtime < currenttime) {
+                        if(now.isSame(today, "day") && bigslots[i]['start'] + j - bathtime < currenttime) {
                             continue;
                         }
                         // If the current 15 minute start time would push the end time past
@@ -910,8 +905,14 @@ $_SESSION['Hours'] = $hours;
                     var options = $("#slot");
                     options.empty();
                     
-                    today = date.getTime();
+                    // Offset of user's local timezone from UTC on the selected day in seconds.
+                    var localoffset = moment(date).utcOffset()*60;
                     
+                    // Offset of the spa's timezone from UTC on the selected day in seconds.
+                    var offset = moment.tz(date, "<?php echo $_SESSION['Timezone']; ?>").utcOffset()*60;
+                    
+                    today = date.getTime();
+                
                     for(var i = 0; i < timeslots[today]['slots'].length; i++) {
                         var start = timeslots[today]['slots'][i]['start'];
                         var end = timeslots[today]['slots'][i]['end'];
@@ -938,7 +939,7 @@ $_SESSION['Hours'] = $hours;
                         
                         var groomer = timeslots[today]['groomers'][i];
                         
-                        var timestamp = (start*60) + (today/1000) + (offset - localoffset*60);
+                        var timestamp = (today/1000 + localoffset) - offset + (start*60);
                         options.append($("<option />").val(groomer + "-" + timestamp + "-" + starthour + ":" + (startmin < 10 ? "0" + startmin : startmin) + " " + s + "-" + endhour + ":" + (endmin < 10 ? "0" + endmin : endmin) + " " + e).prop('selected', (timestamp == prevstart ? true : false)).text(starthour + ":" + (startmin < 10 ? "0" + startmin : startmin) + " " + s + " - " + endhour + ":" + (endmin < 10 ? "0" + endmin : endmin) + " " + e));
                     }
                 }
