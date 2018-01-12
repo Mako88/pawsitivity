@@ -1,6 +1,5 @@
 schedule.php:
 	Don't allow users to schedule if Missed field is 1, tell them to call / inform receptionist.
-	If a dog requires two people, differentiate bathing time and helping time
     Disable groom services when bath selected
     - If groom price or time is 0, disable groom packages for clients (not employees)
     - Make sure bath price and groom price aren't added
@@ -8,18 +7,12 @@ schedule.php:
     - If dog is under 3 warn if any vaccine is out of date
     - If dog is 3 or over, warn if rabies is out of date
     Don't allow clicking next if no date is set
-    Store price in database
-    Allow moving appointments (but not changing the services)
     Allow searching for the next open slot at a certain time for a certain dog or group of dogs
     Add error if someone skips to page 2 but doesn't have permission to schedule.
-    Change from number of dogs/seniority when picking the groomer, to whichever has the earliest dog.
-    Fix deleting event when editing a recurring instance
     Fix FREAKING DAYLIGHT SAVINGS TIME!!!
-    Check whether a groomer is scheduled to work or not in pickgroomer
     Don't allow end dates before start dates
     Change summary page to popup box
     Check if scheduling a slot before the last one ends is the result of rounding, or an actual issue.
-    Fix issue when a groomer is selected but has no available slots
     Add "Signature Package" checkbox. When selected add $15 and only allow 3 other selections.
 
     
@@ -27,8 +20,7 @@ calendar.php:
     In bathing view remove edit button
     In bathing view show enhancements
     Different colors in month view for bath-only and groom-only
-    Add check in/out button (also to the database) on popup
-    When clicking check out have dropdown of method of payment
+    Add check in/out button on popup (edit status in database)
     Add missed button on popup. When button is pushed, delete that event and set Missed flag.
     Make owner and pet names links to their info
     Show price on popup
@@ -59,10 +51,6 @@ newclient.php/viewclient.php:
 
 newuser.php:
 	Add viewuser.php to allow editing a user
-    
-    
-settings.php:
-    Allow setting business hours (update on schedule and employeeschedule)
 
 	
 Misc:
@@ -76,7 +64,6 @@ Misc:
 	Figure out text/email reminders with scheduling
     Automatically remove events the age from global settings
     Prevent infinite redirect when user doesn't have permission to access page
-    Add exporting events as CSV for import into Quickbooks
     Add daily backups
     When marking a client as missed, delete the scheduled event
     Create script to reset everyone's passwords 1-time.
