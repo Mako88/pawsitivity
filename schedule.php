@@ -93,6 +93,7 @@ $_SESSION['Hours'] = $hours;
             $_SESSION['info']['Size'] = $res['Size'];
             $_SESSION['info']['GroomPrice'] = $res['GroomPrice'];
             $_SESSION['info']['BathPrice'] = $res['BathPrice'];
+            $_SESSION['info']['previd'] = -1;
             
             $stmt = $database->query("SELECT * FROM Services");
             $services = $stmt->fetchAll();
@@ -124,66 +125,7 @@ $_SESSION['Hours'] = $hours;
                         $_SESSION['info']['prevstart'] = $prevevent['StartTime'];
                     }
                     
-                    if($prevevent['Recurring'] == 1) {
-                        $difference = abs($_SESSION['info']['prevstart'] - $prevevent['StartTime']);
-                        // It's not the initial event
-                        if($difference > 0) {
-                            // It's the last instance
-                            if($_SESSION['info']['prevstart'] + $prevevent['RecInterval']*604800 > $prevevent['EndDate']) {
-                                $enddate = $prevevent['EndDate'] - $prevevent['RecInterval']*604800;
-                                $stmt = $database->prepare("UPDATE Scheduling SET EndDate = :EndDate WHERE ID = :ID");
-                                $stmt->bindValue(':EndDate', $enddate);
-                                $stmt->bindValue(':ID', $prevevent['ID']);
-                                $stmt->execute();
-                            }
-                            // It's not the last instance
-                            else {
-                                $totalevents = 0;
-                                for($i = $prevevent['StartTime']; $i < $prevevent['EndDate']; $i += $prevevent['RecInterval']*604800) {
-                                    $totalevents++;
-                                }
-                                $prevevents = $difference / ($prevevent['RecInterval']*604800);
-                                $newtotal = $totalevents - $prevevents;
-                                
-                                $enddate = $prevevent['EndDate'] - $newtotal*$prevevent['RecInterval']*604800;
-                                $stmt = $database->prepare("UPDATE Scheduling SET EndDate = :EndDate WHERE ID = :ID");
-                                $stmt->bindValue(':EndDate', $enddate);
-                                $stmt->bindValue(':ID', $prevevent['ID']);
-                                $stmt->execute();
-                                
-                                $starttime = $_SESSION['info']['prevstart'] + $prevevent['RecInterval']*604800;
-                                $stmt = $database->prepare('INSERT INTO Scheduling (PetID, StartTime, GroomTime, BathTime, TotalTime, GroomerID, Recurring, RecInterval, EndDate, Package, Services, Price) VALUES (:PetID, :StartTime, :GroomTime, :BathTime, :TotalTime, :GroomerID, :Recurring, :RecInterval, :EndDate, :Package, :Services, :Price)');
-                                $stmt->bindValue(':PetID', $prevevent['PetID']);
-                                $stmt->bindValue(':StartTime', $starttime);
-                                $stmt->bindValue(':GroomTime', $prevevent['GroomTime']);
-                                $stmt->bindValue(':BathTime', $prevevent['BathTime']);
-                                $stmt->bindValue(':TotalTime', $prevevent['TotalTime']);
-                                $stmt->bindValue(':GroomerID', $prevevent['GroomerID']);
-                                $stmt->bindValue(':Recurring', $prevevent['Recurring']);
-                                $stmt->bindValue(':RecInterval', $prevevent['RecInterval']);
-                                $stmt->bindValue(':EndDate', $prevevent['EndDate']);
-                                $stmt->bindValue(':Package', $prevevent['Package']);
-                                $stmt->bindValue(':Price', $prevevent['Price']);
-                                $stmt->bindValue(':Services', $prevevent['Services']);
-                                $stmt->execute();
-                                
-                                
-                            }
-                        }
-                        // It's the inital event
-                        else {
-                            $starttime = $_SESSION['info']['prevstart'] + $prevevent['RecInterval']*604800;
-                            $stmt = $database->prepare("UPDATE Scheduling SET StartTime = :StartTime WHERE ID = :ID");
-                            $stmt->bindValue(':StartTime', $starttime);
-                            $stmt->bindValue(':ID', $prevevent['ID']);
-                            $stmt->execute();
-                        }
-                    }
-                    else {
-                        $stmt = $database->prepare("DELETE FROM Scheduling WHERE ID = :ID");
-                        $stmt->bindValue(':ID', $_GET['eventid']);
-                        $stmt->execute(); 
-                    }
+                    $_SESSION['info']['previd'] = $prevevent['ID'];
                 }
                 
                 echo '<form action="schedule.php" method="post">';
@@ -459,6 +401,7 @@ $_SESSION['Hours'] = $hours;
             var tiers = <?php echo $tiers['Tiers']; ?>;
             var size = "<?php echo $_SESSION['info']['Size']; ?>";
             var prevstart = <?php echo $prevstart ?>;
+            var previd = <?php echo $_SESSION['info']['previd'] ?>;
             
             // Set open and close times for each day of the week
             var openclose = <?php echo $_SESSION['Hours']; ?>;
@@ -584,6 +527,10 @@ $_SESSION['Hours'] = $hours;
                     }
                     
                     if(event.isSame(today, "day")) {
+                        
+                        if(previd == events[i]['ID'] && prevstart == event.unix()) {
+                            continue;
+                        }
                         
                         // Remove scheduled events' times from today's minutes array
                         var startminutes = (event.hours() * 60) + (event.minutes());
@@ -1228,6 +1175,73 @@ $_SESSION['Hours'] = $hours;
         }
     }
     else if($_SESSION['page'] == 'submit' && intval($_POST['confirm']) == 1) {
+        if($_SESSION['info']['previd'] != -1) {
+            $stmt = $database->prepare("SELECT * FROM Scheduling WHERE ID = :ID");
+            $stmt->bindValue(':ID', $_SESSION['info']['previd']);
+            $stmt->execute();
+            $prevevent = $stmt->fetch();
+            if($prevevent['Recurring'] == 1) {
+                $difference = abs($_SESSION['info']['prevstart'] - $prevevent['StartTime']);
+                // It's not the initial event
+                if($difference > 0) {
+                    // It's the last instance
+                    if($_SESSION['info']['prevstart'] + $prevevent['RecInterval']*604800 > $prevevent['EndDate']) {
+                        $enddate = $prevevent['EndDate'] - $prevevent['RecInterval']*604800;
+                        $stmt = $database->prepare("UPDATE Scheduling SET EndDate = :EndDate WHERE ID = :ID");
+                        $stmt->bindValue(':EndDate', $enddate);
+                        $stmt->bindValue(':ID', $prevevent['ID']);
+                        $stmt->execute();
+                    }
+                    // It's not the last instance
+                    else {
+                        $totalevents = 0;
+                        for($i = $prevevent['StartTime']; $i < $prevevent['EndDate']; $i += $prevevent['RecInterval']*604800) {
+                            $totalevents++;
+                        }
+                        $prevevents = $difference / ($prevevent['RecInterval']*604800);
+                        $newtotal = $totalevents - $prevevents;
+
+                        $enddate = $prevevent['EndDate'] - $newtotal*$prevevent['RecInterval']*604800;
+                        $stmt = $database->prepare("UPDATE Scheduling SET EndDate = :EndDate WHERE ID = :ID");
+                        $stmt->bindValue(':EndDate', $enddate);
+                        $stmt->bindValue(':ID', $prevevent['ID']);
+                        $stmt->execute();
+
+                        $starttime = $_SESSION['info']['prevstart'] + $prevevent['RecInterval']*604800;
+                        $stmt = $database->prepare('INSERT INTO Scheduling (PetID, StartTime, GroomTime, BathTime, TotalTime, GroomerID, Recurring, RecInterval, EndDate, Package, Services, Price) VALUES (:PetID, :StartTime, :GroomTime, :BathTime, :TotalTime, :GroomerID, :Recurring, :RecInterval, :EndDate, :Package, :Services, :Price)');
+                        $stmt->bindValue(':PetID', $prevevent['PetID']);
+                        $stmt->bindValue(':StartTime', $starttime);
+                        $stmt->bindValue(':GroomTime', $prevevent['GroomTime']);
+                        $stmt->bindValue(':BathTime', $prevevent['BathTime']);
+                        $stmt->bindValue(':TotalTime', $prevevent['TotalTime']);
+                        $stmt->bindValue(':GroomerID', $prevevent['GroomerID']);
+                        $stmt->bindValue(':Recurring', $prevevent['Recurring']);
+                        $stmt->bindValue(':RecInterval', $prevevent['RecInterval']);
+                        $stmt->bindValue(':EndDate', $prevevent['EndDate']);
+                        $stmt->bindValue(':Package', $prevevent['Package']);
+                        $stmt->bindValue(':Price', $prevevent['Price']);
+                        $stmt->bindValue(':Services', $prevevent['Services']);
+                        $stmt->execute();
+
+
+                    }
+                }
+                // It's the inital event
+                else {
+                    $starttime = $_SESSION['info']['prevstart'] + $prevevent['RecInterval']*604800;
+                    $stmt = $database->prepare("UPDATE Scheduling SET StartTime = :StartTime WHERE ID = :ID");
+                    $stmt->bindValue(':StartTime', $starttime);
+                    $stmt->bindValue(':ID', $prevevent['ID']);
+                    $stmt->execute();
+                }
+            }
+            else {
+                $stmt = $database->prepare("DELETE FROM Scheduling WHERE ID = :ID");
+                $stmt->bindValue(':ID', $prevevent['ID']);
+                $stmt->execute(); 
+            }
+        }
+        
         $_SESSION['page'] = null;
         $stmt = $database->prepare('INSERT INTO Scheduling (PetID, StartTime, GroomTime, BathTime, TotalTime, GroomerID, Recurring, RecInterval, EndDate, Package, Services, Price) VALUES (:PetID, :StartTime, :GroomTime, :BathTime, :TotalTime, :GroomerID, :Recurring, :RecInterval, :EndDate, :Package, :Services, :Price)');
         $stmt->bindValue(':PetID', $_SESSION['info']['pet']);

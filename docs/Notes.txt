@@ -10,7 +10,7 @@ schedule.php:
     Check if scheduling a slot before the last one ends is the result of rounding, or an actual issue.
     - Add "Signature Package" checkbox. When selected add $15 and only allow 3 other selections.
     - Add back button
-    - Don't delete appointments on edit
+    Improve performance of DisableDay sort
 
     
 calendar.php:
@@ -23,6 +23,7 @@ calendar.php:
     - Show price on popup
     - Add a "disable day" checkbox to prevent a day from having any more scheduled
     - Add notes on a dog for the day in popup
+    Fix disappearing events
     
 	
 search.php:
