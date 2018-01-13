@@ -23,7 +23,6 @@ calendar.php:
     - Show price on popup
     - Add a "disable day" checkbox to prevent a day from having any more scheduled
     - Add notes on a dog for the day in popup
-    Fix disappearing events
     
 	
 search.php:

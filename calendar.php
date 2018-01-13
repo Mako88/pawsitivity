@@ -155,47 +155,48 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                 case 'all':
                     for(var i = 0; i < objects.length; i++) {
                         // Offset of the Salon's timezone from UTC (on the date of the event).
-                        var offset = moment.tz(events[i]['StartTime']*1000, "<?php echo $_SESSION['Timezone']; ?>").utcOffset()*60;
+                        var offset = moment.tz(objects[i].starttime*1000, "<?php echo $_SESSION['Timezone']; ?>").utcOffset()*60;
             
-                        objects[i]['start'] = (events[i]['StartTime'] + offset) * 1000;
-                        objects[i]['end'] = (events[i]['StartTime'] + (events[i]['TotalTime'] * 60) + offset) * 1000;
+                        objects[i].start = (objects[i].starttime + offset) * 1000;
+                        objects[i].end = (objects[i].starttime + (events[i]['TotalTime'] * 60) + offset) * 1000;
                         objects[i].view = 'all';
                     }
                     break;
                 case 'groom':
-                    for(var i = 0; i < events.length; i++) {
+                    for(var i = 0; i < objects.length; i++) {
                         // Offset of the Salon's timezone from UTC (on the date of the event).
-                        var offset = moment.tz(events[i]['StartTime']*1000, "<?php echo $_SESSION['Timezone']; ?>").utcOffset()*60;
+                        var offset = moment.tz(objects[i].starttime*1000, "<?php echo $_SESSION['Timezone']; ?>").utcOffset()*60;
             
-                        objects[i]['start'] = (events[i]['StartTime'] + offset + Math.ceil(events[i]['BathTime']/15)*15 * 60) * 1000;
-                        objects[i]['end'] = (events[i]['StartTime'] + offset + events[i]['TotalTime'] * 60) * 1000;
+                        objects[i].start = (objects[i].starttime + offset + Math.ceil(events[i]['BathTime']/15)*15 * 60) * 1000;
+                        objects[i].end = (objects[i].starttime + offset + events[i]['TotalTime'] * 60) * 1000;
                         objects[i].view = 'groom';
                     }
                     break;
                 case 'bath':
                     for(var i = 0; i < events.length; i++) {
                         // Offset of the Salon's timezone from UTC (on the date of the event).
-                        var offset = moment.tz(events[i]['StartTime']*1000, "<?php echo $_SESSION['Timezone']; ?>").utcOffset()*60;
+                        var offset = moment.tz(objects[i].starttime*1000, "<?php echo $_SESSION['Timezone']; ?>").utcOffset()*60;
             
-                        objects[i]['start'] = (events[i]['StartTime'] + offset) * 1000;
-                        if(objects[i]['TwoPeople'] == 1) {
-                            objects[i]['end'] = (events[i]['StartTime'] + offset + events[i]['TotalTime'] * 60) * 1000;
+                        objects[i].start = (objects[i].starttime + offset) * 1000;
+                        if(objects[i].TwoPeople == 1) {
+                            objects[i].end = (objects[i].starttime + offset + events[i]['TotalTime'] * 60) * 1000;
                         }
                         else {
-                            objects[i]['end'] = (events[i]['StartTime'] + (Math.ceil(events[i]['BathTime']/15)*15 * 60) + offset) * 1000;
+                            objects[i].end = (objects[i].starttime + (Math.ceil(events[i]['BathTime']/15)*15 * 60) + offset) * 1000;
                         }
                         objects[i].view = 'bath';
                     }
                     break;
             }
             
-            $('#calendar').fullCalendar('removeEvents');
-            $('#calendar').fullCalendar( 'renderEvents', objects );
+            $('#calendar').fullCalendar('removeEventSource', objects);
+            $('#calendar').fullCalendar( 'addEventSource', objects);
         }
 
         $('#calendar').fullCalendar({
             events: objects,
             eventLimit: true,
+            lazyFetching: false,
             customButtons: {
                 viewAll: {
                     text: 'All',
