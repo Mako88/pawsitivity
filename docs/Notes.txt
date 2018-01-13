@@ -5,7 +5,6 @@ schedule.php:
     Make sure bath price and groom price aren't added
     Don't allow clicking next if no date is set
     Add error if someone skips to page 2 but doesn't have permission to schedule.
-    - Fix FREAKING DAYLIGHT SAVINGS TIME!!!
     Don't allow end dates before start dates
     Change summary page to popup box
     Check if scheduling a slot before the last one ends is the result of rounding, or an actual issue.

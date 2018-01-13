@@ -469,7 +469,7 @@ $_SESSION['Hours'] = $hours;
             // Function that given a day and a groomer ID returns the number
             // of dogs scheduled for that groomer that day.
             function getcount(groomer, today) {
-
+                
                 var count = 0;
                 var id;
                 
@@ -481,8 +481,9 @@ $_SESSION['Hours'] = $hours;
                         continue;
                     }
 
-                    var event = moment.unix(events[i]['StartTime']);
-                    if((!event.isSame(today, "day")) && events[i]['Recurring'] == 1 && (events[i]['EndDate'] != null ? today.isSameOrBefore(moment.unix(events[i]['EndDate']), "day") : 1)) {
+                    var event = moment.tz(events[i]['StartTime']*1000, "<?php echo $_SESSION['Timezone']; ?>");
+                                        
+                    if((!event.isSame(today, "day")) && events[i]['Recurring'] == 1 && (events[i]['EndDate'] != null ? today.isSameOrBefore(moment.tz(events[i]['EndDate']*1000, "<?php echo $_SESSION['Timezone']; ?>"), "day") : 1)) {
                         while(event.isSameOrBefore(today, "day")) {
                             event.add(events[i]['RecInterval'], 'weeks'); // Add the number of weeks as an interval
                             if(event.isSame(today, "day")) {
@@ -499,6 +500,8 @@ $_SESSION['Hours'] = $hours;
                     }
                 }
                 
+                
+                
                 return count;
                 
             }
@@ -509,8 +512,6 @@ $_SESSION['Hours'] = $hours;
             function getavailable(id, today) {
                 var todayminutes = Array();
                 var largedogs = Array();
-                
-                today = moment(today);
 
                 // Fill array with minutes spa is open today
                 switch(today.day()) {
@@ -571,9 +572,9 @@ $_SESSION['Hours'] = $hours;
 
                 for(var i = 0; i < events.length; i++) {
                     
-                    var event = moment.unix(events[i]['StartTime']);
+                    var event = moment.tz(events[i]['StartTime']*1000, "<?php echo $_SESSION['Timezone']; ?>");
                     
-                    if((!event.isSame(today, "day")) && events[i]['Recurring'] == 1 && (events[i]['EndDate'] != null ? today.isSameOrBefore(moment.unix(events[i]['EndDate']), "day") : 1)) {
+                    if((!event.isSame(today, "day")) && events[i]['Recurring'] == 1 && (events[i]['EndDate'] != null ? today.isSameOrBefore(moment.tz(events[i]['EndDate']*1000, "<?php echo $_SESSION['Timezone']; ?>"), "day") : 1)) {
                         while(event.isSameOrBefore(today, "day")) {
                             event.add(events[i]['RecInterval'], 'weeks'); // Add the number of weeks as an interval
                             if(event.isSame(today, "day")) {
@@ -593,10 +594,14 @@ $_SESSION['Hours'] = $hours;
                             eventminutes.push(startminutes);
                             startminutes++;
                         }
+                        
                         // If the event is a large dog, add its time to the largedogs array
                         if((size == "L" || size == "XL") && (events[i]['Size'] == "L" || events[i]['Size'] == "XL")) {
                             largedogs.push(eventminutes);
                         }
+                        
+                        
+                        
                         // If the event is this groomer's, remove it from the available time
                         if(events[i]['GroomerID'] == id) {
                             todayminutes = todayminutes.filter(function(minute) {
@@ -693,7 +698,6 @@ $_SESSION['Hours'] = $hours;
             // slots the length of the groom time, beginning every 15 minutes.
             // If, because of the timing of the big slot, there are no little slots, return false.
             function splitslots(bigslots, time, today) {
-                today = moment(today);
                 var littleslots = Array();
                 var dayindex = today.day();
                 var now = moment();
@@ -747,7 +751,8 @@ $_SESSION['Hours'] = $hours;
             }
             
             function disableDay(today) {
-                var dayindex = today.getDay();
+                today = moment(today);
+                var dayindex = today.day();
                 var allslots = Array();
                     
                 // Disable Sundays and Mondays
@@ -755,7 +760,7 @@ $_SESSION['Hours'] = $hours;
                     return true;
                 }
 
-                var index = today.getTime();
+                var index = today.unix();
                 timeslots[index] = Array();
                 timeslots[index]['slots'] = Array();
                 timeslots[index]['groomers'] = Array();
@@ -782,6 +787,7 @@ $_SESSION['Hours'] = $hours;
                     }
                     var slots = slotfits(minutes, groomerslottime);
                     if(slots) {
+                        
                         var littleslots = splitslots(slots, groomerslottime, today);
                         if(!littleslots) {
                             continue;
@@ -902,6 +908,8 @@ $_SESSION['Hours'] = $hours;
                 },
                 onSelect: function(date) {
                     
+                    date = moment(date);
+                    
                     var options = $("#slot");
                     options.empty();
                     
@@ -911,7 +919,8 @@ $_SESSION['Hours'] = $hours;
                     // Offset of the spa's timezone from UTC on the selected day in seconds.
                     var offset = moment.tz(date, "<?php echo $_SESSION['Timezone']; ?>").utcOffset()*60;
                     
-                    today = date.getTime();
+                    today = date.unix();
+                    
                 
                     for(var i = 0; i < timeslots[today]['slots'].length; i++) {
                         var start = timeslots[today]['slots'][i]['start'];
@@ -939,7 +948,8 @@ $_SESSION['Hours'] = $hours;
                         
                         var groomer = timeslots[today]['groomers'][i];
                         
-                        var timestamp = (today/1000 + localoffset) - offset + (start*60);
+                        
+                        var timestamp = (today + localoffset) - offset + (start*60);
                         options.append($("<option />").val(groomer + "-" + timestamp + "-" + starthour + ":" + (startmin < 10 ? "0" + startmin : startmin) + " " + s + "-" + endhour + ":" + (endmin < 10 ? "0" + endmin : endmin) + " " + e).prop('selected', (timestamp == prevstart ? true : false)).text(starthour + ":" + (startmin < 10 ? "0" + startmin : startmin) + " " + s + " - " + endhour + ":" + (endmin < 10 ? "0" + endmin : endmin) + " " + e));
                     }
                 }
