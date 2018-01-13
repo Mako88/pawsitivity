@@ -43,7 +43,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
     
     foreach($events as $key => $event) {
         $event['TwoPeople'] = $pets[$event['PetID']][0]['TwoPeople'];
-        $event['URL'] = $event['ID'];
+        $events[$key]['URL'] = $event['ID'];
         if(!empty($event['Services'])) {
             $services = array();
             $event['Services'] = json_decode($event['Services'], true);
@@ -90,7 +90,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
         var objects = Array();
         
         events = Array();
-        
+                
         // Split recurring events
         for(var i = 0; i < oldevents.length; i++) {
             if(oldevents[i]['Recurring'] == 1) {
@@ -99,6 +99,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                     firststart.add(oldevents[i]['RecInterval'], "weeks");
                     var temp = oldevents[i];
                     temp['StartTime'] = firststart.unix();
+                    temp['URL'] = temp['URL'] + "-" + firststart.unix();
                     // Make sure we're doing a deep push instead of just the reference
                     events.push(JSON.parse(JSON.stringify(temp)));
                 }
