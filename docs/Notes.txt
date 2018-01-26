@@ -11,6 +11,7 @@ schedule.php:
     - Add "Signature Package" checkbox. When selected add $15 and only allow 3 other selections.
     - Add back button
     Improve performance of DisableDay sort
+    - Make "Finisher" access tier that is only available for bath-only dogs
 
     
 calendar.php:
