@@ -159,6 +159,9 @@ if(!empty($_GET['id'])) {
             $stmt = $database->prepare("DELETE FROM Pets WHERE ID = :ID");
             $stmt->bindValue(':ID', $_GET['delpet']);
             $stmt->execute();
+            $stmt = $database->prepare("DELETE FROM Scheduling WHERE PetID = :ID");
+            $stmt->bindValue(':ID', $_GET['delpet']);
+            $stmt->execute();
             echo '<p>Pet deleted!</p>';
             goto finish;
         }
