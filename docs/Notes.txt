@@ -10,7 +10,6 @@ schedule.php:
     Check if scheduling a slot before the last one ends is the result of rounding, or an actual issue.
     Add back button
     Improve performance of DisableDay sort
-    - Make "Finisher" access tier that is only available for bath-only dogs
 
     
 calendar.php:
