@@ -139,7 +139,8 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                 starttime: events[i]['StartTime'],
                 recurring: events[i]['Recurring'],
                 recinterval: events[i]['RecInterval'],
-                enddate: events[i]['EndDate']
+                enddate: events[i]['EndDate'],
+                price: events[i]['Price']
             };
             
             
@@ -335,7 +336,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                     event.nameLink = links[0];
                     event.ownerLink = links[1];
                     
-                    element.children().last().append('<div style="display: none" id="' + event.url + '">Pet Name: ' + event.nameLink + '<br />Groomer: ' + event.groomerName + '<br />Warnings: ' + nl2br(event.warnings) + '<br />Notes: ' + nl2br(event.notes) + '<br />' + ((event.TwoPeople == 1) ? 'Requires two people<br />' : '<br />') + services + 'Owner: ' + event.ownerLink + '<br />Phone: ' + event.phone + '</div>');
+                    element.children().last().append('<div style="display: none" id="' + event.url + '">Pet Name: ' + event.nameLink + '<br />Groomer: ' + event.groomerName + '<br />Warnings: ' + nl2br(event.warnings) + '<br />Notes: ' + nl2br(event.notes) + '<br />Price: ' + '&#36;' + event.price + '<br />' + ((event.TwoPeople == 1) ? 'Requires two people<br />' : '<br />') + services + 'Owner: ' + event.ownerLink + '<br />Phone: ' + event.phone + '</div>');
                 }
             }
         });

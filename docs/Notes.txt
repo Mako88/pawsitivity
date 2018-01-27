@@ -17,7 +17,6 @@ calendar.php:
     Different colors in month view for bath-only and groom-only
     Add check in/out button on popup (edit status in database)
     Add missed button on popup. When button is pushed, delete that event and set Missed flag.
-    - Show price on popup
     Add a "disable day" checkbox to prevent a day from having any more scheduled
     Add notes on a dog for the day in popup
     
