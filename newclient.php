@@ -85,7 +85,8 @@ else if(!empty($_POST)) {
 if(isset($newpass)) {
     echo '<p>User added!<br />
     ID: ' . $id . '<br />
-    Password: ' . $newpass . '</p>';
+    Password: ' . $newpass . '</p>
+    <a href="newpet.php?id=' . $id . '">Add a pet for this client</a>';
 } else { ?>
     <form action="newclient.php" method="post">
         <label for="FirstName">First Name: </label><input type="text" name="FirstName" id="FirstName"><br />
