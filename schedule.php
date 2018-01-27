@@ -136,6 +136,8 @@ $_SESSION['Hours'] = $hours;
                 echo '</select><br />';
                 
                 echo '<p>Select which services you would like to schedule: </p>';
+                echo '<input type="checkbox" id="signature" name="services[]" value="signature" . ' . (in_array('signature', $servicelist) ? 'checked' : '') . ' />';
+                echo '<label style="display: inline-block; margin-bottom: 20px;" for="signature">Signature Package</label><br />';
                 foreach($services as $service) {
                     echo '<input type="checkbox" name="services[]" id="' . $service['ID'] . '" value="' . $service['ID'] . '" ' . (in_array($service['ID'], $servicelist) ? 'checked' : '') . '/>';
                     echo '<label for="' . $service['ID'] . '">' . $service['Name'] . '</label><br />';
@@ -181,16 +183,33 @@ $_SESSION['Hours'] = $hours;
                             break;
                     }
                     
-                    $("input:checkbox:checked").each(function() {
-                        for(var i = 0; i < services.length; i++) {
-                            if($(this).attr("id") == services[i]['ID']) {
-                                selectedservices.push(services[i]['Price'][size]);
-                            }
+                    if($('#signature').is(':checked')) {
+                        price += 15;
+                        var num = $("input:checkbox:not(#signature)").filter(':checked').length;
+                        if(num >= 3) {
+                            $("input:checkbox:not(:checked)").each(function() {
+                                $(this).attr("disabled", true);
+                            });
                         }
-                    });
+                        else {
+                            $("input:checkbox:not(checked)").each(function() {
+                                $(this).removeAttr("disabled");
+                            });
+                        }
+                    }
+                    else {
                     
-                    for(var i = 0; i < selectedservices.length; i++) {
-                        price += Number(selectedservices[i]);
+                        $("input:checkbox:checked").each(function() {
+                            for(var i = 0; i < services.length; i++) {
+                                if($(this).attr("id") == services[i]['ID']) {
+                                    selectedservices.push(services[i]['Price'][size]);
+                                }
+                            }
+                        });
+
+                        for(var i = 0; i < selectedservices.length; i++) {
+                            price += Number(selectedservices[i]);
+                        }
                     }
                     
                     $("#price").text("Price: $" + price);

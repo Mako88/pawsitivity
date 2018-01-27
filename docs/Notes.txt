@@ -8,8 +8,7 @@ schedule.php:
     Don't allow end dates before start dates
     Change summary page to popup box
     Check if scheduling a slot before the last one ends is the result of rounding, or an actual issue.
-    - Add "Signature Package" checkbox. When selected add $15 and only allow 3 other selections.
-    - Add back button
+    Add back button
     Improve performance of DisableDay sort
     - Make "Finisher" access tier that is only available for bath-only dogs
 
@@ -22,8 +21,8 @@ calendar.php:
     Add missed button on popup. When button is pushed, delete that event and set Missed flag.
     - Make owner and pet names links to their info
     - Show price on popup
-    - Add a "disable day" checkbox to prevent a day from having any more scheduled
-    - Add notes on a dog for the day in popup
+    Add a "disable day" checkbox to prevent a day from having any more scheduled
+    Add notes on a dog for the day in popup
     
 	
 search.php:
@@ -45,12 +44,12 @@ newclient.php/viewclient.php:
 	Allow resetting the "missed" field on client pages
     - Add link to add pet under "User added" page
     - Change password to only numbers and letters
-    - If visited is 0, display initial password
-    - Allow deleting clients
+    If visited is 0, display initial password
+    Allow deleting clients
     
 
 newuser.php:
-	- Add viewuser.php to allow editing a user
+	Add viewuser.php to allow editing a user
 
 	
 Misc:
