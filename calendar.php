@@ -132,8 +132,10 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                 view: 'all',
                 owner: clients[index2][0]['FirstName'] + ' ' + clients[index2][0]['LastName'],
                 petID: events[i]['PetID'],
+                ownerID: pets[index][0]['OwnedBy'],
                 package: events[i]['Package'],
                 groomer: events[i]['GroomerID'],
+                groomerName: events[i]['Groomer'],
                 starttime: events[i]['StartTime'],
                 recurring: events[i]['Recurring'],
                 recinterval: events[i]['RecInterval'],
@@ -326,7 +328,14 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                         element.children().last().append('<br />' + services);
                     }
                     
-                    element.children().last().append('<div style="display: none" id="' + event.url + '">Pet Name: ' + event.title + '<br />Warnings: ' + nl2br(event.warnings) + '<br />Notes: ' + nl2br(event.notes) + '<br />' + ((event.TwoPeople == 1) ? 'Requires two people<br />' : '<br />') + services + 'Owner: ' + event.owner + '<br />Phone: ' + event.phone + '</div>');
+                    var links = event.title.split(" - ");
+                    links[0] = '<a href="viewpet.php?id=' + event.petID + '">' + links[0] + '</a>';
+                    links[1] = '<a href="viewclient.php?id=' + event.ownerID + '">' + event.owner + '</a>';
+                    
+                    event.nameLink = links[0];
+                    event.ownerLink = links[1];
+                    
+                    element.children().last().append('<div style="display: none" id="' + event.url + '">Pet Name: ' + event.nameLink + '<br />Groomer: ' + event.groomerName + '<br />Warnings: ' + nl2br(event.warnings) + '<br />Notes: ' + nl2br(event.notes) + '<br />' + ((event.TwoPeople == 1) ? 'Requires two people<br />' : '<br />') + services + 'Owner: ' + event.ownerLink + '<br />Phone: ' + event.phone + '</div>');
                 }
             }
         });
