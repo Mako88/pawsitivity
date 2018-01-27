@@ -145,15 +145,99 @@ if(!empty($_GET['id'])) {
         $groomername = $stmt->fetch();
         
         if(!empty($_GET['delschedule'])) {
-            $stmt = $database->prepare("DELETE FROM Scheduling WHERE ID = :ID");
+            $stmt = $database->prepare("SELECT * FROM Scheduling WHERE ID = :ID");
             $stmt->bindValue(':ID', $_GET['delschedule']);
             $stmt->execute();
+            $prevevent = $stmt->fetch();
+            
+            if($prevevent['Recurring'] == 1) {
+                $difference = abs($_GET['starttime'] - $prevevent['StartTime']);
+                // It's not the initial event
+                if($difference > 0) {
+                    // It's the last instance
+                    if($_GET['starttime'] + $prevevent['RecInterval']*604800 > $prevevent['EndDate']) {
+                        $enddate = $prevevent['EndDate'] - $prevevent['RecInterval']*604800;
+                        $stmt = $database->prepare("UPDATE Scheduling SET EndDate = :EndDate WHERE ID = :ID");
+                        $stmt->bindValue(':EndDate', $enddate);
+                        $stmt->bindValue(':ID', $prevevent['ID']);
+                        $stmt->execute();
+                    }
+                    // It's not the last instance
+                    else {
+                        $totalevents = 0;
+                        for($i = $prevevent['StartTime']; $i < $prevevent['EndDate']; $i += $prevevent['RecInterval']*604800) {
+                            $totalevents++;
+                        }
+                        $prevevents = $difference / ($prevevent['RecInterval']*604800);
+                        $newtotal = $totalevents - $prevevents;
+
+                        $enddate = $prevevent['EndDate'] - $newtotal*$prevevent['RecInterval']*604800;
+                        $stmt = $database->prepare("UPDATE Scheduling SET EndDate = :EndDate WHERE ID = :ID");
+                        $stmt->bindValue(':EndDate', $enddate);
+                        $stmt->bindValue(':ID', $prevevent['ID']);
+                        $stmt->execute();
+
+                        $starttime = $_GET['starttime'] + $prevevent['RecInterval']*604800;
+                        $stmt = $database->prepare('INSERT INTO Scheduling (PetID, StartTime, GroomTime, BathTime, TotalTime, GroomerID, Recurring, RecInterval, EndDate, Package, Services, Price) VALUES (:PetID, :StartTime, :GroomTime, :BathTime, :TotalTime, :GroomerID, :Recurring, :RecInterval, :EndDate, :Package, :Services, :Price)');
+                        $stmt->bindValue(':PetID', $prevevent['PetID']);
+                        $stmt->bindValue(':StartTime', $starttime);
+                        $stmt->bindValue(':GroomTime', $prevevent['GroomTime']);
+                        $stmt->bindValue(':BathTime', $prevevent['BathTime']);
+                        $stmt->bindValue(':TotalTime', $prevevent['TotalTime']);
+                        $stmt->bindValue(':GroomerID', $prevevent['GroomerID']);
+                        $stmt->bindValue(':Recurring', $prevevent['Recurring']);
+                        $stmt->bindValue(':RecInterval', $prevevent['RecInterval']);
+                        $stmt->bindValue(':EndDate', $prevevent['EndDate']);
+                        $stmt->bindValue(':Package', $prevevent['Package']);
+                        $stmt->bindValue(':Price', $prevevent['Price']);
+                        $stmt->bindValue(':Services', $prevevent['Services']);
+                        $stmt->execute();
+
+
+                    }
+                }
+                // It's the inital event
+                else {
+                    $starttime = $_GET['starttime'] + $prevevent['RecInterval']*604800;
+                    $stmt = $database->prepare("UPDATE Scheduling SET StartTime = :StartTime WHERE ID = :ID");
+                    $stmt->bindValue(':StartTime', $starttime);
+                    $stmt->bindValue(':ID', $prevevent['ID']);
+                    $stmt->execute();
+                }
+            }
+            else {
+                $stmt = $database->prepare("DELETE FROM Scheduling WHERE ID = :ID");
+                $stmt->bindValue(':ID', $prevevent['ID']);
+                $stmt->execute(); 
+            }
         }
         
-        $stmt = $database->prepare("SELECT * FROM Scheduling WHERE PetID = :ID");
+        $stmt = $database->prepare("SELECT * FROM Scheduling WHERE PetID = :ID ORDER BY StartTime");
         $stmt->bindValue(':ID', $id);
         $stmt->execute();
         $events = $stmt->fetchAll();
+        $allevents = Array();
+        
+        foreach($events as $event) {
+            if($event['Recurring'] == 1) {
+                for($i = $event['StartTime']; $i < $event['EndDate']; $i += $event['RecInterval']*604800) {                      
+                    $event['StartTime'] = $i;
+                    array_push($allevents, $event);
+                }
+            }
+            else {
+                array_push($allevents, $event);
+            }
+        }
+        
+        $events = $allevents;
+        
+        // Sort the events
+        function mySort($a, $b) {
+            return $a['StartTime'] > $b['StartTime'];
+        }
+        usort($events, "mySort");
+        
         
         if(!empty($_GET['delpet'])) {
             $stmt = $database->prepare("DELETE FROM Pets WHERE ID = :ID");
@@ -174,6 +258,7 @@ if(!empty($_GET['id'])) {
             <table>
                 <tr><td>ID:</td><td><?php echo $pet['ID']; ?></td></tr>
                 <tr><td>Name:</td><td><?php echo $pet['Name']; ?></td></tr>
+                <tr><td>Owned By:</td><td><a href="viewclient.php?id=<?php echo $pet['OwnedBy'] ?>"><?php echo $owner['FirstName'] . ' ' . $owner['LastName'] . ' ' . '(' . $pet['OwnedBy'] . ')'; ?></a></td></tr>
                 <tr><td>Breed:</td><td><a href="viewbreed.php?id=<?php echo $pet['Breed']; ?>"><?php echo $breed['Name']; ?></a></td></tr>
                 <tr><td>Age:</td><td><?php echo date("Y") - intval($pet['Age']); ?></td></tr>
                 <tr><td>Weight:</td><td><?php echo $pet['Weight'] ?></td></tr>
@@ -197,7 +282,6 @@ if(!empty($_GET['id'])) {
                 </tr>
                 <tr><td>Preferred Groomer:</td><td><?php echo ((!empty($groomername['Name'])) ? $groomername['Name'] : 'Any'); ?></td></tr>
                 <tr><td>Requires Two People:</td><td><?php echo (($pet['TwoPeople'] == 1) ? 'yes' : 'no'); ?></td></tr>
-                <tr><td>Owned By:</td><td><a href="viewclient.php?id=<?php echo $pet['OwnedBy'] ?>"><?php echo $owner['FirstName'] . ' ' . $owner['LastName'] . ' ' . '(' . $pet['OwnedBy'] . ')'; ?></a></td></tr>
             </table>
             <h2>Scheduling:</h2>
             <?php
@@ -221,7 +305,7 @@ if(!empty($_GET['id'])) {
                         foreach($futureevents as $event) {
                             $date = new DateTime("@" . ($event['StartTime']));
                             $date->setTimezone(new DateTimeZone($timezone));
-                            echo '<tr><td>' . $date->format("m/d/Y @ h:i A") . ' <a href="viewpet.php?id=' . $_GET['id'] . '&delschedule=' . $event['ID'] . '" onclick="return confirm(\'Are you sure you want to delete this event?\')">Delete</a></td></tr>';
+                            echo '<tr><td>' . $date->format("m/d/Y @ h:i A") . ' <a href="viewpet.php?id=' . $_GET['id'] . '&delschedule=' . $event['ID'] . '&starttime=' . $event['StartTime'] . '" onclick="return confirm(\'Are you sure you want to delete this event?\')">Delete</a></td></tr>';
                         }
                         echo "</table>";
                     }
@@ -231,7 +315,7 @@ if(!empty($_GET['id'])) {
                         foreach($pastevents as $event) {
                             $date = new DateTime("@" . ($event['StartTime']));
                             $date->setTimezone(new DateTimeZone($timezone));
-                            echo '<tr><td>' . $date->format("m/d/Y @ h:i A") . ' <a href="viewpet.php?id=' . $_GET['id'] . '&delschedule=' . $event['ID'] . '" onclick="return confirm(\'Are you sure you want to delete this event?\')">Delete</a></td></tr>';
+                            echo '<tr><td>' . $date->format("m/d/Y @ h:i A") . ' <a href="viewpet.php?id=' . $_GET['id'] . '&delschedule=' . $event['ID'] . '&starttime=' . $event['StartTime'] . '" onclick="return confirm(\'Are you sure you want to delete this event?\')">Delete</a></td></tr>';
                         }
                         echo "</table>";
                     }

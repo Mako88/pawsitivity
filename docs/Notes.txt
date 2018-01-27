@@ -27,11 +27,9 @@ search.php:
 	
 newpet.php/viewpet.php:
 	Change time to "clicker" in 15 minute intervals on newpet page (don't allow base editing)
-    View recurring visits in "scheduling"
-    - Remove delete button on past visits
-    - Sort visits by date, not ID
-    - Move Owned By under Name
+    ? Remove delete button on past visits
     - Add vet line
+    Fix DST issue when display recurring dates
 	
 	
 newclient.php/viewclient.php:
