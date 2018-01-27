@@ -77,7 +77,7 @@ if(!empty($_POST['search'])) {
         foreach($pets as $pet) {
             $stmt = $database->query("SELECT FirstName, LastName FROM Owners WHERE ID = " . $pet['OwnedBy']);
             $owner = $stmt->fetch();
-            echo '<tr style="cursor: pointer;" onclick="window.document.location=\'viewpet.php?id=' . $pet['ID'] . '\'"><td>' . $pet['ID'] . '</td><td>' . $pet['Name'] . '</td><td>' . $owner['FirstName'] . ' ' . $owner['LastName'] . ' (' . $pet['OwnedBy'] . ')' . '</td></tr>';
+            echo '<tr><td><a href="viewpet.php?id=' . $pet['ID'] . '">' . $pet['ID'] . '</td><td><a href="viewpet.php?id=' . $pet['ID'] . '">' . $pet['Name'] . '</a></td><td><a href="viewclient.php?id=' . $pet['OwnedBy'] . '">' . $owner['FirstName'] . ' ' . $owner['LastName'] . ' (' . $pet['OwnedBy'] . ')' . '</a></td></tr>';
         }
         echo '</table>';
     }
