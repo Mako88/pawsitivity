@@ -177,6 +177,7 @@ if(!empty($_GET['id'])) {
                 <tr><td>Breed:</td><td><a href="viewbreed.php?id=<?php echo $pet['Breed']; ?>"><?php echo $breed['Name']; ?></a></td></tr>
                 <tr><td>Age:</td><td><?php echo date("Y") - intval($pet['Age']); ?></td></tr>
                 <tr><td>Weight:</td><td><?php echo $pet['Weight'] ?></td></tr>
+                <tr><td>Coloring:</td><td><?php echo $pet['Coloring'] ?></td></tr>                
                 <tr><td>Vaccines:</td><td><?php echo ((!empty($pet['Vaccines'])) ? '<a href="' . $pet['Vaccines'] . '">View</a>' : 'None'); ?></td></tr>
                 <tr><td>Vaccine Dates:</td><td><?php echo "Rabies: " . $pet['Vaccines2']['Rabies'] . "<br />" . "Distemper: " . $pet['Vaccines2']['Distemper'] . "<br />" . "Parvo: " . $pet['Vaccines2']['Parvo']; ?></td></tr>                
                 <tr><td>Release Form:</td><td><?php echo ((!empty($pet['Release'])) ? '<a href="' . $pet['Release'] . '">View</a>' : 'None'); ?></td></tr>
@@ -311,6 +312,7 @@ if(!empty($_GET['id'])) {
                 </select><br />
                 <label for="Age">Age: </label><input type="text" name="Age" id="Age" value="<?php echo date("Y") - intval($pet['Age']); ?>"><br />
                 <label for="Weight">Weight: </label><input type="text" name="Weight" id="Weight" value="<?php echo $pet['Weight']; ?>"><br />
+                <label for="Coloring">Coloring: </label><input type="text" name="Coloring" id="Coloring" value="<?php echo $pet['Coloring']; ?>"><br />                
                 <label for="Vaccines">Vaccines: </label><input type="file" name="Vaccines" id="Vaccines"><br />
                 <label>Vaccine Dates: </label><br />
                     <label for="Rabies">Rabies: </label><input id="Rabies" type="text" name="Vaccines2[Rabies]" value="<?php echo $pet['Vaccines2']['Rabies']; ?>" /><br />
