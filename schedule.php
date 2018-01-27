@@ -101,10 +101,12 @@ $_SESSION['Hours'] = $hours;
                 $_SESSION['info']['pet'] = $pet['ID'];
                 $stmt = $database->query("SELECT Name, ID, Tier FROM Users WHERE Access = 2");
                 $groomers = $stmt->fetchAll();
+                $stmt = $database->query("SELECT Name, ID, Tier FROM Users WHERE Access = 3");
+                $bathers = $stmt->fetchAll();
                 
                 $stmt = $database->query("SELECT SigUpcharge, SigPrice FROM Globals");
                 $globals = $stmt->fetch();
-                $package = $prevgroomer = '';
+                $package = $prevgroomer = '0';
                 $servicelist = Array();
                 
                 if(!empty($_GET['eventid']) && $_SESSION['authenticated'] > 1) {
@@ -145,14 +147,14 @@ $_SESSION['Hours'] = $hours;
 
                 echo '<label for="groomer">Preferred Groomer: </label><select id="groomer" name="groomer">';
                 echo '<option value="NULL">Any</option>';
-                foreach($groomers as $groomer) {
+                /*foreach($groomers as $groomer) {
                     if(!empty($prevgroomer)) {
                         echo '<option value="' . $groomer['ID'] . '" ' . (($groomer['ID'] == $prevgroomer) ? 'selected' : '' ) . '>' . $groomer['Name'] . '</option>';
                     }
                     else {
                         echo '<option value="' . $groomer['ID'] . '" ' . (($groomer['ID'] == $pet['PreferredGroomer']) ? 'selected' : '' ) . '>' . $groomer['Name'] . '</option>';
                     }
-                }
+                }*/
                 echo '</select><br />';
                 echo '<div id="price"></div>';
                 echo '<input type="submit" value="Next" />';
@@ -165,12 +167,28 @@ $_SESSION['Hours'] = $hours;
                 var bath = <?php echo $_SESSION['info']['BathPrice']; ?>;
                 var services = <?php echo json_encode($services); ?>;
                 var size = "<?php echo $_SESSION['info']['Size'] ?>";
+                var groomers = <?php echo json_encode($groomers); ?>;
+                var bathers = <?php echo json_encode($bathers); ?>;
+                var prevgroomer = "<?php echo $prevgroomer; ?>";
+
                 
                 for(var i = 0; i < services.length; i++) {
                     services[i]['Price'] = JSON.parse(services[i]['Price'], true);
                 }
                 
                 function updatePrice() {
+                    
+                    // Update groomer list
+                    $('#groomer').children('option:not(":first")').remove();
+                    for(var i = 0; i < groomers.length; i++) {
+                        $('#groomer').append('<option value="' + groomers[i]['ID'] + '"' + (prevgroomer == groomers[i]['ID'] ? ' selected>' : '>') + groomers[i]['Name'] + '</option>');
+                    }
+                    if($('#package option:selected').val() == 1) {
+                        for(var i = 0; i < bathers.length; i++) {
+                            $('#groomer').append('<option value="' + bathers[i]['ID'] + '"' + (prevgroomer == bathers[i]['ID'] ? ' selected>' : '>') + bathers[i]['Name'] + '</option>');
+                        }
+                    }
+                    
                     price = 0;
                     selectedservices = Array();
                     var package = parseInt($("#package").val());
@@ -270,15 +288,27 @@ $_SESSION['Hours'] = $hours;
             else {
                 $stmt = $database->query("SELECT * FROM Scheduling");
                 $events = $stmt->fetchAll();
-                $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2");
-                $groomers = $stmt->fetchAll();
+                if($_SESSION['info']['package'] == 1) {
+                    $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2 OR Access = 3");
+                    $groomers = $stmt->fetchAll();
+                }
+                else {
+                    $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2");
+                    $groomers = $stmt->fetchAll();
+                }
             }
         }
         else {
             $stmt = $database->query("SELECT * FROM Scheduling");
             $events = $stmt->fetchAll();
-            $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2");
-            $groomers = $stmt->fetchAll();
+            if($_SESSION['info']['package'] == 1) {
+                $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2 OR Access = 3");
+                $groomers = $stmt->fetchAll();
+            }
+            else {
+                $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2");
+                $groomers = $stmt->fetchAll();
+            }
         }
         
         // Add size of dog to each event
