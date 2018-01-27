@@ -14,8 +14,6 @@ schedule.php:
 
     
 calendar.php:
-    - In bathing view remove edit button
-    - In bathing view show enhancements
     Different colors in month view for bath-only and groom-only
     Add check in/out button on popup (edit status in database)
     Add missed button on popup. When button is pushed, delete that event and set Missed flag.

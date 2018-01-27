@@ -252,14 +252,16 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                     if(event.warnings != null) {
                         element.children().last().append('<span class="warning">' + event.warnings + '</span>');
                     }
-                    element.children().last().append('\
-                        <form action="schedule.php" method="get" class="edit">\
-                        <input type="hidden" value="' + event.petID + '" name="pet" />\
-                        <input type="hidden" value="' + event.starttime + '" name="starttime" />\
-                        <input type="hidden" value="' + event.id + '" name="eventid" />\
-                        <input type="submit" value="Edit" />\
-                        </form>\
-                    ');
+                    if(event.view != "bath") {
+                        element.children().last().append('\
+                            <form action="schedule.php" method="get" class="edit">\
+                            <input type="hidden" value="' + event.petID + '" name="pet" />\
+                            <input type="hidden" value="' + event.starttime + '" name="starttime" />\
+                            <input type="hidden" value="' + event.id + '" name="eventid" />\
+                            <input type="submit" value="Edit" />\
+                            </form>\
+                        ');
+                    }
                     var services = 'No Services<br />';
                     var bathservices = '';
                     var groomservices = '';
@@ -318,6 +320,10 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                                 }
                                 break;
                         }
+                    }
+                    
+                    if(event.view == "bath") {
+                        element.children().last().append('<br />' + services);
                     }
                     
                     element.children().last().append('<div style="display: none" id="' + event.url + '">Pet Name: ' + event.title + '<br />Warnings: ' + nl2br(event.warnings) + '<br />Notes: ' + nl2br(event.notes) + '<br />' + ((event.TwoPeople == 1) ? 'Requires two people<br />' : '<br />') + services + 'Owner: ' + event.owner + '<br />Phone: ' + event.phone + '</div>');
