@@ -33,8 +33,6 @@ newpet.php/viewpet.php:
 	
 newclient.php/viewclient.php:
 	Allow resetting the "missed" field on client pages
-    - Add link to add pet under "User added" page
-    - Change password to only numbers and letters
     If visited is 0, display initial password
     Allow deleting clients
     

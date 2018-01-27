@@ -37,8 +37,8 @@ if(!empty($_POST['FirstName']) && !empty($_POST['LastName']) && !empty($_POST['P
 
     for($i = 0; $i < $length; $i++) {
         do {
-            $n = rand(33, 126); // Ascii character range
-        } while(in_array($n, array(48, 49, 65, 69, 73, 76, 79, 85))); // Exclude 0, 1, l, and all vowels
+            $n = rand(50, 90); // Ascii 2-Z range
+        } while(in_array($n, array(58, 59, 60, 61, 62, 63, 64, 65, 69, 73, 76, 79, 85))); // Exclude 0, o, 1, l, i, symbols, and all vowels
         $password .= chr($n);
     }
 
