@@ -2,13 +2,11 @@ schedule.php:
 	Don't allow users to schedule if Missed field is 1, tell them to call / inform receptionist.
     Disable groom services when bath selected
     If groom price or time is 0, disable groom packages for clients (not employees)
-    Make sure bath price and groom price aren't added
     Don't allow clicking next if no date is set
     Add error if someone skips to page 2 but doesn't have permission to schedule.
     Don't allow end dates before start dates
     Change summary page to popup box
-    Check if scheduling a slot before the last one ends is the result of rounding, or an actual issue.
-    Add back button
+    - Add back button
     Improve performance of DisableDay sort
 
     
@@ -27,30 +25,29 @@ search.php:
 newpet.php/viewpet.php:
 	Change time to "clicker" in 15 minute intervals on newpet page (don't allow base editing)
     ? Remove delete button on past visits
-    Fix DST issue when display recurring dates
+    Fix DST issue when displaying recurring dates
 	
 	
 newclient.php/viewclient.php:
 	Allow resetting the "missed" field on client pages
     If visited is 0, display initial password
-    Allow deleting clients
+    - Allow deleting clients
     
 
 newuser.php:
-	Add viewuser.php to allow editing a user
+	- Add viewuser.php to allow editing a user
 
 	
 Misc:
 	Look into fax-to-pdf
 	Add bath/groom tracking using Status field
 	Validate all forms with Jquery
-	Add delete option to all edit pages
 	Give error if setup hasn't been run yet/redirect to setup page
     Redirect to global settings page after setup
 	Find timeclock software (with the ability to print/email reports)
 	Figure out text/email reminders with scheduling
     Automatically remove events the age from global settings
-    Prevent infinite redirect when user doesn't have permission to access page
-    Add daily backups
-    When marking a client as missed, delete the scheduled event
+    - Prevent infinite redirect when user doesn't have permission to access page
+    - Add daily backups
     Create script to reset everyone's passwords 1-time.
+    Style everything
