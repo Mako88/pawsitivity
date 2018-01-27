@@ -50,9 +50,10 @@ else {
         </select><br />
         <label for="tier">Groomer Tier: </label>
         <select name="tier">
-            <option value="0">Gold</option>
-            <option value="1">Platinum</option>
-            <option value="2">Diamond</option>
+            <option value="0">Training</option>
+            <option value="1">Gold</option>
+            <option value="2">Platinum</option>
+            <option value="3">Diamond</option>
         </select><br />
         <label for="seniority">Seniority: </label><input type="seniority" name="seniority" /><br />
         <input type="submit" name="submit" value="Create User">

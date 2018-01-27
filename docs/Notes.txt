@@ -55,4 +55,3 @@ Misc:
     Add daily backups
     When marking a client as missed, delete the scheduled event
     Create script to reset everyone's passwords 1-time.
-    - Add training tier which is an hour slower than the average tier

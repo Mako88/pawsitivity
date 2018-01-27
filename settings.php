@@ -70,24 +70,30 @@ else {
         <label for="sigupcharge">Percentage Upcharge for Signature Bath or Spa: </label><input type="text" name="sigupcharge" value="<?php if($set) echo $settings['SigUpcharge']; ?>" />%<br />
         <label for="sigprice">Signature Services Price: </label><input type="text" name="sigprice" value="<?php if($set) echo $settings['SigPrice']; ?>" /><br />
         <label>Time Difference Per Tier (In Minutes): </label><br />
+            <label>Training Tier: </label><br />
+                <label for="tp">Petite Dogs: </label><input id="tp" type="text" name="tiers[0][P]" value="<?php if($set) echo $tiers[0]['P']; ?>" /><br />
+                <label for="ts">Small Dogs: </label><input id="ts" type="text" name="tiers[0][S]" value="<?php if($set) echo $tiers[0]['S']; ?>" /><br />
+                <label for="tm">Medium Dogs: </label><input id="tm" type="text" name="tiers[0][M]" value="<?php if($set) echo $tiers[0]['M']; ?>" /><br />
+                <label for="tl">Large Dogs: </label><input id="tl" type="text" name="tiers[0][L]" value="<?php if($set) echo $tiers[0]['L']; ?>" /><br />
+                <label for="tx">Extra Large Dogs: </label><input id="tx" type="text" name="tiers[0][XL]" value="<?php if($set) echo $tiers[0]['XL']; ?>" /><br />
             <label>Gold Tier: </label><br />
-                <label for="gp">Petite Dogs: </label><input id="gp" type="text" name="tiers[0][P]" value="<?php if($set) echo $tiers[0]['P']; ?>" /><br />
-                <label for="gs">Small Dogs: </label><input id="gs" type="text" name="tiers[0][S]" value="<?php if($set) echo $tiers[0]['S']; ?>" /><br />
-                <label for="gm">Medium Dogs: </label><input id="gm" type="text" name="tiers[0][M]" value="<?php if($set) echo $tiers[0]['M']; ?>" /><br />
-                <label for="gl">Large Dogs: </label><input id="gl" type="text" name="tiers[0][L]" value="<?php if($set) echo $tiers[0]['L']; ?>" /><br />
-                <label for="gx">Extra Large Dogs: </label><input id="gx" type="text" name="tiers[0][XL]" value="<?php if($set) echo $tiers[0]['XL']; ?>" /><br />
+                <label for="gp">Petite Dogs: </label><input id="gp" type="text" name="tiers[1][P]" value="<?php if($set) echo $tiers[1]['P']; ?>" /><br />
+                <label for="gs">Small Dogs: </label><input id="gs" type="text" name="tiers[1][S]" value="<?php if($set) echo $tiers[1]['S']; ?>" /><br />
+                <label for="gm">Medium Dogs: </label><input id="gm" type="text" name="tiers[1][M]" value="<?php if($set) echo $tiers[1]['M']; ?>" /><br />
+                <label for="gl">Large Dogs: </label><input id="gl" type="text" name="tiers[1][L]" value="<?php if($set) echo $tiers[1]['L']; ?>" /><br />
+                <label for="gx">Extra Large Dogs: </label><input id="gx" type="text" name="tiers[1][XL]" value="<?php if($set) echo $tiers[1]['XL']; ?>" /><br />
             <label>Platinum Tier: </label><br />
-                <label for="pp">Petite Dogs: </label><input id="pp" type="text" name="tiers[1][P]" value="<?php if($set) echo $tiers[1]['P']; ?>" /><br />
-                <label for="ps">Small Dogs: </label><input id="ps" type="text" name="tiers[1][S]" value="<?php if($set) echo $tiers[1]['S']; ?>" /><br />
-                <label for="pm">Medium Dogs: </label><input id="pm" type="text" name="tiers[1][M]" value="<?php if($set) echo $tiers[1]['M']; ?>" /><br />
-                <label for="pl">Large Dogs: </label><input id="pl" type="text" name="tiers[1][L]" value="<?php if($set) echo $tiers[1]['L']; ?>" /><br />
-                <label for="px">Extra Large Dogs: </label><input id="px" type="text" name="tiers[1][XL]" value="<?php if($set) echo $tiers[1]['XL']; ?>" /><br />
+                <label for="pp">Petite Dogs: </label><input id="pp" type="text" name="tiers[2][P]" value="<?php if($set) echo $tiers[2]['P']; ?>" /><br />
+                <label for="ps">Small Dogs: </label><input id="ps" type="text" name="tiers[2][S]" value="<?php if($set) echo $tiers[2]['S']; ?>" /><br />
+                <label for="pm">Medium Dogs: </label><input id="pm" type="text" name="tiers[2][M]" value="<?php if($set) echo $tiers[2]['M']; ?>" /><br />
+                <label for="pl">Large Dogs: </label><input id="pl" type="text" name="tiers[2][L]" value="<?php if($set) echo $tiers[2]['L']; ?>" /><br />
+                <label for="px">Extra Large Dogs: </label><input id="px" type="text" name="tiers[2][XL]" value="<?php if($set) echo $tiers[2]['XL']; ?>" /><br />
             <label>Diamond Tier: </label><br />
-                <label for="dp">Petite Dogs: </label><input id="dp" type="text" name="tiers[2][P]" value="<?php if($set) echo $tiers[2]['P']; ?>" /><br />
-                <label for="ds">Small Dogs: </label><input id="ds" type="text" name="tiers[2][S]" value="<?php if($set) echo $tiers[2]['S']; ?>" /><br />
-                <label for="dm">Medium Dogs: </label><input id="dm" type="text" name="tiers[2][M]" value="<?php if($set) echo $tiers[2]['M']; ?>" /><br />
-                <label for="dl">Large Dogs: </label><input id="dl" type="text" name="tiers[2][L]" value="<?php if($set) echo $tiers[2]['L']; ?>" /><br />
-                <label for="dx">Extra Large Dogs: </label><input id="dx" type="text" name="tiers[2][XL]" value="<?php if($set) echo $tiers[2]['XL']; ?>" /><br />
+                <label for="dp">Petite Dogs: </label><input id="dp" type="text" name="tiers[3][P]" value="<?php if($set) echo $tiers[3]['P']; ?>" /><br />
+                <label for="ds">Small Dogs: </label><input id="ds" type="text" name="tiers[3][S]" value="<?php if($set) echo $tiers[3]['S']; ?>" /><br />
+                <label for="dm">Medium Dogs: </label><input id="dm" type="text" name="tiers[3][M]" value="<?php if($set) echo $tiers[3]['M']; ?>" /><br />
+                <label for="dl">Large Dogs: </label><input id="dl" type="text" name="tiers[3][L]" value="<?php if($set) echo $tiers[3]['L']; ?>" /><br />
+                <label for="dx">Extra Large Dogs: </label><input id="dx" type="text" name="tiers[3][XL]" value="<?php if($set) echo $tiers[3]['XL']; ?>" /><br />
         <label>Store Hours:</label>
         <table>
             <tr><td>Sunday</td><td>Monday</td><td>Tuesday</td><td>Wednesday</td><td>Thursday</td><td>Friday</td><td>Saturday</td></tr>
