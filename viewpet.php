@@ -48,11 +48,13 @@ if(!empty($_GET['id'])) {
             }
             
             // Create SQL query based on fields recieved
-            $stmt = $database->prepare('Update Pets Set Name=:Name, Breed=:Breed, Age=:Age, Weight=:Weight, Vaccines2=:Vaccines2, Notes=:Notes, Info=:Info, DogOfMonth=:DogOfMonth, Time=:Time, PreferredGroomer=:PreferredGroomer, TwoPeople=:TwoPeople WHERE ID=:ID');
+            $stmt = $database->prepare('Update Pets Set Name=:Name, Breed=:Breed, Age=:Age, Weight=:Weight, Coloring=:Coloring, Vet=:Vet, Vaccines2=:Vaccines2, Notes=:Notes, Info=:Info, DogOfMonth=:DogOfMonth, Time=:Time, PreferredGroomer=:PreferredGroomer, TwoPeople=:TwoPeople WHERE ID=:ID');
             $stmt->bindValue(':Name', $_POST['Name']);
             $stmt->bindValue(':Breed', $_POST['Breed']);
             $stmt->bindValue(':Age', $age);
             (!empty($_POST['Weight'])) ? $stmt->bindValue(':Weight', $_POST['Weight']) : $stmt->bindValue(':Weight', NULL);
+            (!empty($_POST['Coloring'])) ? $stmt->bindValue(':Coloring', $_POST['Coloring']) : $stmt->bindValue(':Coloring', NULL);
+            (!empty($_POST['Vet'])) ? $stmt->bindValue(':Vet', $_POST['Vet']) : $stmt->bindValue(':Vet', NULL);
             (is_array($_POST['Vaccines2'])) ? $stmt->bindValue(':Vaccines2', json_encode($_POST['Vaccines2'])) : $stmt->bindValue(':Vaccines2', NULL);
             (!empty($_POST['Notes'])) ? $stmt->bindValue(':Notes', $_POST['Notes']) : $stmt->bindValue(':Notes', NULL);
             (!empty($_POST['Info'])) ? $stmt->bindValue(':Info', $_POST['Info']) : $stmt->bindValue(':Info', NULL);
@@ -263,6 +265,7 @@ if(!empty($_GET['id'])) {
                 <tr><td>Age:</td><td><?php echo date("Y") - intval($pet['Age']); ?></td></tr>
                 <tr><td>Weight:</td><td><?php echo $pet['Weight'] ?></td></tr>
                 <tr><td>Coloring:</td><td><?php echo $pet['Coloring'] ?></td></tr>                
+                <tr><td>Vet:</td><td><?php echo $pet['Vet'] ?></td></tr>                
                 <tr><td>Vaccines:</td><td><?php echo ((!empty($pet['Vaccines'])) ? '<a href="' . $pet['Vaccines'] . '">View</a>' : 'None'); ?></td></tr>
                 <tr><td>Vaccine Dates:</td><td><?php echo "Rabies: " . $pet['Vaccines2']['Rabies'] . "<br />" . "Distemper: " . $pet['Vaccines2']['Distemper'] . "<br />" . "Parvo: " . $pet['Vaccines2']['Parvo']; ?></td></tr>                
                 <tr><td>Release Form:</td><td><?php echo ((!empty($pet['Release'])) ? '<a href="' . $pet['Release'] . '">View</a>' : 'None'); ?></td></tr>
@@ -397,6 +400,7 @@ if(!empty($_GET['id'])) {
                 <label for="Age">Age: </label><input type="text" name="Age" id="Age" value="<?php echo date("Y") - intval($pet['Age']); ?>"><br />
                 <label for="Weight">Weight: </label><input type="text" name="Weight" id="Weight" value="<?php echo $pet['Weight']; ?>"><br />
                 <label for="Coloring">Coloring: </label><input type="text" name="Coloring" id="Coloring" value="<?php echo $pet['Coloring']; ?>"><br />                
+                <label for="Vet">Vet: </label><input type="text" name="Vet" id="Vet" value="<?php echo $pet['Vet']; ?>"><br />                
                 <label for="Vaccines">Vaccines: </label><input type="file" name="Vaccines" id="Vaccines"><br />
                 <label>Vaccine Dates: </label><br />
                     <label for="Rabies">Rabies: </label><input id="Rabies" type="text" name="Vaccines2[Rabies]" value="<?php echo $pet['Vaccines2']['Rabies']; ?>" /><br />

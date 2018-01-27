@@ -49,12 +49,13 @@ else if(!empty($_POST)) {
         (!empty($_POST['DogOfMonth'])) ? $dom = strtotime($_POST['DogOfMonth']) : $dom = false;
         
         // Create SQL query based on fields recieved
-        $stmt = $database->prepare('INSERT INTO Pets (Name, Breed, Age, Weight, Coloring, Vaccines2, Notes, Info, DogOfMonth, Time, TwoPeople, PreferredGroomer, OwnedBy) VALUES (:Name, :Breed, :Age, :Weight, :Coloring, :Vaccines2, :Notes, :Info, :DogOfMonth, :Time, :TwoPeople, :PreferredGroomer, :OwnedBy)');
+        $stmt = $database->prepare('INSERT INTO Pets (Name, Breed, Age, Weight, Coloring, Vet, Vaccines2, Notes, Info, DogOfMonth, Time, TwoPeople, PreferredGroomer, OwnedBy) VALUES (:Name, :Breed, :Age, :Weight, :Coloring, :Vet, :Vaccines2, :Notes, :Info, :DogOfMonth, :Time, :TwoPeople, :PreferredGroomer, :OwnedBy)');
         $stmt->bindValue(':Name', $_POST['Name']);
         $stmt->bindValue(':Breed', $_POST['Breed']);
         $stmt->bindValue(':Age', $age);
         (!empty($_POST['Weight'])) ? $stmt->bindValue(':Weight', $_POST['Weight']) : $stmt->bindValue(':Weight', NULL);
         (!empty($_POST['Coloring'])) ? $stmt->bindValue(':Coloring', $_POST['Coloring']) : $stmt->bindValue(':Coloring', NULL);        
+        (!empty($_POST['Vet'])) ? $stmt->bindValue(':Vet', $_POST['Vet']) : $stmt->bindValue(':Vet', NULL);        
         (is_array($_POST['Vaccines2'])) ? $stmt->bindValue(':Vaccines2', json_encode($_POST['Vaccines2'])) : $stmt->bindValue(':Vaccines2', NULL);
         (!empty($_POST['Notes'])) ? $stmt->bindValue(':Notes', $_POST['Notes']) : $stmt->bindValue(':Notes', NULL);
         (!empty($_POST['Info'])) ? $stmt->bindValue(':Info', $_POST['Info']) : $stmt->bindValue(':Info', NULL);
@@ -234,6 +235,7 @@ $(function() {
     <label for="Age">Age: </label><input type="text" name="Age" id="Age"><br />
     <label for="Weight">Weight: </label><input type="text" name="Weight" id="Weight"><br />
     <label for="Coloring">Coloring: </label><input type="text" name="Coloring" id="Coloring"><br />
+    <label for="Vet">Vet: </label><input type="text" name="Vet" id="Vet"><br />
     <label for="Vaccines">Vaccines: </label><input type="file" name="Vaccines" id="Vaccines"><br />
     <label>Vaccine Dates: </label><br />
         <label for="Rabies">Rabies: </label><input id="Rabies" type="text" name="Vaccines2[Rabies]" /><br />
