@@ -8,8 +8,7 @@ schedule.php:
     Change summary page to popup box
     - Add back button
     Improve performance of DisableDay sort
-    - Separate enhancements by type. Signature checkbox only affects signature packages
-
+    
     
 calendar.php:
     Different colors in month view for bath-only and groom-only
