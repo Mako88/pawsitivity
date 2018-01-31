@@ -157,6 +157,7 @@ $_SESSION['Hours'] = $hours;
                 }*/
                 echo '</select><br />';
                 echo '<div id="price"></div>';
+                echo '<input type="hidden" name="price" id="price2" />';
                 echo '<input type="submit" value="Next" />';
                 echo '</form>'; ?>
     
@@ -216,7 +217,11 @@ $_SESSION['Hours'] = $hours;
                         }
                     }
                     else {
-                    
+                        
+                        $("input:checkbox:not(checked)").each(function() {
+                            $(this).removeAttr("disabled");
+                        });
+                        
                         $("input:checkbox:checked").each(function() {
                             for(var i = 0; i < services.length; i++) {
                                 if($(this).attr("id") == services[i]['ID']) {
@@ -231,6 +236,7 @@ $_SESSION['Hours'] = $hours;
                     }
                     
                     $("#price").text("Price: $" + price);
+                    $("#price2").val(price);
                 }
                 
                 $(function() {
@@ -375,44 +381,9 @@ $_SESSION['Hours'] = $hours;
         $stmt = $database->query("SELECT Tiers FROM Globals");
         $tiers = $stmt->fetch();
         
-        // Calculate price
-        switch($_SESSION['info']['package']) {
-            case 1:
-                $pricetype = "BathPrice";
-                break;
-            case 2:
-                $pricetype = "GroomPrice";
-                break;
-            default:
-                $pricetype = "BathPrice";
-                break;
-        }
+        // Set price
         
-        $sql = "SELECT " . $pricetype . " FROM Breeds WHERE ID = :ID";
-        $stmt = $database->prepare("SELECT Breed FROM Pets WHERE ID = :ID");
-        $stmt->bindValue(':ID', $_SESSION['info']['pet']);
-        $stmt->execute();
-        $breed = $stmt->fetch();
-        $stmt = $database->prepare($sql);
-        $stmt->bindValue(':ID', $breed['Breed']);
-        $stmt->execute();
-        $price = $stmt->fetch();
-        $price = $price[$pricetype];
-        
-        if(!empty($_SESSION['info']['services'])) {
-        
-            foreach($_SESSION['info']['services'] as $service) {
-                $stmt = $database->prepare("SELECT Price FROM Services WHERE ID = :ID");
-                $stmt->bindValue(':ID', $service);
-                $stmt->execute();
-                $result = $stmt->fetch();
-                $serviceprice = json_decode($result['Price'], true);
-                
-                $price += $serviceprice[$_SESSION['info']['Size']];
-            }
-        }
-        
-        $_SESSION['info']['Price'] = $price;
+        $_SESSION['info']['Price'] = $_POST['price'];
         
         $prevstart = "false";
         if(!empty($_SESSION['info']['prevstart'])) {

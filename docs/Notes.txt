@@ -8,6 +8,7 @@ schedule.php:
     Change summary page to popup box
     - Add back button
     Improve performance of DisableDay sort
+    - Separate enhancements by type. Signature checkbox only affects signature packages
 
     
 calendar.php:
@@ -24,13 +25,12 @@ search.php:
 	
 newpet.php/viewpet.php:
 	Change time to "clicker" in 15 minute intervals on newpet page (don't allow base editing)
-    ? Remove delete button on past visits
-    Fix DST issue when displaying recurring dates
+    - Fix DST issue when displaying recurring dates
 	
 	
 newclient.php/viewclient.php:
 	Allow resetting the "missed" field on client pages
-    If visited is 0, display initial password
+    - If visited is 0, display initial password
     - Allow deleting clients
     
 
@@ -46,7 +46,7 @@ Misc:
     Redirect to global settings page after setup
 	Find timeclock software (with the ability to print/email reports)
 	Figure out text/email reminders with scheduling
-    Automatically remove events the age from global settings
+    - Automatically remove events the age from global settings
     - Prevent infinite redirect when user doesn't have permission to access page
     - Add daily backups
     Create script to reset everyone's passwords 1-time.
