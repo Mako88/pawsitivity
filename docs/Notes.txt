@@ -8,6 +8,8 @@ schedule.php:
     Change summary page to popup box
     - Add back button
     Improve performance of DisableDay sort
+    Fix extra <li> on Summary page with signature options
+    Fix recurring scheduling
     
     
 calendar.php:

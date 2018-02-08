@@ -38,7 +38,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
     $stmt = $database->query("SELECT ID, FirstName, LastName, Phone FROM Owners");
     $clients = $stmt->fetchAll(PDO::FETCH_ASSOC | PDO::FETCH_GROUP);
     
-    $stmt = $database->query("SELECT * FROM Scheduling WHERE PetID != -1");
+    $stmt = $database->query("SELECT * FROM Scheduling WHERE PetID != -1 ORDER BY ID");
     $events = $stmt->fetchAll();
     
     foreach($events as $key => $event) {
@@ -108,6 +108,8 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                 events.push(oldevents[i]);
             }
         }
+        
+        console.log(events);
                 
         // Create array of event objects for fullCalendar
         for(var i = 0; i < events.length; i++) {
