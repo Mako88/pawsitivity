@@ -1087,7 +1087,7 @@ $_SESSION['Hours'] = $hours;
                         }
                         $_SESSION['info']['EndDate'] = strtotime("tomorrow", $lastinstance) - 1;
                         
-                        $stmt = $database->query("SELECT * FROM Scheduling WHERE PetID > 0");
+                        $stmt = $database->query("SELECT * FROM Scheduling WHERE PetID != -1");
                         $events = $stmt->fetchAll();
 
                         // Check if making this recurring will conflict with anything. $i is the timestamp of each reccurance
