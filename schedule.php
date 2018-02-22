@@ -298,8 +298,12 @@ $_SESSION['Hours'] = $hours;
         }
         
         if(!empty($_POST['groomer'])) {
-            $stmt = $database->prepare("SELECT * FROM Scheduling WHERE GroomerID = :ID");
-            $stmt->bindValue(':ID', $_POST['groomer']);
+            $now = time();
+            $stmt = $database->prepare("(SELECT * FROM Scheduling WHERE GroomerID = :ID1 AND Recurring = 0 AND StartTime >= :Time1) UNION (SELECT * FROM Scheduling WHERE GroomerID = :ID2 AND Recurring = 1 AND EndDate >= :Time2)");
+            $stmt->bindValue(':ID1', $_POST['groomer']);
+            $stmt->bindValue(':Time1', $now);
+            $stmt->bindValue(':ID2', $_POST['groomer']);
+            $stmt->bindValue(':Time2', $now);
             $stmt->execute();
             $events = $stmt->fetchAll();
             if(!empty($events)) {
@@ -309,27 +313,33 @@ $_SESSION['Hours'] = $hours;
                 $groomers = $stmt->fetchAll();
             }
             else {
-                $stmt = $database->query("SELECT * FROM Scheduling");
+                $stmt = $database->prepare("(SELECT * FROM Scheduling WHERE Recurring = 0 AND StartTime >= :Time1) UNION (SELECT * FROM Scheduling WHERE Recurring = 1 AND EndDate >= :Time2)");
+                $stmt->bindValue(':Time1', $now);
+                $stmt->bindValue(':Time2', $now);
+                $stmt->execute();
                 $events = $stmt->fetchAll();
                 if($_SESSION['info']['package'] == 1) {
-                    $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2 OR Access = 3");
+                    $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2 OR Access = 3 ORDER BY Seniority");
                     $groomers = $stmt->fetchAll();
                 }
                 else {
-                    $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2");
+                    $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2 ORDER BY Seniority");
                     $groomers = $stmt->fetchAll();
                 }
             }
         }
         else {
-            $stmt = $database->query("SELECT * FROM Scheduling");
+            $stmt = $database->prepare("(SELECT * FROM Scheduling WHERE Recurring = 0 AND StartTime >= :Time1) UNION (SELECT * FROM Scheduling WHERE Recurring = 1 AND EndDate >= :Time2)");
+            $stmt->bindValue(':Time1', $now);
+            $stmt->bindValue(':Time2', $now);
+            $stmt->execute();
             $events = $stmt->fetchAll();
             if($_SESSION['info']['package'] == 1) {
-                $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2 OR Access = 3");
+                $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2 OR Access = 3 ORDER BY Seniority");
                 $groomers = $stmt->fetchAll();
             }
             else {
-                $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2");
+                $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2 ORDER BY Seniority");
                 $groomers = $stmt->fetchAll();
             }
         }
@@ -781,9 +791,37 @@ $_SESSION['Hours'] = $hours;
                     }
                 }
                 
+                // Remove groomers with no available time
+                for(var i = allslots.length - 1; i >= 0; i--) { 
+                    if(!allslots[i]['slots'].length) {
+                        allslots.splice(i, 1);
+                        continue;
+                    }
+                }
+                
+                var sortedslots = Array();
+                
+                while(allslots.length > 0) {
+                    var selected = 0;
+                    var curcount = allslots[selected]['count'];
+                    for(var i = 0; i < allslots.length; i++) {
+                        if(allslots[i]['count'] > curcount) {
+                            selected = i;
+                            curcount = allslots[i]['count'];
+                        }
+                        else if(allslots[i]['count'] == curcount) {
+                            if(allslots[i]['Seniority'] > allslots[selected]['Seniority']) {
+                                selected = i;
+                                curcount = allslots[i]['count'];
+                            }
+                        }
+                    }
+                    sortedslots.push(allslots[selected]);
+                    allslots.splice(selected, 1);
+                }
                 
                 // Sort the slots so that the lowest priority is first (based on count and seniority)
-                var sortedslots = Array();
+                /*var sortedslots = Array();
                 sortedslots.push(allslots[0]);
                 
                 for(var i = 1; i < allslots.length; i++) {
@@ -827,8 +865,8 @@ $_SESSION['Hours'] = $hours;
                             break sorted;
                         }
                     }
-                }
-                
+                }*/
+                                
                 for(var i = 0; i < sortedslots[0]['slots'].length; i++) {
                     timeslots[index]['slots'].push(sortedslots[0]['slots'][i]);
                     timeslots[index]['groomers'].push(sortedslots[0]['groomer']);
