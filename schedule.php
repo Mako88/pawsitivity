@@ -499,7 +499,7 @@ $_SESSION['Hours'] = $hours;
             // false if there are none.
             function getavailable(id, today) {
                 var todayminutes = Array();
-                var largedogs = Array();
+                var largedogs = 0;
 
                 // Fill array with minutes spa is open today
                 switch(today.day()) {
@@ -587,9 +587,9 @@ $_SESSION['Hours'] = $hours;
                             startminutes++;
                         }
                         
-                        // If the event is a large dog, add its time to the largedogs array
-                        if((size == "L" || size == "XL") && (events[i]['Size'] == "L" || events[i]['Size'] == "XL")) {
-                            largedogs.push(eventminutes);
+                        // If we're scheduling a large dog, and the event is a large dog, add the event to the total number of large dogs for this groomer
+                        if((size == "L" || size == "XL") && (events[i]['Size'] == "L" || events[i]['Size'] == "XL") && events[i]['GroomerID'] == id) {
+                            largedogs++;
                         }
                         
                         
@@ -603,32 +603,9 @@ $_SESSION['Hours'] = $hours;
                     }
                 }
                 
-                var toremove = Array();
-                
-                // Compare every minute of every event with large dogs to the minutes
-                // of all other events with large dogs. When there are overlaps, add
-                // them to the "toremove" array.
-                for(var i = 0; i < largedogs.length; i++) {
-                    for(var k = 0; k < largedogs[i].length; k++) {
-                        for(var j = 0; j < largedogs.length; j++) {
-                            // Don't compare a set of times to itself
-                            if(largedogs[j] == largedogs[i]) {
-                                continue;
-                            }
-                            for(var l = 0; l < largedogs[j].length; l++) {
-                                if(largedogs[i][k] == largedogs[j][l]) {
-                                    if($.inArray(largedogs[j][l], toremove) == -1) {
-                                        toremove.push(largedogs[j][l]);
-                                    }
-                                }
-                            }
-                        }
-                    }
+                if(largedogs >= 2) {
+                    return false;
                 }
-                
-                todayminutes = todayminutes.filter(function(minute) {
-                    return toremove.indexOf(minute) === -1;
-                });
                 
                 if(todayminutes.length) {
                     return todayminutes;
@@ -931,9 +908,23 @@ $_SESSION['Hours'] = $hours;
                 }
             });
             
-            $('#datepicker2').pikaday({
-                format: 'MM/DD/YYYY',
-                minDate: new Date()
+            var picker2 = new Pikaday({
+                field: document.getElementById('datepicker2'),
+                format: 'MM/DD/YYYY'
+            });
+            
+            $('#datepicker').change(function() {
+                var mindate = new Date($('#datepicker').val());
+                picker2.setMinDate(mindate);
+                picker2.gotoDate(mindate);
+            });
+            
+            $('#weeks').change(function() {
+                $('#recurring').prop('checked', true);
+            });
+            
+            $('#datepicker2').change(function() {
+                $('#recurring').prop('checked', true);
             });
             
             if(prevstart != false) {
@@ -1041,9 +1032,11 @@ $_SESSION['Hours'] = $hours;
                         }
                         $_SESSION['info']['EndDate'] = strtotime("tomorrow", $lastinstance) - 1;
                         
-                        $stmt = $database->query("SELECT * FROM Scheduling WHERE PetID != -1");
+                        $stmt = $database->prepare("SELECT * FROM Scheduling WHERE PetID != -1 AND GroomerID = :ID");
+                        $stmt->bindValue(":ID", $_SESSION['info']['groomer']);
+                        $stmt->execute();
                         $events = $stmt->fetchAll();
-
+                        
                         // Check if making this recurring will conflict with anything. $i is the timestamp of each reccurance
                         for($i = $_SESSION['info']['timestamp']; $i < $_SESSION['info']['EndDate']; $i += $_SESSION['info']['RecInterval']*604800) {
                             foreach($events as $event) {
