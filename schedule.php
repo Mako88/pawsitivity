@@ -462,8 +462,6 @@ $_SESSION['Hours'] = $hours;
                 
                 var count = 0;
                 var id;
-                
-                today = moment(today);
     
                 for(var i = 0; i < events.length; i++) {
 
@@ -471,9 +469,9 @@ $_SESSION['Hours'] = $hours;
                         continue;
                     }
 
-                    var event = moment.tz(events[i]['StartTime']*1000, "<?php echo $_SESSION['Timezone']; ?>");
+                    var event = moment(events[i]['StartTime']*1000);
                                         
-                    if((!event.isSame(today, "day")) && events[i]['Recurring'] == 1 && (events[i]['EndDate'] != null ? today.isSameOrBefore(moment.tz(events[i]['EndDate']*1000, "<?php echo $_SESSION['Timezone']; ?>"), "day") : 1)) {
+                    if((!event.isSame(today, "day")) && events[i]['Recurring'] == 1 && (events[i]['EndDate'] != null ? today.isSameOrBefore(moment(events[i]['EndDate']*1000), "day") : 1)) {
                         while(event.isSameOrBefore(today, "day")) {
                             event.add(events[i]['RecInterval'], 'weeks'); // Add the number of weeks as an interval
                             if(event.isSame(today, "day")) {
@@ -544,10 +542,10 @@ $_SESSION['Hours'] = $hours;
                         break;
                 }
                 
-                var now = moment();
-                
+                var now = moment.tz("<?php echo $_SESSION['Timezone']; ?>");
+                                                
                 // Remove time that has already passed
-                if(now.isSame(today, "day")) {
+                if(now.format("M/D/Y") == today.format("M/D/Y")) {
                     var currenttime = now.hours() * 60 + now.minutes();
                     var pastminutes = Array();
                     var i = todayminutes[0];
@@ -559,12 +557,12 @@ $_SESSION['Hours'] = $hours;
                         return pastminutes.indexOf(minute) === -1;
                     });
                 }
-
+                                
                 for(var i = 0; i < events.length; i++) {
                     
-                    var event = moment.tz(events[i]['StartTime']*1000, "<?php echo $_SESSION['Timezone']; ?>");
+                    var event = moment.utc(events[i]['StartTime']*1000);
                     
-                    if((!event.isSame(today, "day")) && events[i]['Recurring'] == 1 && (events[i]['EndDate'] != null ? today.isSameOrBefore(moment.tz(events[i]['EndDate']*1000, "<?php echo $_SESSION['Timezone']; ?>"), "day") : 1)) {
+                    if((!event.isSame(today, "day")) && events[i]['Recurring'] == 1 && (events[i]['EndDate'] != null ? today.isSameOrBefore(moment(events[i]['EndDate']*1000), "day") : 1)) {
                         while(event.isSameOrBefore(today, "day")) {
                             event.add(events[i]['RecInterval'], 'weeks'); // Add the number of weeks as an interval
                             if(event.isSame(today, "day")) {
@@ -574,7 +572,7 @@ $_SESSION['Hours'] = $hours;
                     }
                     
                     if(event.isSame(today, "day")) {
-                        
+                                                
                         if(previd == events[i]['ID'] && prevstart == event.unix()) {
                             continue;
                         }
@@ -694,10 +692,10 @@ $_SESSION['Hours'] = $hours;
             function splitslots(bigslots, time, today) {
                 var littleslots = Array();
                 var dayindex = today.day();
-                var now = moment();
+                var now = moment.tz("<?php echo $_SESSION['Timezone']; ?>");
                 var currenttime = now.hours() * 60 + now.minutes();
                 var index = -1;
-                
+            
                 
                 // i = Every big slot
                 for(var i = 0; i < bigslots.length; i++) {
@@ -715,7 +713,7 @@ $_SESSION['Hours'] = $hours;
                         }
                         // If the current 15 minute start time would push the bathing time
                         // before the current time (on the current day), don't add it
-                        if(now.isSame(today, "day") && bigslots[i]['start'] + j - bathtime < currenttime) {
+                        if(now.format("M/D/Y") == today.format("M/D/Y") && bigslots[i]['start'] + j - bathtime < currenttime) {
                             continue;
                         }
                         // If the current 15 minute start time would push the end time past
@@ -746,6 +744,8 @@ $_SESSION['Hours'] = $hours;
             
             function disableDay(today) {
                 today = moment(today);
+                today.add(today.utcOffset(), 'minutes');
+                today.utc();
                 var dayindex = today.day();
                 var allslots = Array();
                     
@@ -758,7 +758,7 @@ $_SESSION['Hours'] = $hours;
                 timeslots[index] = Array();
                 timeslots[index]['slots'] = Array();
                 timeslots[index]['groomers'] = Array();
-
+                
                 for(var i = 0; i < groomers.length; i++) {
                     allslots[i] = Array();
                     allslots[i]['groomer'] = groomers[i]['ID'];
@@ -790,7 +790,7 @@ $_SESSION['Hours'] = $hours;
                         allslots[i]['slots'] = littleslots.slice(0);
                     }
                 }
-                
+                                
                 // Remove groomers with no available time
                 for(var i = allslots.length - 1; i >= 0; i--) { 
                     if(!allslots[i]['slots'].length) {
@@ -801,6 +801,7 @@ $_SESSION['Hours'] = $hours;
                 
                 var sortedslots = Array();
                 
+                // Remove slots from allslots in order and put them into sortedslots
                 while(allslots.length > 0) {
                     var selected = 0;
                     var curcount = allslots[selected]['count'];
@@ -820,52 +821,9 @@ $_SESSION['Hours'] = $hours;
                     allslots.splice(selected, 1);
                 }
                 
-                // Sort the slots so that the lowest priority is first (based on count and seniority)
-                /*var sortedslots = Array();
-                sortedslots.push(allslots[0]);
-                
-                for(var i = 1; i < allslots.length; i++) {
-                    sorted:
-                    for(var j = 0; j < sortedslots.length; j++) {
-                        if(j == sortedslots.length - 1) {
-                            if(allslots[i]['count'] < sortedslots[j]['count']) {
-                                sortedslots.push(allslots[i]);
-                                break sorted;
-                            }
-                            else if(allslots[i]['count'] == sortedslots[j]['count']) {
-                                if(allslots[i]['seniority'] <= sortedslots[j]['seniority']) {
-                                    sortedslots.splice(j, 0, allslots[i]);
-                                    break sorted;
-                                }
-                                else {
-                                    sortedslots.splice(j+1, 0, allslots[i]);
-                                    break sorted;
-                                }
-                            }
-                            else {
-                                sortedslots.splice(j, 0, allslots[i]);
-                                break sorted;
-                            }
-                        }
-                        if(allslots[i]['count'] < sortedslots[j]['count']) {
-                            continue sorted;
-                        }
-                        else if(allslots[i]['count'] == sortedslots[j]['count']) {
-                            if(allslots[i]['seniority'] <= sortedslots[j]['seniority']) {
-                                sortedslots.splice(j+1, 0, allslots[i]);
-                                break sorted;
-                            }
-                            else {
-                                sortedslots.splice(j, 0, allslots[i]);
-                                break sorted;
-                            }
-                        }
-                        else {
-                            sortedslots.splice(j, 0, allslots[i]);
-                            break sorted;
-                        }
-                    }
-                }*/
+                if(!sortedslots.length) {
+                    return true;
+                }
                                 
                 for(var i = 0; i < sortedslots[0]['slots'].length; i++) {
                     timeslots[index]['slots'].push(sortedslots[0]['slots'][i]);
@@ -931,15 +889,11 @@ $_SESSION['Hours'] = $hours;
                 onSelect: function(date) {
                     
                     date = moment(date);
+                    date.add(date.utcOffset(), 'minutes');
+                    date.utc();
                     
                     var options = $("#slot");
                     options.empty();
-                    
-                    // Offset of user's local timezone from UTC on the selected day in seconds.
-                    var localoffset = moment(date).utcOffset()*60;
-                    
-                    // Offset of the spa's timezone from UTC on the selected day in seconds.
-                    var offset = moment.tz(date, "<?php echo $_SESSION['Timezone']; ?>").utcOffset()*60;
                     
                     today = date.unix();
                     
@@ -971,7 +925,7 @@ $_SESSION['Hours'] = $hours;
                         var groomer = timeslots[today]['groomers'][i];
                         
                         
-                        var timestamp = (today + localoffset) - offset + (start*60);
+                        var timestamp = today + (start*60);
                         options.append($("<option />").val(groomer + "-" + timestamp + "-" + starthour + ":" + (startmin < 10 ? "0" + startmin : startmin) + " " + s + "-" + endhour + ":" + (endmin < 10 ? "0" + endmin : endmin) + " " + e).prop('selected', (timestamp == prevstart ? true : false)).text(starthour + ":" + (startmin < 10 ? "0" + startmin : startmin) + " " + s + " - " + endhour + ":" + (endmin < 10 ? "0" + endmin : endmin) + " " + e));
                     }
                 }

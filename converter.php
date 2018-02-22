@@ -42,8 +42,27 @@ else {
     $http = 'http://';
 }
 
-$stmt = $database->query("UPDATE Scheduling SET EndDate = 1546300800 WHERE Recurring = 1");
-$res = $stmt->execute();
+$stmt = $database->query("SELECT * FROM Scheduling");
+$stmt->execute();
+$res = $stmt->fetchAll();
+
+foreach($res as $event) {
+    $day = new DateTime();
+    $day->setTimestamp($event['StartTime']);
+    $day->setTimezone(new DateTimeZone('America/New_York'));
+    
+    if($day->format('I') == 0) {
+        $time = $event['StartTime'] - 18000;
+    }
+    else {
+        $time = $event['StartTime'] - 14400;
+    }
+    
+    $stmt = $database->prepare("UPDATE Scheduling SET StartTime = :Time WHERE ID = :ID");
+    $stmt->bindValue(':Time', $time);
+    $stmt->bindValue(':ID', $event['ID']);
+    $stmt->execute();
+}
 
 echo "done";
 

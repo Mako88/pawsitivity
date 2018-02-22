@@ -10,6 +10,7 @@ schedule.php:
     Improve performance of DisableDay sort
     Fix extra <li> on Summary page with signature options
     Fix recurring scheduling
+    Change large dogs to only allowing 2 per groomer per day
     
     
 calendar.php:

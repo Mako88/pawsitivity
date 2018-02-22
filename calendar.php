@@ -88,13 +88,13 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
         var clients = <?php echo json_encode($clients); ?>;
         
         var objects = Array();
-        
+                
         events = Array();
                 
         // Split recurring events
         for(var i = 0; i < oldevents.length; i++) {
             if(oldevents[i]['Recurring'] == 1) {
-                var firststart = moment.unix(oldevents[i]['StartTime']);
+                var firststart = moment.unix(oldevents[i]['StartTime']).utc();
                 for(var j = oldevents[i]['StartTime']; j < oldevents[i]['EndDate']; j += oldevents[i]['RecInterval']*604800) {
                     var temp = oldevents[i];
                     temp['StartTime'] = firststart.unix();
@@ -108,22 +108,17 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                 events.push(oldevents[i]);
             }
         }
-        
-        console.log(events);
-                
+                        
         // Create array of event objects for fullCalendar
         for(var i = 0; i < events.length; i++) {
             
             var index = events[i]['PetID'];
             var index2 = pets[index][0]['OwnedBy'];
                         
-            // Offset of the Salon's timezone from UTC (on the date of the event).
-            var offset = moment.tz(events[i]['StartTime']*1000, "<?php echo $_SESSION['Timezone']; ?>").utcOffset()*60;
-            
             var event = {
                 id: events[i]['ID'],
-                start: (events[i]['StartTime'] + offset) * 1000,
-                end: (events[i]['StartTime'] + (events[i]['TotalTime'] * 60) + offset) * 1000,
+                start: events[i]['StartTime'] * 1000,
+                end: (events[i]['StartTime'] + (events[i]['TotalTime'] * 60)) * 1000,
                 title: pets[index][0]['Name'] + ' - ' + events[i]['Groomer'],
                 TwoPeople: events[i]['TwoPeople'],
                 warnings: pets[index][0]['Info'],
@@ -158,36 +153,27 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
             
             switch(view) {
                 case 'all':
-                    for(var i = 0; i < objects.length; i++) {
-                        // Offset of the Salon's timezone from UTC (on the date of the event).
-                        var offset = moment.tz(objects[i].starttime*1000, "<?php echo $_SESSION['Timezone']; ?>").utcOffset()*60;
-            
-                        objects[i].start = (objects[i].starttime + offset) * 1000;
-                        objects[i].end = (objects[i].starttime + (events[i]['TotalTime'] * 60) + offset) * 1000;
+                    for(var i = 0; i < objects.length; i++) {            
+                        objects[i].start = objects[i].starttime * 1000;
+                        objects[i].end = (objects[i].starttime + (events[i]['TotalTime'] * 60)) * 1000;
                         objects[i].view = 'all';
                     }
                     break;
                 case 'groom':
                     for(var i = 0; i < objects.length; i++) {
-                        // Offset of the Salon's timezone from UTC (on the date of the event).
-                        var offset = moment.tz(objects[i].starttime*1000, "<?php echo $_SESSION['Timezone']; ?>").utcOffset()*60;
-            
-                        objects[i].start = (objects[i].starttime + offset + Math.ceil(events[i]['BathTime']/15)*15 * 60) * 1000;
-                        objects[i].end = (objects[i].starttime + offset + events[i]['TotalTime'] * 60) * 1000;
+                        objects[i].start = (objects[i].starttime + Math.ceil(events[i]['BathTime']/15)*15 * 60) * 1000;
+                        objects[i].end = (objects[i].starttime + events[i]['TotalTime'] * 60) * 1000;
                         objects[i].view = 'groom';
                     }
                     break;
                 case 'bath':
                     for(var i = 0; i < events.length; i++) {
-                        // Offset of the Salon's timezone from UTC (on the date of the event).
-                        var offset = moment.tz(objects[i].starttime*1000, "<?php echo $_SESSION['Timezone']; ?>").utcOffset()*60;
-            
-                        objects[i].start = (objects[i].starttime + offset) * 1000;
+                        objects[i].start = objects[i].starttime * 1000;
                         if(objects[i].TwoPeople == 1) {
-                            objects[i].end = (objects[i].starttime + offset + events[i]['TotalTime'] * 60) * 1000;
+                            objects[i].end = (objects[i].starttime + events[i]['TotalTime'] * 60) * 1000;
                         }
                         else {
-                            objects[i].end = (objects[i].starttime + (Math.ceil(events[i]['BathTime']/15)*15 * 60) + offset) * 1000;
+                            objects[i].end = (objects[i].starttime + Math.ceil(events[i]['BathTime']/15)*15 * 60) * 1000;
                         }
                         objects[i].view = 'bath';
                     }
@@ -201,6 +187,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
         $('#calendar').fullCalendar({
             events: objects,
             eventLimit: true,
+            timezone: "UTC",
             lazyFetching: false,
             customButtons: {
                 viewAll: {

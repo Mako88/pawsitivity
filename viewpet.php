@@ -307,7 +307,6 @@ if(!empty($_GET['id'])) {
                         echo "<table>";
                         foreach($futureevents as $event) {
                             $date = new DateTime("@" . ($event['StartTime']));
-                            $date->setTimezone(new DateTimeZone($timezone));
                             echo '<tr><td>' . $date->format("m/d/Y @ h:i A") . ' <a href="viewpet.php?id=' . $_GET['id'] . '&delschedule=' . $event['ID'] . '&starttime=' . $event['StartTime'] . '" onclick="return confirm(\'Are you sure you want to delete this event?\')">Delete</a></td></tr>';
                         }
                         echo "</table>";
@@ -317,7 +316,6 @@ if(!empty($_GET['id'])) {
                         echo "<table>";
                         foreach($pastevents as $event) {
                             $date = new DateTime("@" . ($event['StartTime']));
-                            $date->setTimezone(new DateTimeZone($timezone));
                             echo '<tr><td>' . $date->format("m/d/Y @ h:i A") . ' <a href="viewpet.php?id=' . $_GET['id'] . '&delschedule=' . $event['ID'] . '&starttime=' . $event['StartTime'] . '" onclick="return confirm(\'Are you sure you want to delete this event?\')">Delete</a></td></tr>';
                         }
                         echo "</table>";
