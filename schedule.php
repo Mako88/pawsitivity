@@ -424,7 +424,7 @@ $_SESSION['Hours'] = $hours;
             echo '<p class="error">WARNING: Bathing time is &#36;0</p>';
         }
         if($_SESSION['info']['GroomTime'] == 0) {
-            echo '<p class="error">WARNING: Grooming time is &#36;0</p>';
+            echo '<p class="error">WARNING: Grooming time is 0</p>';
         }
 ?>
     <form action="schedule.php" method="post" id="day">
