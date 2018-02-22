@@ -998,6 +998,7 @@ $_SESSION['Hours'] = $hours;
                     }
                     
                     if(!empty($_POST['recurring'])) {
+                        $notrecurring = false;
                         
                         $_SESSION['info']['Recurring'] = $_POST['recurring'];
                         
@@ -1038,7 +1039,7 @@ $_SESSION['Hours'] = $hours;
                         $events = $stmt->fetchAll();
                         
                         // Check if making this recurring will conflict with anything. $i is the timestamp of each reccurance
-                        for($i = $_SESSION['info']['timestamp']; $i < $_SESSION['info']['EndDate']; $i += $_SESSION['info']['RecInterval']*604800) {
+                        for($i = $_SESSION['info']['timestamp'] + $_SESSION['info']['RecInterval']*604800; $i < $_SESSION['info']['EndDate']; $i += $_SESSION['info']['RecInterval']*604800) {
                             foreach($events as $event) {
                                 if($event['Recurring'] != 1) {
                                     // Check if the current recurrance is between the start and end of each non-recurring event
@@ -1062,6 +1063,10 @@ $_SESSION['Hours'] = $hours;
                         }
 
                         if(isset($finalevent)) {
+                            if($finalevent <= $_SESSION['info']['timestamp']) {
+                                $notrecurring = true;
+                                goto notrec;
+                            }
                             $_SESSION['info']['EndDate'] = strtotime("tomorrow", $finalevent) - 1;
                         }
                         
@@ -1084,6 +1089,7 @@ $_SESSION['Hours'] = $hours;
                         
                     }
                     else {
+                        notrec:
                         $_SESSION['info']['Recurring'] = $_SESSION['info']['RecInterval'] = $_SESSION['info']['EndDate'] = 0;
                     }
                     
@@ -1173,14 +1179,17 @@ $_SESSION['Hours'] = $hours;
                     echo "<br />";
                     
                     
-                    if(!empty($_POST['recurring'])) {
+                    if(!empty($_POST['recurring']) && !$notrecurring) {
                         $enddate = new DateTime('@'.$_SESSION['info']['EndDate']);
                         echo "<h3>Automatic Rescheduling:</h3>";
                         echo "<p>Your pet is automatically scheduled at this time every " . $_SESSION['info']['RecInterval'] . " week(s). Your final appointment will be on " . $enddate->format("l, m/d/Y");
                     }
-                    if(isset($finalevent)) {
+                    if(isset($finalevent) && !$notrecurring) {
                         echo '<p class="error">NOTE: The ending date is different from what you set due to a conflict.<br />';
                         echo 'You can manually re-schedule for dates after ' . $enddate->format("m/d/Y") . '</p>';
+                    }
+                    if($notrecurring) {
+                        echo '<p class="error">NOTE: The first recurrance had a conflict, so this appointment will not be stored as a recurring appointment.</p>';
                     }
                     
                     echo '<form action="schedule.php" method="post" id="confirm">';
