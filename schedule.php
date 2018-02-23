@@ -133,8 +133,8 @@ $_SESSION['Hours'] = $hours;
                 echo '<form action="schedule.php" method="post">';
                 
                 echo '<label for="package">Select Package: </label><select id="package" name="package">';
-                echo '<option value="1" ' . (intval($package) == 1 ? 'selected' : '') . '>Basic Bath</option>';
-                echo '<option value="2" ' . (intval($package) == 2 ? 'selected' : '') . '>Basic Groom</option>';
+                echo '<option value="1" ' . (intval($package) == 1 ? 'selected' : '') . '>Bath</option>';
+                echo '<option value="2" ' . (intval($package) == 2 ? 'selected' : '') . '>Haircut</option>';
                 echo '</select><br />';
                 
                 echo '<p>Select which services you would like to schedule: </p>';
@@ -590,7 +590,7 @@ $_SESSION['Hours'] = $hours;
                         }
                         
                         // If we're scheduling a large dog, and the event is a large dog, add the event to the total number of large dogs for this groomer
-                        if((size == "L" || size == "XL") && (events[i]['Size'] == "L" || events[i]['Size'] == "XL") && events[i]['GroomerID'] == id && package == 2) {
+                        if((size == "L" || size == "XL") && (events[i]['Size'] == "L" || events[i]['Size'] == "XL") && events[i]['GroomerID'] == id && package == 2 && events[i]['Package'] == 2) {
                             largedogs++;
                         }
                         
@@ -1127,10 +1127,10 @@ $_SESSION['Hours'] = $hours;
 
                     switch($_SESSION['info']['package']) {
                         case 1:
-                            $package = "Basic Bath";
+                            $package = "Bath";
                             break;
                         case 2:
-                            $package = "Basic Spa";
+                            $package = "Haircut";
                             break;
                         case 3:
                             $package = "Signature Bath";
