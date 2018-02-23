@@ -17,6 +17,7 @@ calendar.php:
     Add missed button on popup. When button is pushed, delete that event and set Missed flag.
     Add a "disable day" checkbox to prevent a day from having any more scheduled
     Add notes on a dog for the day in popup
+    Add delete button?
     
 	
 search.php:
@@ -25,7 +26,7 @@ search.php:
 	
 newpet.php/viewpet.php:
 	Change time to "clicker" in 15 minute intervals on newpet page (don't allow base editing)
-    - Fix DST issue when displaying recurring dates
+    Add groomer name to appointment list
 	
 	
 newclient.php/viewclient.php:
