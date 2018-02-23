@@ -14,6 +14,7 @@ if($_SESSION['authenticated'] < 2) {
 <head>
 <meta charset="UTF-8">
 <title>Add Breed</title>
+<link rel='stylesheet' href='css/styles.css' />
 </head>
 <body>
 <?php include "include/menu.php"; ?>
@@ -42,7 +43,7 @@ if(!empty($_POST['Name']) && isset($_POST['Group']) && !empty($_POST['Size']) &&
 
 }
 else { ?>
-    <form action="newbreed.php" method="post">
+    <form class="infoform" action="newbreed.php" method="post">
         <label for="Name">Breed Name: </label><input type="text" name="Name" id="Name"><br />
         <label for="Group">Group: </label>
         <select name="Group">
@@ -62,18 +63,20 @@ else { ?>
             <option value="M">Medium</option>
             <option value="L">Large</option>
             <option value="XL">Extra-Large</option>
-        </select><br />
-        <label>Time (In Minutes): </label><br />
-            <label>Bath Only: </label><br />
-                <label for="BathBath">Bathing Time: </label><input id="BathBath" type="text" name="Time[Bath][BathTime]" /><br />
-                <label for="BathGroom">Grooming Time: </label><input id="BathGroom" type="text" name="Time[Bath][GroomTime]" /><br />
-            <label>Bath and Groom: </label><br />
-                <label for="GroomBath">Bathing Time: </label><input id="GroomBath" type="text" name="Time[Groom][BathTime]" /><br />
-                <label for="GroomGroom">Grooming Time: </label><input id="GroomGroom" type="text" name="Time[Groom][GroomTime]" /><br />
+        </select>
+        <h3 class="nooffset">Time (In Minutes): </h3>
+            <h4>Bath Only: </h4>
+                <label class="offset" for="BathBath">Bathing Time: </label><input id="BathBath" type="text" name="Time[Bath][BathTime]" /><br />
+                <label class="offset" for="BathGroom">Grooming Time: </label><input id="BathGroom" type="text" name="Time[Bath][GroomTime]" />
+            <h4>Bath and Haircut: </h4>
+                <label class="offset" for="GroomBath">Bathing Time: </label><input id="GroomBath" type="text" name="Time[Groom][BathTime]" /><br />
+                <label class="offset" for="GroomGroom">Grooming Time: </label><input id="GroomGroom" type="text" name="Time[Groom][GroomTime]" /><br />
         <label for="BathPrice">Base Bath Price: </label><input type="text" name="BathPrice" id="BathPrice"><br />
         <label for="GroomPrice">Base Grooming Price: </label><input type="text" name="GroomPrice" id="GroomPrice"><br />
         <input type="submit" value="Submit">
     </form>
 <?php } finish: ?>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="js/menu.js"></script>
 </body>
 </html>

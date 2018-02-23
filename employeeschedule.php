@@ -21,11 +21,13 @@ $hours = json_decode($hours, true);
 <meta charset="UTF-8">
 <title>Schedule Employees</title>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="js/menu.js"></script>
 <script src="js/moment.min.js"></script>
 <script src="js/moment-timezone.min.js"></script>
 <script src="js/pikaday.js"></script>
 <script src="js/pikaday.jquery.js"></script>
 <link rel="stylesheet" type="text/css" href="css/pikaday.css" />
+<link rel='stylesheet' href='css/styles.css' />
 </head>
 <body>
 
@@ -99,10 +101,10 @@ include "include/menu.php";
     
 ?>
 
-    <form action="employeeschedule.php" method="post" id="scheduleform">
+    <form class="infoform" action="employeeschedule.php" method="post" id="scheduleform">
         <input type="text" id="week" />
-        <table id="schedule" style="display: none">
-            <tr id="days"><td>Groomer</td><td>Sunday</td><td>Monday</td><td>Tuesday</td><td>Wednesday</td><td>Thursday</td><td>Friday</td><td>Saturday</td></tr>
+        <table class="weektable" id="schedule" style="display: none">
+            <tr id="days"><th>Groomer</th><th>Sunday</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th><th>Saturday</th></tr>
             <?php
                 foreach($employees as $employee) {
                     echo '<tr id=' . $employee['ID'] . '><td>' . $employee['Name'] . '</td>';
@@ -121,7 +123,7 @@ include "include/menu.php";
         <input type="hidden" id="timestamp" name="timestamp" />
         <input type="submit" value="Save" />
     </form>
-    <form id="cancel" action="employeeschedule.php" method="post">
+    <form class="infoform" id="cancel" action="employeeschedule.php" method="post" style="display: none;">
         <input type="submit" value="Cancel" />
     </form>
     
@@ -151,12 +153,13 @@ var employees = <?php echo json_encode($employees); ?>;
 var defaultdate = "<?php echo $defaultdate; ?>";
 
 function updateTable() {
+    $("#cancel").css('display', 'blcok');
     var week = $("#week").val().split(' - ');
     var date = week[0].split('/');
     date = date[2] + '-' + date[0] + '-' + date[1];
     var day = moment.tz(date, timezone);
     $("#timestamp").val(day.unix());
-    $("#days").children('td').each(function(index) {
+    $("#days").children('th').each(function(index) {
         if(index == 0) {
             return;
         }

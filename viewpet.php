@@ -19,7 +19,9 @@ if($_SESSION['authenticated'] < 2) {
 <script src="js/moment-timezone.min.js"></script>
 <script src="js/pikaday.js"></script>
 <script src="js/pikaday.jquery.js"></script>
+<script src="js/menu.js"></script>
 <link rel="stylesheet" type="text/css" href="css/pikaday.css" />
+<link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
 
@@ -37,8 +39,6 @@ if(!empty($_GET['id'])) {
         if(!empty($_POST['Name']) && !empty($_POST['Breed']) && !empty($_GET['id'])) {
 
             (!empty($_POST['TwoPeople'])) ? $two = 1 : $two = 0;
-
-            (!empty($_POST['DogOfMonth'])) ? $dom = strtotime($_POST['DogOfMonth']) : $dom = false;
             
             $age = NULL;
         
@@ -58,7 +58,7 @@ if(!empty($_GET['id'])) {
             (is_array($_POST['Vaccines2'])) ? $stmt->bindValue(':Vaccines2', json_encode($_POST['Vaccines2'])) : $stmt->bindValue(':Vaccines2', NULL);
             (!empty($_POST['Notes'])) ? $stmt->bindValue(':Notes', $_POST['Notes']) : $stmt->bindValue(':Notes', NULL);
             (!empty($_POST['Info'])) ? $stmt->bindValue(':Info', $_POST['Info']) : $stmt->bindValue(':Info', NULL);
-            ($dom != false) ? $stmt->bindValue(':DogOfMonth', $dom) : $stmt->bindValue(':DogOfMonth', NULL);
+            (!empty($_POST['DogOfMonth'])) ? $stmt->bindValue(':DogOfMonth', $_POST['DogOfMonth']) : $stmt->bindValue(':DogOfMonth', NULL);
             (is_array($_POST['Time'])) ? $stmt->bindValue(':Time', json_encode($_POST['Time'])) : $stmt->bindValue(':Time', NULL);
             $stmt->bindValue(':PreferredGroomer', $_POST['PreferredGroomer']);
             $stmt->bindValue(':TwoPeople', $two);
@@ -253,11 +253,13 @@ if(!empty($_GET['id'])) {
         }
         
         if(empty($_GET['e'])) { ?>
-            <a href="schedule.php?pet=<?php echo $pet['ID']; ?>">Schedule Pet</a>
-            <a href="viewpet.php?id=<?php echo $pet['ID']; ?>&e=1">Edit Pet</a>
-            <a href="viewpet.php?id=<?php echo $pet['ID']; ?>&delpet=<?php echo $pet['ID']; ?>" onclick="return confirm('Are you sure you want to delete this pet?')">Delete Pet</a><br />
+            <div class="editbox">
+                <a class="buttonlink" href="schedule.php?pet=<?php echo $pet['ID']; ?>">Schedule Pet</a>
+                <a class="buttonlink" href="viewpet.php?id=<?php echo $pet['ID']; ?>&e=1">Edit Pet</a>
+                <a class="buttonlink" href="viewpet.php?id=<?php echo $pet['ID']; ?>&delpet=<?php echo $pet['ID']; ?>" onclick="return confirm('Are you sure you want to delete this pet?')">Delete Pet</a><br />
+            </div>
             <?php echo (!empty($pet['Picture'])) ? '<img src="' . $pet['Picture'] . '" />' : ''; ?>
-            <table>
+            <table class="infotable">
                 <tr><td>ID:</td><td><?php echo $pet['ID']; ?></td></tr>
                 <tr><td>Name:</td><td><?php echo $pet['Name']; ?></td></tr>
                 <tr><td>Owned By:</td><td><a href="viewclient.php?id=<?php echo $pet['OwnedBy'] ?>"><?php echo $owner['FirstName'] . ' ' . $owner['LastName'] . ' ' . '(' . $pet['OwnedBy'] . ')'; ?></a></td></tr>
@@ -271,7 +273,7 @@ if(!empty($_GET['id'])) {
                 <tr><td>Release Form:</td><td><?php echo ((!empty($pet['Release'])) ? '<a href="' . $pet['Release'] . '">View</a>' : 'None'); ?></td></tr>
                 <tr><td>Notes:</td><td><?php echo $pet['Notes']; ?></td></tr>
                 <tr><td>Warnings:</td><td><?php echo $pet['Info']; ?></td></tr>
-                <tr><td>Dog of the Month Date:</td><td><?php echo date('m/d/Y', $pet['DogOfMonth']); ?></td></tr>
+                <tr><td>Dog of the Month Date:</td><td><?php echo $pet['DogOfMonth']; ?></td></tr>
                 <tr>
                     <td>Time (In Minutes):</td>
                     <td>
@@ -304,7 +306,7 @@ if(!empty($_GET['id'])) {
                     }
                     if(!empty($futureevents)) {
                         echo "<h3>Future Visits:</h3>";
-                        echo "<table>";
+                        echo "<table class=\"shortlist offset\">";
                         foreach($futureevents as $event) {
                             $date = new DateTime("@" . ($event['StartTime']));
                             echo '<tr><td>' . $date->format("m/d/Y @ h:i A") . ' <a href="viewpet.php?id=' . $_GET['id'] . '&delschedule=' . $event['ID'] . '&starttime=' . $event['StartTime'] . '" onclick="return confirm(\'Are you sure you want to delete this event?\')">Delete</a></td></tr>';
@@ -313,7 +315,7 @@ if(!empty($_GET['id'])) {
                     }
                     if(!empty($pastevents)) {
                         echo "<h3>Past Visits:</h3>";
-                        echo "<table>";
+                        echo "<table class=\"shortlist offset\">";
                         foreach($pastevents as $event) {
                             $date = new DateTime("@" . ($event['StartTime']));
                             echo '<tr><td>' . $date->format("m/d/Y @ h:i A") . ' <a href="viewpet.php?id=' . $_GET['id'] . '&delschedule=' . $event['ID'] . '&starttime=' . $event['StartTime'] . '" onclick="return confirm(\'Are you sure you want to delete this event?\')">Delete</a></td></tr>';
@@ -326,9 +328,10 @@ if(!empty($_GET['id'])) {
             $stmt = $database->query("SELECT Name, ID FROM Users WHERE Access = 2");
             $groomers = $stmt->fetchAll(); ?>
             <h2>Editing Pet <?php echo $pet['ID']; ?></h2>
-            <form action="viewpet.php?id=<?php echo $pet['ID']; ?>" method="post" enctype="multipart/form-data">
+            <form class="infoform" action="viewpet.php?id=<?php echo $pet['ID']; ?>" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="MAX_FILE_SIZE" value="10485760" />
                 <label for="Name">Name: </label><input type="text" name="Name" id="Name" value="<?php echo $pet['Name']; ?>"><br />
+                <label for="Breed">Breed: </label>
                 <select name="Breed" id="Breed">
                     <optgroup label="Toy Breeds:">
                         <?php
@@ -399,23 +402,23 @@ if(!empty($_GET['id'])) {
                 <label for="Weight">Weight: </label><input type="text" name="Weight" id="Weight" value="<?php echo $pet['Weight']; ?>"><br />
                 <label for="Coloring">Coloring: </label><input type="text" name="Coloring" id="Coloring" value="<?php echo $pet['Coloring']; ?>"><br />                
                 <label for="Vet">Vet: </label><input type="text" name="Vet" id="Vet" value="<?php echo $pet['Vet']; ?>"><br />                
-                <label for="Vaccines">Vaccines: </label><input type="file" name="Vaccines" id="Vaccines"><br />
-                <label>Vaccine Dates: </label><br />
-                    <label for="Rabies">Rabies: </label><input id="Rabies" type="text" name="Vaccines2[Rabies]" value="<?php echo $pet['Vaccines2']['Rabies']; ?>" /><br />
-                    <label for="Distemper">Distemper: </label><input id="Distemper" type="text" name="Vaccines2[Distemper]" value="<?php echo $pet['Vaccines2']['Distemper']; ?>" /><br />
-                    <label for="Parvo">Parvo: </label><input id="Parvo" type="text" name="Vaccines2[Parvo]" value="<?php echo $pet['Vaccines2']['Parvo']; ?>" /><br />
+                <label for="Vaccines">Vaccine File: </label><input type="file" name="Vaccines" id="Vaccines"><br />
+                <h3 class="nooffset">Vaccine Dates: </h3>
+                    <label class="offset" for="Rabies">Rabies: </label><input id="Rabies" type="text" name="Vaccines2[Rabies]" value="<?php echo $pet['Vaccines2']['Rabies']; ?>" /><br />
+                    <label class="offset" for="Distemper">Distemper: </label><input id="Distemper" type="text" name="Vaccines2[Distemper]" value="<?php echo $pet['Vaccines2']['Distemper']; ?>" /><br />
+                    <label class="offset" for="Parvo">Parvo: </label><input id="Parvo" type="text" name="Vaccines2[Parvo]" value="<?php echo $pet['Vaccines2']['Parvo']; ?>" /><br />
                 <label for="Release">Release Form: </label><input type="file" name="Release" id="Release"><br />
                 <label for="Notes">Notes: </label><textarea name="Notes" id="Notes"><?php echo $pet['Notes']; ?></textarea><br />
                 <label for="Info">Warnings: </label><textarea name="Info" id="Info"><?php echo $pet['Info']; ?></textarea><br />
                 <label for="Picture">Picture: </label><input type="file" name="Picture" id="Picture"><br />
-                <label for="DogOfMonth">Dog of the Month Date (MM/DD/YYYY): </label><input type="text" name="DogOfMonth" id="DogOfMonth" value="<?php echo date('m/d/Y', $pet['DogOfMonth']); ?>"><br />
-                <label>Time (In Minutes): </label><br />
-                <label>Bath Only: </label><br />
-                    <label for="BathBath">Bathing Time: </label><input id="BathBath" type="text" name="Time[Bath][BathTime]" value="<?php echo $pet['Time']['Bath']['BathTime'] ?>" /><br />
-                    <label for="BathGroom">Grooming Time: </label><input id="BathGroom" type="text" name="Time[Bath][GroomTime]" value="<?php echo $pet['Time']['Bath']['GroomTime'] ?>" /><br />
-                <label>Bath and Groom: </label><br />
-                    <label for="GroomBath">Bathing Time: </label><input id="GroomBath" type="text" name="Time[Groom][BathTime]" value="<?php echo $pet['Time']['Groom']['BathTime'] ?>" /><br />
-                    <label for="GroomGroom">Grooming Time: </label><input id="GroomGroom" type="text" name="Time[Groom][GroomTime]" value="<?php echo $pet['Time']['Groom']['GroomTime'] ?>" /><br />
+                <label for="DogOfMonth">Dog of the Month Date: </label><input type="text" name="DogOfMonth" id="DogOfMonth" value="<?php echo $pet['DogOfMonth']; ?>"><br />
+                <h3 class="nooffset">Time (In Minutes): </h3>
+                <h4>Bath Only: </h4>
+                    <label class="offset" for="BathBath">Bathing Time: </label><input id="BathBath" type="text" name="Time[Bath][BathTime]" value="<?php echo $pet['Time']['Bath']['BathTime'] ?>" /><br />
+                    <label class="offset" for="BathGroom">Grooming Time: </label><input id="BathGroom" type="text" name="Time[Bath][GroomTime]" value="<?php echo $pet['Time']['Bath']['GroomTime'] ?>" /><br />
+                <h4>Bath and Haircut: </h4>
+                    <label class="offset" for="GroomBath">Bathing Time: </label><input id="GroomBath" type="text" name="Time[Groom][BathTime]" value="<?php echo $pet['Time']['Groom']['BathTime'] ?>" /><br />
+                    <label class="offset" for="GroomGroom">Grooming Time: </label><input id="GroomGroom" type="text" name="Time[Groom][GroomTime]" value="<?php echo $pet['Time']['Groom']['GroomTime'] ?>" /><br />
                 <label for="PreferredGroomer">Preferred Groomer: </label>
                 <select id="PreferredGroomer" name="PreferredGroomer">
                     <option value="NULL">Any</option>
@@ -438,11 +441,11 @@ else {
     $stmt = $database->query("SELECT * FROM Pets ORDER BY Name");
     $pets = $stmt->fetchAll();
     if(!empty($pets)) {
-        echo '<table><tr><th>ID</th><th>Name</th><th>Owned By</th></tr>';
+        echo '<table class="longlist"><tr><th>ID</th><th>Name</th><th>Owned By</th></tr>';
         foreach($pets as $pet) {
             $stmt = $database->query("SELECT FirstName, LastName FROM Owners WHERE ID = " . $pet['OwnedBy']);
             $owner = $stmt->fetch();
-            echo '<tr style="cursor: pointer;" onclick="window.document.location=\'viewpet.php?id=' . $pet['ID'] . '\'"><td>' . $pet['ID'] . '</td><td>' . $pet['Name'] . '</td><td>' . $owner['FirstName'] . ' ' . $owner['LastName'] . ' (' . $pet['OwnedBy'] . ')' . '</td></tr>';
+            echo '<tr class="listline" onclick="window.document.location=\'viewpet.php?id=' . $pet['ID'] . '\'"><td>' . $pet['ID'] . '</td><td>' . $pet['Name'] . '</td><td>' . $owner['FirstName'] . ' ' . $owner['LastName'] . ' (' . $pet['OwnedBy'] . ')' . '</td></tr>';
         }
         echo '</table>';
     }
@@ -461,6 +464,9 @@ $(function() {
         format: 'MM/DD/YYYY'
     });
     $('#Parvo').pikaday({
+        format: 'MM/DD/YYYY'
+    });
+    $('#DogOfMonth').pikaday({
         format: 'MM/DD/YYYY'
     });
 });

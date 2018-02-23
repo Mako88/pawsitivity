@@ -9,6 +9,7 @@ schedule.php:
     - Add back button
     Improve performance of DisableDay sort
     Fix extra <li> on Summary page with signature options
+    Set days closed based on global settings
     
     
 calendar.php:
@@ -27,12 +28,14 @@ search.php:
 newpet.php/viewpet.php:
 	Change time to "clicker" in 15 minute intervals on newpet page (don't allow base editing)
     Add groomer name to appointment list
+    Add cancel button
 	
 	
 newclient.php/viewclient.php:
 	Allow resetting the "missed" field on client pages
     - If visited is 0, display initial password
     - Allow deleting clients
+    Add cancel button
     
 
 newuser.php:

@@ -1,5 +1,87 @@
+/* Menu Styles */
+#menubox {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+}
+
+#menuicon {
+    width: 30px;
+    height: 30px;
+    position: relative;
+    display: none;
+    transition: all 0s 0.1s;
+}
+
+nav {
+    background: #d3ebff;
+    z-index: 999;
+    margin-bottom: 25px;
+}
+
 nav ul {
+    text-align: center;
     list-style: none;
+    padding: 0;
+}
+
+nav ul li {
+    float: left;
+    display: inline;
+    position: relative;
+    z-index: 999;
+}
+
+nav ul li a {
+    display: block;
+    padding: 15px 25px;
+    color: #444;
+    text-decoration: none;
+}
+
+nav ul li:hover, nav ul li.current {
+    background: #c9d8ff;
+}
+
+nav ul li ul {
+    position: absolute;
+    width: 100%;
+    background: #FFF;
+    z-index: 999;
+}
+
+nav ul li ul li {
+    width: 100%;
+}
+
+nav ul li ul li a {
+    display: block;
+    padding: 15px 10px;
+    color: #444;
+    text-decoration: none;
+}
+
+nav ul li ul li ul {
+    left: 100%;
+    top: 0;
+}
+
+.clearfix:before, .clearfix:after {
+    content: " ";
+    display: table;
+}
+
+.clearfix:after {
+    clear: both;
+}
+
+body {
+    background-color: #d3ebff;
+}
+
+#rightmenu {
+    float: right;
+    padding: 15px 25px;
 }
 
 .warning {
@@ -13,4 +95,200 @@ nav ul {
 
 .error {
     color: red;
+}
+
+.longlist {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.longlist th, .longlist td {
+    width: 200px;
+    text-align: left;
+    padding: 10px;
+    display: inline-block;
+}
+
+.longlist tr:not(:first-of-type):hover, .shorttable tr:not(:first-of-type):hover, .weektable tr:not(:first-of-type):hover {
+    background-color: #c9d8ff;
+}
+
+.listline {
+    cursor: pointer;
+}
+
+.infotable {
+    margin-left: 25px;
+}
+
+.infotable tr {
+    padding: 5px 0;
+    display: block;
+}
+
+.infotable td {
+    width: 200px;
+}
+
+.editbox {
+    margin-bottom: 25px;
+    display: block;
+}
+
+h2, h3, h4 {
+    margin-left: 10px;
+}
+
+.buttonlink {
+    min-width: 100px;
+    width: auto;
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2);
+    color: #222;
+    background: linear-gradient(#fff, #ddd);
+    border: 1px solid #ddd;
+    cursor: pointer;
+    display: inline-block;
+    padding: 10px;
+    text-decoration: none;
+    text-align: center;
+    border-radius: 5px;
+    margin: 5px;
+}
+
+.buttonlink:active {
+    background: linear-gradient(#ddd, #fff);
+}
+
+.shortlist {
+    margin: 0 0 25px 50px;
+}
+
+.shortlist tr {
+    display: block;
+    margin: 5px auto;
+}
+
+.shorttable th, .shorttable td {
+    width: 150px;
+    text-align: left;
+    display: inline-block;
+}
+
+.infoform {
+    margin-left: 25px;
+}
+
+.infoform {
+    margin-top: 50px;
+}
+
+
+.infoform label {
+    width: 200px;
+    margin-bottom: 5px;
+    text-align: left;
+    margin-right: 25px;
+    display: inline-block;
+    vertical-align: top;
+    padding: 9px;
+}
+
+.infoform checkbox label.checkbox {
+    display: block;
+    width: auto;
+    text-align: left;
+    margin-left: 30px;
+}
+
+.infoform input[type="checkbox"] {
+    width: auto;
+    margin-right: 10px;
+    /* Double-sized Checkboxes */
+    -ms-transform: scale(2); /* IE */
+    -moz-transform: scale(2); /* FF */
+    -webkit-transform: scale(2); /* Safari and Chrome */
+    -o-transform: scale(2); /* Opera */
+    transform: scale(2);
+    padding: 10px;
+    margin-top: 11px;
+}
+
+.infoform input, .infoform textarea, .infoform select {
+    border-radius: 5px;
+    width: 250px;
+    padding: 9px;
+    outline: 0;
+    border: 1px solid gray;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.2);
+    margin-bottom: 15px;
+}
+
+.infoform input[type="file"] {
+    box-shadow: none;
+    border: none;
+}
+
+.infoform input[type="checkbox"], .infoform input[type="radio"] {
+    box-shadow: none;
+}
+
+.infoform input:focus, .infoform textarea:focus {
+    border: 2px solid gray;
+}
+
+.infoform textarea {
+    width: 400px;
+    height: 200px;
+}
+
+.infoform input[type="submit"] {
+    min-width: 100px;
+    width: auto;
+    box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.2);
+    color: #222;
+    background: linear-gradient(#fff, #ddd);
+    border: 1px solid #ddd;
+    cursor: pointer;
+}
+
+.infoform input[type="submit"]:active {
+    background: linear-gradient(#ddd, #fff);
+}
+
+.nooffset {
+    margin-left: 0;
+}
+
+.offset {
+    margin-left: 10px;
+}
+
+#calendar {
+    background-color: white;
+    padding: 15px;
+}
+
+.weektable td, .weektable th {
+    margin: 0 5px;
+    display: inline-block;
+    width: 125px;
+    text-align: center;
+}
+
+.weektable tr {
+    margin: 10px 0;
+    display: block;
+}
+
+.weektable select {
+    width: 90px;
+    padding: 5px;
+}
+
+.weektable2 td, .weektable2 th {
+    width: 150px;
+}
+
+.weektable2 tr:hover {
+    background-color: #d3ebff !important;
 }

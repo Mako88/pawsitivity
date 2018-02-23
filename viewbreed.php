@@ -14,6 +14,7 @@ if($_SESSION['authenticated'] < 2) {
 <head>
 <meta charset="UTF-8">
 <title>View Breed</title>
+<link rel='stylesheet' href='css/styles.css' />
 </head>
 <body>
 
@@ -109,10 +110,11 @@ if(!empty($_GET['id'])) {
             }
     
             $breed['Time'] = json_decode($breed['Time'], true); ?>
-    
-            <a href="viewbreed.php?id=<?php echo $breed['ID']; ?>&e=1">Edit Breed</a>
-            <a href="viewbreed.php?id=<?php echo $breed['ID']; ?>&delete=<?php echo $breed['ID']; ?>" onclick="return confirm('Are you sure you want to delete this breed?')">Delete Breed</a><br />
-            <table>
+            <div class="editbox">
+                <a class="buttonlink" href="viewbreed.php?id=<?php echo $breed['ID']; ?>&e=1">Edit Breed</a>
+                <a class="buttonlink" href="viewbreed.php?id=<?php echo $breed['ID']; ?>&delete=<?php echo $breed['ID']; ?>" onclick="return confirm('Are you sure you want to delete this breed?')">Delete Breed</a><br />
+            </div>
+            <table class="infotable">
                 <tr><td>ID: </td><td><?php echo $breed['ID']; ?></td></tr>
                 <tr><td>Name: </td><td><?php echo $breed['Name']; ?></td></tr>
                 <tr><td>Group: </td><td><?php echo $group; ?></td></tr>
@@ -135,7 +137,7 @@ if(!empty($_GET['id'])) {
         else {
         $breed['Time'] = json_decode($breed['Time'], true); ?>
             <h2>Editing Breed <?php echo $breed['ID']; ?></h2>
-            <form action="viewbreed.php?id=<?php echo $breed['ID'] ?>" method="post">
+            <form class="infoform" action="viewbreed.php?id=<?php echo $breed['ID'] ?>" method="post">
                 <label for="Name">Breed Name: </label><input type="text" name="Name" id="Name" value="<?php echo $breed['Name'] ?>"><br />
                 <label for="Group">Group: </label>
                 <select name="Group">
@@ -178,7 +180,7 @@ else {
     $stmt = $database->query("SELECT * FROM Breeds ORDER BY BreedGroup, Name");
     $breeds = $stmt->fetchAll();
     if(!empty($breeds)) {
-        echo '<table><tr><th>Name</th><th>Group</th><th>Size</th><th>Bath-Only Times</th><th>Bath &amp; Groom Times</th><th>Base Bath Price</th><th>Base Groom Price</th></tr>';
+        echo '<table class="longlist"><tr><th>Name</th><th>Group</th><th>Size</th></tr>';
         foreach($breeds as $breed) {
             echo '<tr style="cursor: pointer;" onclick="window.document.location=\'viewbreed.php?id=' . $breed['ID'] . '\'">';
             echo '<td>' . $breed['Name'] . '</td>';
@@ -229,13 +231,6 @@ else {
                     break;
             }
             echo '</td>';
-            $time = json_decode($breed['Time'], true);
-            echo '<td><strong>Bath Time: </strong>' . $time['Bath']['BathTime'] . '<br />';
-            echo '<strong>Groom Time: </strong>' . $time['Bath']['GroomTime'] . '</td>';
-            echo '<td><strong>Bath Time: </strong>' . $time['Groom']['BathTime'] . '<br />';
-            echo '<strong>Groom Time: </strong>' . $time['Groom']['GroomTime'] . '</td>';
-            echo '<td>' . $breed['BathPrice'] . '</td>';
-            echo '<td>' . $breed['GroomPrice'] . '</td></tr>';
         }
         echo '</table>';
     }
@@ -245,6 +240,7 @@ else {
 }
 finish:
 ?>
-    
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="js/menu.js"></script>
 </body>
 </html>

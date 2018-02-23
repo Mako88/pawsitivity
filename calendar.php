@@ -70,6 +70,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
 <?php include "include/footer.php"; ?>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="js/menu.js"></script>
 <script src='js/moment.min.js'></script>
 <script src="js/moment-timezone.min.js"></script>
 <script src='js/fullcalendar.min.js'></script>

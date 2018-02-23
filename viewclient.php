@@ -15,11 +15,13 @@ if($_SESSION['authenticated'] < 2) {
 <meta charset="UTF-8">
 <title>View Client</title>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="js/menu.js"></script>
 <script src="js/moment.min.js"></script>
 <script src="js/moment-timezone.min.js"></script>
 <script src="js/pikaday.js"></script>
 <script src="js/pikaday.jquery.js"></script>
 <link rel="stylesheet" type="text/css" href="css/pikaday.css" />
+<link rel='stylesheet' href='css/styles.css' />
 </head>
 <body>
 <?php
@@ -62,33 +64,36 @@ if(!empty($_GET['id'])) {
     $pets = $stmt->fetchAll();
     if(!empty($client)) {
         if(empty($_GET['e'])) {
-            echo '<a href="viewclient.php?id=' . $client['ID'] . '&e=1">Edit Client</a><br />';
-            echo '<a href="newpass.php?id=' . $client['ID'] . '">Reset Client Password</a><br />';
-            echo '<a href="schedule.php?id=' . $client['ID'] . '">Schedule Client</a>';
-            echo '<table>';
-            echo '<tr><td>ID</td><td>' . $client['ID'] . '</td></tr>';
-            echo '<tr><td>First Name</td><td>' . $client['FirstName'] . '</td></tr>';
-            echo '<tr><td>Last Name</td><td>' . $client['LastName'] . '</td></tr>';
-            echo '<tr><td>Phone Number</td><td>' . $client['Phone'] . '</td></tr>';
-            echo '<tr><td>Address Line 1</td><td>' . $client['Address1'] . '</td></tr>';
-            echo '<tr><td>Address Line 2</td><td>' . $client['Address2'] . '</td></tr>';
-            echo '<tr><td>City</td><td>' . $client['City'] . '</td></tr>';
-            echo '<tr><td>State</td><td>' . $client['State'] . '</td></tr>';
-            echo '<tr><td>Zip Code</td><td>' . $client['Zip'] . '</td></tr>';
-            echo '<tr><td>Country</td><td>' . $client['Country'] . '</td></tr>';
-            echo '<tr><td>Email</td><td>' . $client['Email'] . '</td></tr>';
-            echo '<tr><td>Spouse\'s Name</td><td>' . $client['SpouseName'] . '</td></tr>';
-            echo '<tr><td>Spouse\'s Phone Number</td><td>' . $client['SpousePhone'] . '</td></tr>';
-            echo '<tr><td>Emergency Contact Name</td><td>' . $client['Emergency'] . '</td></tr>';
-            echo '<tr><td>Emergency Contact Phone Number</td><td>' . $client['EmergencyPhone'] . '</td></tr>';
-            echo '<tr><td>Authorized Pickup</td><td>' . $client['AuthorizedPickup'] . '</td></tr>';
-            echo '<tr><td>Authorized Pickup Phone Number</td><td>' . $client['APPhone'] . '</td></tr>';
-            echo '<tr><td>Referred By</td><td>' . $client['ReferredBy'] . '</td></tr>';
-            echo '<tr><td>Client Since</td><td>' . $client['DateCreated'] . '</td></tr>';
+            echo '<div class="editbox">';
+            echo '<a class="buttonlink" href="viewclient.php?id=' . $client['ID'] . '&e=1">Edit Client</a>';
+            echo '<a class="buttonlink" href="newpass.php?id=' . $client['ID'] . '">Reset Client Password</a>';
+            echo '<a class="buttonlink" href="schedule.php?id=' . $client['ID'] . '">Schedule Client</a>';
+            echo '<a class="buttonlink" href="newpet.php?id=' . $client['ID'] . '">Add a pet</a>';
+            echo '</div>';
+            echo '<table class="infotable">';
+            echo '<tr><td>ID:</td><td>' . $client['ID'] . '</td></tr>';
+            echo '<tr><td>First Name:</td><td>' . $client['FirstName'] . '</td></tr>';
+            echo '<tr><td>Last Name:</td><td>' . $client['LastName'] . '</td></tr>';
+            echo '<tr><td>Phone Number:</td><td>' . $client['Phone'] . '</td></tr>';
+            echo '<tr><td>Address Line 1:</td><td>' . $client['Address1'] . '</td></tr>';
+            echo '<tr><td>Address Line 2:</td><td>' . $client['Address2'] . '</td></tr>';
+            echo '<tr><td>City:</td><td>' . $client['City'] . '</td></tr>';
+            echo '<tr><td>State:</td><td>' . $client['State'] . '</td></tr>';
+            echo '<tr><td>Zip Code:</td><td>' . $client['Zip'] . '</td></tr>';
+            echo '<tr><td>Country:</td><td>' . $client['Country'] . '</td></tr>';
+            echo '<tr><td>Email:</td><td>' . $client['Email'] . '</td></tr>';
+            echo '<tr><td>Spouse\'s Name:</td><td>' . $client['SpouseName'] . '</td></tr>';
+            echo '<tr><td>Spouse\'s Phone Number:</td><td>' . $client['SpousePhone'] . '</td></tr>';
+            echo '<tr><td>Emergency Contact Name:</td><td>' . $client['Emergency'] . '</td></tr>';
+            echo '<tr><td>Emergency Contact Phone Number:</td><td>' . $client['EmergencyPhone'] . '</td></tr>';
+            echo '<tr><td>Authorized Pickup:</td><td>' . $client['AuthorizedPickup'] . '</td></tr>';
+            echo '<tr><td>Authorized Pickup Phone Number:</td><td>' . $client['APPhone'] . '</td></tr>';
+            echo '<tr><td>Referred By:</td><td>' . $client['ReferredBy'] . '</td></tr>';
+            echo '<tr><td>Client Since:</td><td>' . $client['DateCreated'] . '</td></tr>';
             echo '</table>';
-            echo '<h2>Pets:</h2>';
+            echo '<h2 class="offset">Pets:</h2>';
             if(!empty($pets)) {
-                echo '<table><th><td>ID</td><td>Name</td><td>Breed</td></th>';
+                echo '<table class="shortlist shorttable"><tr><th>ID</th><th>Name</th><th>Breed</th></tr>';
                 foreach($pets as $pet) {
                     $stmt = $database->prepare("SELECT Name FROM Breeds WHERE ID = :ID");
                     $stmt->bindValue(':ID', $pet['Breed']);
@@ -101,11 +106,10 @@ if(!empty($_GET['id'])) {
             else {
                 echo "<p>No pets added yet :/</p>";
             }
-            echo '<a href="newpet.php?id=' . $client['ID'] . '">Add a pet</a>';
         }
         else {
             echo '<h2>Editing Client ' . $client['ID'] . '</h2>';
-            echo '<form action="viewclient.php?id=' . $client['ID'] . '" method="post">';
+            echo '<form class="infoform" action="viewclient.php?id=' . $client['ID'] . '" method="post">';
             echo '<label for="FirstName">First Name: </label><input type="text" name="FirstName" id="FirstName" value="' . $client['FirstName'] . '"><br />';
             echo '<label for="LastName">Last Name: </label><input type="text" name="LastName" id="LastName" value="' . $client['LastName'] . '"><br />';
             echo '<label for="Phone">Phone: </label><input type="text" name="Phone" id="Phone" value="' . $client['Phone'] . '"><br />';
@@ -136,9 +140,9 @@ else {
     $stmt = $database->query("SELECT * FROM Owners ORDER BY LastName");
     $clients = $stmt->fetchAll();
     if(!empty($clients)) {
-        echo '<table><tr><th>ID</th><th>First Name</th><th>Last Name</th></tr>';
+        echo '<table class="longlist"><tr><th>ID</th><th>First Name</th><th>Last Name</th></tr>';
         foreach($clients as $client) {
-            echo '<tr style="cursor: pointer;" onclick="window.document.location=\'viewclient.php?id=' . $client['ID'] . '\'"><td>' . $client['ID'] . '</td><td>' . $client['FirstName'] . '</td><td>' . $client['LastName'] . '</td></tr>';
+            echo '<tr class="listline" onclick="window.document.location=\'viewclient.php?id=' . $client['ID'] . '\'"><td>' . $client['ID'] . '</td><td>' . $client['FirstName'] . '</td><td>' . $client['LastName'] . '</td></tr>';
         }
         echo '</table>';
     }

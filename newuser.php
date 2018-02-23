@@ -14,6 +14,7 @@ if($_SESSION['authenticated'] < 2) {
     <head>
         <meta charset="UTF-8">
         <title>Create User</title>
+        <link rel="stylesheet" href="css/styles.css" />
     </head>
 <body>
 <?php include "include/menu.php"; ?>
@@ -38,7 +39,7 @@ if(!empty($_POST['username']) && !empty($_POST['name']) && !empty($_POST['passwo
 }
 else {
 ?>
-    <form method="post" action="newuser.php">
+    <form class="infoform" method="post" action="newuser.php">
         <label for="username">Username: </label><input type="text" name="username" /><br />
         <label for="name">Name: </label><input type="text" name="name" /><br />
         <label for="email">Email: </label><input type="text" name="email" /><br />
@@ -62,6 +63,7 @@ else {
 <?php
 }
 ?>
-    
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="js/menu.js"></script>
 </body>
 </html>

@@ -15,11 +15,13 @@ if($_SESSION['authenticated'] < 2) {
 <meta charset="UTF-8">
 <title>Add Client</title>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="js/menu.js"></script>
 <script src="js/moment.min.js"></script>
 <script src="js/moment-timezone.min.js"></script>
 <script src="js/pikaday.js"></script>
 <script src="js/pikaday.jquery.js"></script>
 <link rel="stylesheet" type="text/css" href="css/pikaday.css" />
+<link rel='stylesheet' href='css/styles.css' />
 </head>
 <body>
 <?php include "include/menu.php"; ?>
@@ -88,7 +90,7 @@ if(isset($newpass)) {
     Password: ' . $newpass . '</p>
     <a href="newpet.php?id=' . $id . '">Add a pet for this client</a>';
 } else { ?>
-    <form action="newclient.php" method="post">
+    <form class="infoform" action="newclient.php" method="post">
         <label for="FirstName">First Name: </label><input type="text" name="FirstName" id="FirstName"><br />
         <label for="LastName">Last Name: </label><input type="text" name="LastName" id="LastName"><br />
         <label for="Phone">Phone: </label><input type="text" name="Phone" id="Phone"><br />

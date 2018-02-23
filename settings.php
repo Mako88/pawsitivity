@@ -14,6 +14,7 @@ if($_SESSION['authenticated'] != 5) {
     <head>
         <meta charset="UTF-8">
         <title>Global Settings</title>
+        <link rel='stylesheet' href='css/styles.css' />
     </head>
 <body>
 <?php include "include/menu.php"; ?>
@@ -51,7 +52,7 @@ if(!empty($_POST['timezone']) && !empty($_POST['eventsage']) && !empty($_POST['s
 }
 else {
 ?>
-    <form method="post" action="settings.php">
+    <form class="infoform" method="post" action="settings.php">
         <label for="timezone">Timezone: </label>
         <select name="timezone" >
             <option disabled selected style='display:none;'>Time Zone...</option>
@@ -95,8 +96,8 @@ else {
                 <label for="dl">Large Dogs: </label><input id="dl" type="text" name="tiers[3][L]" value="<?php if($set) echo $tiers[3]['L']; ?>" /><br />
                 <label for="dx">Extra Large Dogs: </label><input id="dx" type="text" name="tiers[3][XL]" value="<?php if($set) echo $tiers[3]['XL']; ?>" /><br />
         <label>Store Hours:</label>
-        <table>
-            <tr><td>Sunday</td><td>Monday</td><td>Tuesday</td><td>Wednesday</td><td>Thursday</td><td>Friday</td><td>Saturday</td></tr>
+        <table class="weektable weektable2">
+            <tr><th>Sunday</th><th>Monday</th><th>Tuesday</th><th>Wednesday</th><th>Thursday</th><th>Friday</th><th>Saturday</th></tr>
             <tr>
             <?php
                 for($i = 0; $i < 7; $i++) {
@@ -144,6 +145,7 @@ else {
 <?php
 }
 ?>
-    
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="js/menu.js"></script>  
 </body>
 </html>

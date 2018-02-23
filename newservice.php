@@ -14,6 +14,7 @@ if($_SESSION['authenticated'] < 2) {
     <head>
         <meta charset="UTF-8">
         <title>Add Service</title>
+        <link rel='stylesheet' href='css/styles.css' />
     </head>
 <body>
 <?php include "include/menu.php"; ?>
@@ -39,7 +40,7 @@ if(!empty($_POST['name']) && isset($_POST['type']) && !empty($_POST['time']) && 
 }
 else {
 ?>
-    <form method="post" action="newservice.php">
+    <form class="infoform" method="post" action="newservice.php">
         <label for="name">Name: </label><input id="name" type="text" name="name" /><br />
         <label for="description">Description: </label><textarea id="price" name="description"></textarea><br />
         <label for="type">Type: </label>
@@ -47,22 +48,22 @@ else {
             <option value="0">Signature Service</option>
             <option value="1">Bathing Service</option>
             <option value="2">Grooming Service</option>
-        </select><br />
-        <label>Petite Dogs: </label>
-            <label for="pt">Time: </label><input id="pt" type="text" name="time[P]" />
-            <label for="pp">Price: </label><input id="pp" type="text" name="price[P]" /><br />
-        <label>Small Dogs: </label>
-            <label for="st">Time: </label><input id="st" type="text" name="time[S]" />
-            <label for="sp">Price: </label><input id="sp" type="text" name="price[S]" /><br />
-        <label>Medium Dogs: </label>
-            <label for="mt">Time: </label><input id="mt" type="text" name="time[M]" />
-            <label for="mp">Price: </label><input id="mp" type="text" name="price[M]" /><br />
-        <label>Large Dogs: </label>
-            <label for="lt">Time: </label><input id="lt" type="text" name="time[L]" />
-            <label for="lp">Price: </label><input id="lp" type="text" name="price[L]" /><br />
-        <label>Extra Large Dogs: </label>
-            <label for="xt">Time: </label><input id="xt" type="text" name="time[XL]" />
-            <label for="xp">Price: </label><input id="xp" type="text" name="price[XL]" /><br />
+        </select>
+        <h3>Petite Dogs: </h3>
+            <label class="offset" for="pt">Time: </label><input id="pt" type="text" name="time[P]" /><br />
+            <label class="offset" for="pp">Price: </label><input id="pp" type="text" name="price[P]" />
+        <h3>Small Dogs: </h3>
+            <label class="offset" for="st">Time: </label><input id="st" type="text" name="time[S]" /><br />
+            <label class="offset" for="sp">Price: </label><input id="sp" type="text" name="price[S]" />
+        <h3>Medium Dogs: </h3>
+            <label class="offset" for="mt">Time: </label><input id="mt" type="text" name="time[M]" /><br />
+            <label class="offset" for="mp">Price: </label><input id="mp" type="text" name="price[M]" />
+        <h3>Large Dogs: </h3>
+            <label class="offset" for="lt">Time: </label><input id="lt" type="text" name="time[L]" /><br />
+            <label class="offset" for="lp">Price: </label><input id="lp" type="text" name="price[L]" />
+        <h3>Extra Large Dogs: </h3>
+            <label class="offset" for="xt">Time: </label><input id="xt" type="text" name="time[XL]" /><br />
+            <label class="offset" for="xp">Price: </label><input id="xp" type="text" name="price[XL]" /><br />
         
         <input type="submit" name="submit" value="Add Service">
     </form>
@@ -70,6 +71,7 @@ else {
 <?php
 }
 ?>
-    
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="js/menu.js"></script>
 </body>
 </html>
