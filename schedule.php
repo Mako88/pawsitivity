@@ -997,8 +997,8 @@ $_SESSION['Hours'] = $hours;
                         goto finish;
                     }
                     
+                    $notrecurring = false;
                     if(!empty($_POST['recurring'])) {
-                        $notrecurring = false;
                         
                         $_SESSION['info']['Recurring'] = $_POST['recurring'];
                         
