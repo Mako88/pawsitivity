@@ -449,6 +449,8 @@ $_SESSION['Hours'] = $hours;
             var size = "<?php echo $_SESSION['info']['Size']; ?>";
             var prevstart = <?php echo $prevstart ?>;
             var previd = <?php echo $_SESSION['info']['previd'] ?>;
+            var package = <?php echo $_SESSION['info']['package'] ?>;
+            console.log(package);
             
             // Set open and close times for each day of the week
             var openclose = <?php echo $_SESSION['Hours']; ?>;
@@ -588,7 +590,7 @@ $_SESSION['Hours'] = $hours;
                         }
                         
                         // If we're scheduling a large dog, and the event is a large dog, add the event to the total number of large dogs for this groomer
-                        if((size == "L" || size == "XL") && (events[i]['Size'] == "L" || events[i]['Size'] == "XL") && events[i]['GroomerID'] == id) {
+                        if((size == "L" || size == "XL") && (events[i]['Size'] == "L" || events[i]['Size'] == "XL") && events[i]['GroomerID'] == id && package == 2) {
                             largedogs++;
                         }
                         
