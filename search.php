@@ -26,11 +26,13 @@ function find_key_value($array, $key, $val)
 <head>
 <meta charset="UTF-8">
 <title>Search</title>
+<link rel='stylesheet' href='css/styles.css' />
 </head>
 <body>
 <?php include "include/menu.php"; ?>
-<form action="search.php" method="post">
-    <input type="text" name="search" id="search" placeholder="Search...">
+    
+<form class="infoform search" action="search.php" method="post">
+    <input type="text" name="search" id="bigsearch" placeholder="Search...">
     <input type="submit" value="Go">
 </form>
 
@@ -48,10 +50,10 @@ if(!empty($_POST['search'])) {
     $stmt->execute();
     $clients = $stmt->fetchAll();
     if(!empty($clients)) {
-        echo '<table><th><td>ID</td><td>First Name</td><td>Last Name</td></th>';
+        echo '<table class="shortlist shorttable"><tr><th>ID</th><th>First Name</th><th>Last Name</th></tr>';
         foreach($clients as $client) {
             if(!in_array($client['ID'], $clientids)) { array_push($clientids, $client['ID']); }
-            echo '<tr style="cursor: pointer;" onclick="window.document.location=\'viewclient.php?id=' . $client['ID'] . '\'"><td>' . $client['ID'] . '</td><td>' . $client['FirstName'] . '</td><td>' . $client['LastName'] . '</td></tr>';
+            echo '<tr class="listline" onclick="window.document.location=\'viewclient.php?id=' . $client['ID'] . '\'"><td>' . $client['ID'] . '</td><td>' . $client['FirstName'] . '</td><td>' . $client['LastName'] . '</td></tr>';
         }
         echo '</table>';
     }
@@ -73,11 +75,11 @@ if(!empty($_POST['search'])) {
         }
     }
     if(!empty($pets)) {
-        echo '<table><th><td>ID</td><td>Name</td><td>Owned By</td></th>';
+        echo '<table class="shortlist shorttable"><tr><th>ID</th><th>Name</th><th>Owned By</th></tr>';
         foreach($pets as $pet) {
             $stmt = $database->query("SELECT FirstName, LastName FROM Owners WHERE ID = " . $pet['OwnedBy']);
             $owner = $stmt->fetch();
-            echo '<tr><td><a href="viewpet.php?id=' . $pet['ID'] . '">' . $pet['ID'] . '</td><td><a href="viewpet.php?id=' . $pet['ID'] . '">' . $pet['Name'] . '</a></td><td><a href="viewclient.php?id=' . $pet['OwnedBy'] . '">' . $owner['FirstName'] . ' ' . $owner['LastName'] . ' (' . $pet['OwnedBy'] . ')' . '</a></td></tr>';
+            echo '<tr class="listline"><td><a href="viewpet.php?id=' . $pet['ID'] . '">' . $pet['ID'] . '</td><td><a href="viewpet.php?id=' . $pet['ID'] . '">' . $pet['Name'] . '</a></td><td><a href="viewclient.php?id=' . $pet['OwnedBy'] . '">' . $owner['FirstName'] . ' ' . $owner['LastName'] . ' (' . $pet['OwnedBy'] . ')' . '</a></td></tr>';
         }
         echo '</table>';
     }
@@ -87,6 +89,7 @@ if(!empty($_POST['search'])) {
 }
 
 ?>
-    
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="js/menu.js"></script>
 </body>
 </html>

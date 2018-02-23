@@ -21,6 +21,7 @@ $_SESSION['Hours'] = $hours;
 <html lang="en">
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="js/menu.js"></script>
     <script src="js/moment.min.js"></script>
     <script src="js/moment-timezone.min.js"></script>
     <script src="js/pikaday.js"></script>
@@ -55,7 +56,7 @@ $_SESSION['Hours'] = $hours;
 
         if(!empty($pets)) {
             
-            echo '<form action="schedule.php" method="post">';
+            echo '<form class="infoform schedule" action="schedule.php" method="post">';
             echo '<label for="pet">Select which pet you would like to schedule: </label>';
             echo '<select id="pet" name="pet">';
             foreach($pets as $pet) {
@@ -130,7 +131,7 @@ $_SESSION['Hours'] = $hours;
                     $_SESSION['info']['previd'] = $prevevent['ID'];
                 }
                 
-                echo '<form action="schedule.php" method="post">';
+                echo '<form class="infoform schedule" action="schedule.php" method="post">';
                 
                 echo '<label for="package">Select Package: </label><select id="package" name="package">';
                 echo '<option value="1" ' . (intval($package) == 1 ? 'selected' : '') . '>Bath</option>';
@@ -427,7 +428,7 @@ $_SESSION['Hours'] = $hours;
             echo '<p class="error">WARNING: Grooming time is 0</p>';
         }
 ?>
-    <form action="schedule.php" method="post" id="day">
+    <form class="infoform schedule" action="schedule.php" method="post" id="day">
         <label for="datepicker">Please pick a day to schedule your pet: </label>
         <input type="text" id="datepicker" name="date" /><br />
         <label for="slot">Please pick a time slot: </label>
@@ -1025,9 +1026,6 @@ $_SESSION['Hours'] = $hours;
                         }
                         
                         
-                        
-                        
-                        
                         // Set the enddate to the end of the day (local) of the last instance
                         // In the for loop, compare the current instance to the END of the enddate day
                         for($i = $_SESSION['info']['timestamp']; $i < strtotime("tomorrow", $enddate->getTimestamp()) - 1; $i += $_SESSION['info']['RecInterval']*604800) {
@@ -1157,14 +1155,16 @@ $_SESSION['Hours'] = $hours;
 
                     echo "<h1>Summary</h1>";
 
-                    echo "<table><tr>";
+                    echo "<table class=\"infotable\"><tr>";
                     echo "<td>Pet: </td><td>" . $petname . "</td></tr><tr>";
                     echo "<td>Package: </td><td>" . $package . "</td></tr><tr>";
                     echo "<td>Services: </td><td>";
                     if(!empty($_SESSION['info']['services'])) {
                         echo "<ul>";
                         foreach($services as $service) {
-                            echo "<li>" . $service . "</li>";
+                            if(!empty($service)) {
+                                echo "<li>" . $service . "</li>";
+                            }
                         }
                         echo "</ul>";
                     }
@@ -1194,13 +1194,13 @@ $_SESSION['Hours'] = $hours;
                         echo '<p class="error">NOTE: The first recurrance had a conflict, so this appointment will not be stored as a recurring appointment.</p>';
                     }
                     
-                    echo '<form action="schedule.php" method="post" id="confirm">';
-                    echo '<input type="hidden" name="confirm" value="1" />';
-                    echo '<button type="submit" form="confirm">Confirm</button>';
-                    echo '</form>';
-                    echo '<form id="cancel" action="schedule.php" method="get">';
+                    echo '<form class="buttonform" id="cancel" action="schedule.php" method="get">';
                     echo '<input type="hidden" name="id" value="' . $_SESSION['info']['client'] . '" />';
-                    echo '<button type="submit" form="cancel">Cancel</button>';
+                    echo '<button class="submitbutton" type="submit" form="cancel">Cancel</button>';
+                    echo '</form>';
+                    echo '<form class="buttonform" action="schedule.php" method="post" id="confirm">';
+                    echo '<input type="hidden" name="confirm" value="1" />';
+                    echo '<button class="submitbutton" type="submit" form="confirm">Confirm</button>';
                     echo '</form>';
                     goto finish;
                 }

@@ -32,7 +32,7 @@ if(!defined('DIRECT')) die(); // Don't allow this file to be called directly
         <?php } ?>
     </ul>
     <div id="rightmenu">
-        <form action="search.php" method="post" id="menusearch">
+        <form class="infoform littlesearch" action="search.php" method="post" id="menusearch">
             <input type="text" name="search" id="search" placeholder="Search...">
             <input type="submit" value="Go">
         </form>
