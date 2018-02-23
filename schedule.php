@@ -506,9 +506,30 @@ $_SESSION['Hours'] = $hours;
 
                 // Fill array with minutes spa is open today
                 switch(today.day()) {
-                    // Tuesday and Wednesday
+                    // Sunday
+                    case 0:
+                        var i = openclose[0]['open'];
+                        while(i <= openclose[0]['close']) {
+                            if(i == 780) {
+                                i = 810; // Add a break from 1:00 - 1:30
+                            }
+                            todayminutes.push(i);
+                            i++;
+                        }
+                        break;
+                    // Monday
+                    case 1:
+                        var i = openclose[1]['open'];
+                        while(i <= openclose[1]['close']) {
+                            if(i == 780) {
+                                i = 810; // Add a break from 1:00 - 1:30
+                            }
+                            todayminutes.push(i);
+                            i++;
+                        }
+                        break;
+                    // Tuesday
                     case 2:
-                    case 3:
                         var i = openclose[2]['open'];
                         while(i <= openclose[2]['close']) {
                             if(i == 780) {
@@ -518,10 +539,19 @@ $_SESSION['Hours'] = $hours;
                             i++;
                         }
                         break;
-
-                    // Thursday and Friday
+                    // Wednesday
+                    case 3:
+                        var i = openclose[3]['open'];
+                        while(i <= openclose[3]['close']) {
+                            if(i == 780) {
+                                i = 810; // Add a break from 1:00 - 1:30
+                            }
+                            todayminutes.push(i);
+                            i++;
+                        }
+                        break;
+                    // Thursday
                     case 4:
-                    case 5:
                         var i = openclose[4]['open'];
                         while(i <= openclose[4]['close']) {
                             if(i == 780) {
@@ -531,8 +561,18 @@ $_SESSION['Hours'] = $hours;
                             i++;
                         }
                         break;
-
-                    // Saturday (0900 - 1500)
+                    // Friday
+                    case 5:
+                        var i = openclose[5]['open'];
+                        while(i <= openclose[5]['close']) {
+                            if(i == 780) {
+                                i = 810; // Add a break from 1:00 - 1:30
+                            }
+                            todayminutes.push(i);
+                            i++;
+                        }
+                        break;
+                    // Saturday
                     case 6:
                         var i = openclose[6]['open'];
                         while(i <= openclose[6]['close']) {
@@ -728,9 +768,9 @@ $_SESSION['Hours'] = $hours;
                 today.utc();
                 var dayindex = today.day();
                 var allslots = Array();
-                    
-                // Disable Sundays and Mondays
-                if(dayindex == 0 || dayindex == 1) {
+                
+                // Disable days the spa is closed
+                if(openclose[dayindex]['open'] == 'closed') {
                     return true;
                 }
 
