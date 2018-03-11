@@ -34,7 +34,7 @@ $hours = json_decode($hours, true);
 <?php
     
 include "include/menu.php";
-    
+        
     $stmt = $database->query("SELECT ID, Name FROM Users WHERE Access = 2");
     $employees = $stmt->fetchAll();
     
@@ -131,7 +131,7 @@ include "include/menu.php";
     
 // Set open and close times for each day of the week
 var openclose = <?php echo json_encode($hours); ?>;
-var timezone = "<?php echo $timezone; ?>";
+var timezone = "UTC";
     
 var timeslots = Array();
 for(var i = 0; i < 7; i++) {
@@ -146,7 +146,7 @@ for(var i = 0; i < 7; i++) {
     }
 }
 
-moment.tz.setDefault("America/New_York");
+moment.tz.setDefault("UTC");
     
 var events = <?php echo json_encode($events); ?>;
 var employees = <?php echo json_encode($employees); ?>;
@@ -186,9 +186,9 @@ function updateTable() {
                     if(events[k]['GroomerID'] != employees[i]['ID']) {
                         continue;
                     }
-                    if(day.unix() + moment.tz.zone(timezone).offset(moment())*60 + ((index-1) * 86400) + time*60 == events[k]['StartTime'] + events[k]['TotalTime']*60) {
+                    if(day.unix() + ((index-1) * 86400) + time*60 == events[k]['StartTime'] + events[k]['TotalTime']*60) {
                         if(j+1 == timeslots[index-1]['open'].length) {
-                            if(events[k]['StartTime'] != day.unix() + moment.tz.zone(timezone).offset(moment())*60 + ((index-1) * 86400) + openclose[index-1]['open']*60) {
+                            if(events[k]['StartTime'] != day.unix() + ((index-1) * 86400) + openclose[index-1]['open']*60) {
                                 continue;
                             }
                             off = true;
@@ -220,7 +220,7 @@ function updateTable() {
                     if(events[k]['GroomerID'] != employees[i]['ID']) {
                         continue;
                     }
-                    if(day.unix() + moment.tz.zone(timezone).offset(moment())*60 + ((index-1) * 86400) + time*60 == events[k]['StartTime']) {
+                    if(day.unix() + ((index-1) * 86400) + time*60 == events[k]['StartTime']) {
                         if(j == 0) {
                             continue;
                         }
