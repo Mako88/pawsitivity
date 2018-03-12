@@ -32,6 +32,7 @@ if ($_SESSION['authenticated'] != 0) {
     <head>
         <meta charset="UTF-8">
         <title>Login</title>
+        <link rel='stylesheet' href='css/styles.css' />
     </head>
 <body>
     <?php include "include/menu.php"; ?>
@@ -71,5 +72,6 @@ if (!empty($_POST['username']) && !empty($_POST['password'])) {
     <label for="password">Password: </label><input type="password" name="password" /><br />
     <input type="submit" value="login" />
 </form>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 </body>
 </html>

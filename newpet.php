@@ -15,10 +15,12 @@ if($_SESSION['authenticated'] < 2) {
 <meta charset="UTF-8">
 <title>Add Pet</title>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="js/menu.js"></script>
 <script src="js/moment.min.js"></script>
 <script src="js/moment-timezone.min.js"></script>
 <script src="js/pikaday.js"></script>
 <script src="js/pikaday.jquery.js"></script>
+<link rel='stylesheet' href='css/styles.css' />
 <link rel="stylesheet" type="text/css" href="css/pikaday.css" />
 </head>
 <body>
@@ -161,7 +163,7 @@ $(function() {
 });
 </script>
     
-<form action="newpet.php?id=<?php echo $_GET['id']; ?>" method="post" enctype="multipart/form-data">
+<form class="infoform" action="newpet.php?id=<?php echo $_GET['id']; ?>" method="post" enctype="multipart/form-data">
     <input type="hidden" name="MAX_FILE_SIZE" value="10485760" />
     <label for="Name">Name: </label><input type="text" name="Name" id="Name"><br />
     <label for="Breed">Breed: </label>

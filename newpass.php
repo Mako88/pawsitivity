@@ -43,6 +43,7 @@ if(!empty($_POST['password'])) {
     <head>
         <meta charset="UTF-8">
         <title>Reset Password</title>
+        <link rel='stylesheet' href='css/styles.css' />
     </head>
 <body>
     <?php
@@ -59,7 +60,7 @@ if(!empty($_POST['password'])) {
             echo '<p>There was a problem updating your password</p>';
         }
      } else { ?>
-        <form method="post" action="newpass.php">
+        <form class="infoform" method="post" action="newpass.php">
             <?php if($admin) { ?>
             <label for="username">Username: </label><input type="text" name="username" value="<?php echo $id; ?>" /><br />
             <?php } ?>
@@ -67,5 +68,7 @@ if(!empty($_POST['password'])) {
             <input type="submit" name="submit" value="Submit">
         </form>
     <?php } ?>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="js/menu.js"></script>
 </body>
 </html>
