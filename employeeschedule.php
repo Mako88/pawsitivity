@@ -35,7 +35,7 @@ $hours = json_decode($hours, true);
     
 include "include/menu.php";
         
-    $stmt = $database->query("SELECT ID, Name FROM Users WHERE Access = 2");
+    $stmt = $database->query("SELECT ID, Name FROM Users WHERE Access = 2 OR Access = 3");
     $employees = $stmt->fetchAll();
     
     $defaultdate = "false";
