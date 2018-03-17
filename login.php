@@ -67,11 +67,12 @@ if (!empty($_POST['username']) && !empty($_POST['password'])) {
    }
 }
 ?>
-<form action="login.php?redirect=<?php echo $redirect ?>" method="post">
+<form class="infoform" action="login.php?redirect=<?php echo $redirect ?>" method="post">
     <label for="username">Username: </label><input type="text" name="username" /><br />
     <label for="password">Password: </label><input type="password" name="password" /><br />
     <input type="submit" value="login" />
 </form>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="js/menu.js"></script>
 </body>
 </html>

@@ -189,6 +189,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
             events: objects,
             eventLimit: true,
             timezone: "UTC",
+            showNonCurrentDates: false,
             lazyFetching: false,
             customButtons: {
                 viewAll: {
