@@ -46,6 +46,7 @@ if(!empty($_GET['id'])) {
                 $stmt->bindValue(':ID', $id);
                 $stmt->execute();
                 $breed = $stmt->fetch();
+                goto listall;
             }
             else {
                 echo "<p>The Time information was corrupted.</p>";
@@ -177,6 +178,7 @@ if(!empty($_GET['id'])) {
     }
 }
 else {
+listall:
     $stmt = $database->query("SELECT * FROM Breeds ORDER BY BreedGroup, Name");
     $breeds = $stmt->fetchAll();
     if(!empty($breeds)) {
