@@ -631,7 +631,7 @@ $_SESSION['Hours'] = $hours;
                         }
                         
                         // If we're scheduling a large dog, and the event is a large dog, add the event to the total number of large dogs for this groomer
-                        if((size == "L" || size == "XL") && (events[i]['Size'] == "L" || events[i]['Size'] == "XL") && events[i]['GroomerID'] == id && package == 2 && events[i]['Package'] == 2) {
+                        if((size == "L" || size == "XL") && (events[i]['Size'] == "L" || events[i]['Size'] == "XL") && events[i]['GroomerID'] == id) {
                             largedogs++;
                         }
                         

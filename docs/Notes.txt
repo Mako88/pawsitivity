@@ -5,18 +5,19 @@ schedule.php:
     Don't allow clicking next if no date is set
     Add error if someone skips to page 2 but doesn't have permission to schedule.
     Don't allow end dates before start dates
-    Change summary page to popup box
     - Add back button
     Improve performance of DisableDay sort
+    - Automatically prefer bathers if scheduling bath dog
     
     
 calendar.php:
-    Different colors in month view for bath-only and groom-only
-    Add check in/out button on popup (edit status in database)
-    Add missed button on popup. When button is pushed, delete that event and set Missed flag.
-    Add a "disable day" checkbox to prevent a day from having any more scheduled
-    Add notes on a dog for the day in popup
+    - Different colors in month and day view for bath-only and groom-only
+    ~ Add check in/out button on popup (edit status in database)
+    ~ Add missed button on popup. When button is pushed, delete that event and set Missed flag.
+    - Add a "disable day" checkbox to prevent a day from having any more scheduled
+    - Add notes on a dog for the day in popup
     Add delete button?
+    - Break price down into package and services
     
 	
 search.php:
@@ -24,14 +25,13 @@ search.php:
 
 	
 newpet.php/viewpet.php:
-	Change time to "clicker" in 15 minute intervals on newpet page (don't allow base editing)
-    Add groomer name to appointment list
+    - Show popup box when clicking on a past appointment to view info
     Add cancel button
 	
 	
 newclient.php/viewclient.php:
 	Allow resetting the "missed" field on client pages
-    - If visited is 0, display initial password
+    If visited is 0, display initial password
     - Allow deleting clients
     Add cancel button
     
