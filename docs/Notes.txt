@@ -5,7 +5,6 @@ schedule.php:
     Don't allow clicking next if no date is set
     Add error if someone skips to page 2 but doesn't have permission to schedule.
     Don't allow end dates before start dates
-    - Add back button
     Improve performance of DisableDay sort
     - Automatically prefer bathers if scheduling bath dog
     
@@ -17,7 +16,7 @@ calendar.php:
     - Add a "disable day" checkbox to prevent a day from having any more scheduled
     - Add notes on a dog for the day in popup
     Add delete button?
-    - Break price down into package and services
+    - Break price down into package and services on popup
     
 	
 search.php:
@@ -30,7 +29,7 @@ newpet.php/viewpet.php:
 	
 	
 newclient.php/viewclient.php:
-	Allow resetting the "missed" field on client pages
+	~ Allow resetting the "missed" field on client pages
     If visited is 0, display initial password
     - Allow deleting clients
     Add cancel button
@@ -41,7 +40,6 @@ newuser.php:
 
 	
 Misc:
-	Look into fax-to-pdf
 	Add bath/groom tracking using Status field
 	Validate all forms with Jquery
 	Give error if setup hasn't been run yet/redirect to setup page
@@ -52,4 +50,3 @@ Misc:
     - Prevent infinite redirect when user doesn't have permission to access page
     - Add daily backups
     Create script to reset everyone's passwords 1-time.
-    Style everything

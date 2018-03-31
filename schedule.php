@@ -37,6 +37,10 @@ $_SESSION['Hours'] = $hours;
     
     include 'include/menu.php';
     
+    if(!empty($_POST['page'])) {
+        $_SESSION['page'] = $_POST['page'];
+    }
+    
     if(empty($_POST) && empty($_GET['pet'])) {
         
         $_SESSION['page'] = 'package';
@@ -88,13 +92,29 @@ $_SESSION['Hours'] = $hours;
 			$stmt = $database->query("SELECT Timezone FROM Globals");
 			$timezone = $stmt->fetch();
 			
-            $_SESSION['info'] = array();
-            $_SESSION['info']['client'] = $pet['OwnedBy'];
-            $_SESSION['info']['Time'] = json_decode($pet['Time'], true);
-            $_SESSION['info']['Size'] = $res['Size'];
-            $_SESSION['info']['GroomPrice'] = $res['GroomPrice'];
-            $_SESSION['info']['BathPrice'] = $res['BathPrice'];
-            $_SESSION['info']['previd'] = -1;
+            if(empty($_POST['page'])) {
+                $_SESSION['info'] = array();
+                $_SESSION['info']['client'] = $pet['OwnedBy'];
+                $_SESSION['info']['Time'] = json_decode($pet['Time'], true);
+                $_SESSION['info']['Size'] = $res['Size'];
+                $_SESSION['info']['GroomPrice'] = $res['GroomPrice'];
+                $_SESSION['info']['BathPrice'] = $res['BathPrice'];
+                $_SESSION['info']['previd'] = -1;
+                $package = $prevgroomer = '0';
+                $servicelist = Array();
+            }
+            else {
+                if(!empty($_SESSION['info']['groomer2'])) {
+                    $prevgroomer = $_SESSION['info']['groomer2'];
+                }
+                else {
+                    $prevgroomer = '0';
+                }
+                $package = $_SESSION['info']['package'];
+                if(!empty($_SESSION['info']['services'])) {
+                    $servicelist = $_SESSION['info']['services'];
+                }
+            }
             
             $stmt = $database->query("SELECT * FROM Services");
             $services = $stmt->fetchAll();
@@ -107,8 +127,6 @@ $_SESSION['Hours'] = $hours;
                 
                 $stmt = $database->query("SELECT SigUpcharge, SigPrice FROM Globals");
                 $globals = $stmt->fetch();
-                $package = $prevgroomer = '0';
-                $servicelist = Array();
                 
                 if(!empty($_GET['eventid']) && $_SESSION['authenticated'] > 1) {
                     $stmt = $database->prepare("SELECT * FROM Scheduling WHERE ID = :ID");
@@ -286,10 +304,17 @@ $_SESSION['Hours'] = $hours;
         
         $_SESSION['page'] = 'summary';
         
-        if($_POST['package'] == 1 || $_POST['package'] == 2 || $_POST['package'] == 3 || $_POST['package'] == 4) {
-            $_SESSION['info']['package'] = $_POST['package'];
+        if(!empty($_POST['page'])) {
+            $prevstart = $_SESSION['info']['timestamp'];
         }
         else {
+            $prevstart = "false";
+        }
+        
+        if(!empty($_POST['package']) && ($_POST['package'] == 1 || $_POST['package'] == 2 || $_POST['package'] == 3 || $_POST['package'] == 4)) {
+            $_SESSION['info']['package'] = $_POST['package'];
+        }
+        else if(empty($_POST['page'])){
             echo '<p>Your package selection data is corrupted.</p>';
             goto finish;
         }
@@ -307,13 +332,12 @@ $_SESSION['Hours'] = $hours;
             $stmt->bindValue(':Time2', $now);
             $stmt->execute();
             $events = $stmt->fetchAll();
-            if(!empty($events)) {
-                $stmt = $database->prepare("SELECT ID, Seniority, Tier FROM Users WHERE ID = :ID");
-                $stmt->bindValue(':ID', $_POST['groomer']);
-                $stmt->execute();
-                $groomers = $stmt->fetchAll();
-            }
-            else {
+            
+            $stmt = $database->prepare("SELECT ID, Seniority, Tier FROM Users WHERE ID = :ID");
+            $stmt->bindValue(':ID', $_POST['groomer']);
+            $stmt->execute();
+            $groomers = $stmt->fetchAll();
+            if(empty($groomers)) {
                 $stmt = $database->prepare("(SELECT * FROM Scheduling WHERE Recurring = 0 AND StartTime >= :Time1) UNION (SELECT * FROM Scheduling WHERE Recurring = 1 AND EndDate >= :Time2)");
                 $stmt->bindValue(':Time1', $now);
                 $stmt->bindValue(':Time2', $now);
@@ -327,6 +351,9 @@ $_SESSION['Hours'] = $hours;
                     $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2 ORDER BY Seniority");
                     $groomers = $stmt->fetchAll();
                 }
+            }
+            else {
+                $_SESSION['info']['groomer2'] = $_POST['groomer'];
             }
         }
         else {
@@ -411,9 +438,10 @@ $_SESSION['Hours'] = $hours;
         
         // Set price
         
-        $_SESSION['info']['Price'] = $_POST['price'];
+        if(!empty($_POST['price'])) {
+            $_SESSION['info']['Price'] = $_POST['price'];
+        }
         
-        $prevstart = "false";
         if(!empty($_SESSION['info']['prevstart'])) {
             $prevstart = $_SESSION['info']['prevstart'];
         }
@@ -433,8 +461,8 @@ $_SESSION['Hours'] = $hours;
         <input type="text" id="datepicker" name="date" /><br />
         <label for="slot">Please pick a time slot: </label>
         <select id="slot" name="slot"><option value="NULL" selected disabled>Please select a day...</option></select><br />
-        <input type="checkbox" name="recurring" id="recurring" value="1" /><label for="recurring">Automatically reschedule every </label>
-        <input type="text" name="weeks" id="weeks" /><label> week(s) until </label>
+        <input type="checkbox" name="recurring" id="recurring" value="1" <?php echo (!empty($_SESSION['info']['Recurring']) ? 'checked' : ''); ?> /><label for="recurring">Automatically reschedule every </label>
+        <input type="text" name="weeks" id="weeks" value="<?php echo (!empty($_SESSION['info']['RecInterval']) ? $_SESSION['info']['RecInterval'] : ''); ?>" /><label> week(s) until </label>
         <input type="text" id="datepicker2" name="enddate" /><br />
         <input type="submit" value="Next" />
     </form>
@@ -451,7 +479,10 @@ $_SESSION['Hours'] = $hours;
             var prevstart = <?php echo $prevstart ?>;
             var previd = <?php echo $_SESSION['info']['previd'] ?>;
             var package = <?php echo $_SESSION['info']['package'] ?>;
-            console.log(package);
+            var backenddate = "<?php
+                if(!empty($_SESSION['info']['EndDate'])) {
+                    echo $_SESSION['info']['EndDate'];
+                } ?>";
             
             // Set open and close times for each day of the week
             var openclose = <?php echo $_SESSION['Hours']; ?>;
@@ -976,8 +1007,17 @@ $_SESSION['Hours'] = $hours;
                 picker.setMinDate(false);
                 picker.setMoment(prevDate);
             }
+            
+            if(backenddate != false) {
+                picker2.setMoment(moment.unix(backenddate));
+            }
         });
     </script>
+    <form class="buttonform" id="back" action="schedule.php" method="post">
+        <input type="hidden" name="page" value="package" />
+        <input type="hidden" name="pet" value="<?php echo $_SESSION['info']['pet']; ?>" />
+        <button class="submitbutton" type="submit" form="back">Back</button>
+    </form>
 <?php
     }
     else if($_SESSION['page'] == 'summary') {
@@ -1234,6 +1274,12 @@ $_SESSION['Hours'] = $hours;
                         echo '<p class="error">NOTE: The first recurrance had a conflict, so this appointment will not be stored as a recurring appointment.</p>';
                     }
                     
+                    
+                    echo '<form class="buttonform" id="back" action="schedule.php" method="post">';
+                    echo '<input type="hidden" name="page" value="date" />';
+                    echo '<input type="hidden" name="groomer" value="' . (!empty($_SESSION['info']['groomer2']) ? $_SESSION['info']['groomer2'] : 'NULL') . '" />';
+                    echo '<button class="submitbutton" type="submit" form="back">Back</button>';
+                    echo '</form>';
                     echo '<form class="buttonform" id="cancel" action="schedule.php" method="get">';
                     echo '<input type="hidden" name="id" value="' . $_SESSION['info']['client'] . '" />';
                     echo '<button class="submitbutton" type="submit" form="cancel">Cancel</button>';

@@ -253,7 +253,7 @@ h2, h3, h4 {
     border-radius: 5px;
 }
 
-.infoform input[type="submit"]:active, .submitbutton {
+.infoform input[type="submit"]:active, .submitbutton:active {
     background: linear-gradient(#ddd, #fff);
 }
 
