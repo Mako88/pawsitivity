@@ -350,7 +350,7 @@ $_SESSION['Hours'] = $hours;
                 $stmt->execute();
                 $events = $stmt->fetchAll();
                 if($_SESSION['info']['package'] == 1) {
-                    $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2 OR Access = 3 ORDER BY Seniority");
+                    $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2 OR Access = 3 ORDER BY Access, Seniority");
                     $groomers = $stmt->fetchAll();
                 }
                 else {
@@ -369,7 +369,7 @@ $_SESSION['Hours'] = $hours;
             $stmt->execute();
             $events = $stmt->fetchAll();
             if($_SESSION['info']['package'] == 1) {
-                $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2 OR Access = 3 ORDER BY Seniority");
+                $stmt = $database->query("SELECT ID, Seniority, Tier FROM Users WHERE Access = 2 OR Access = 3 ORDER BY Access, Seniority");
                 $groomers = $stmt->fetchAll();
             }
             else {
@@ -810,6 +810,7 @@ $_SESSION['Hours'] = $hours;
                     allslots[i]['count'] = getcount(groomers[i]['ID'], today);
                     allslots[i]['seniority'] = groomers[i]['Seniority'];
                     allslots[i]['slots'] = Array();
+                    allslots[i]['access'] = groomers[i]['Access'];
                     var minutes = getavailable(groomers[i]['ID'], today);
                     if(!minutes) {
                         continue;
@@ -847,10 +848,16 @@ $_SESSION['Hours'] = $hours;
                 var sortedslots = Array();
                 
                 // Remove slots from allslots in order and put them into sortedslots
+                // sortedslots has lowest priority in the front, highest in the back
+                // allslots has groomers first, then bathers
                 while(allslots.length > 0) {
                     var selected = 0;
                     var curcount = allslots[selected]['count'];
                     for(var i = 0; i < allslots.length; i++) {
+                        // Make sure all groomers are put into sortedslots before bathers
+                        if(allslots[selected]['access'] != allslots[i]['access']) {
+                            continue;
+                        }
                         if(allslots[i]['count'] > curcount) {
                             selected = i;
                             curcount = allslots[i]['count'];
@@ -875,6 +882,9 @@ $_SESSION['Hours'] = $hours;
                     timeslots[index]['groomers'].push(sortedslots[0]['groomer']);
                 }
                 
+                
+                // For each groomer, look through every available slot. For each of those slots, look through the entire timeslots array
+                // Add the slots to the timeslots array, replacing ones with the same starttime (so the highest priority will end up being shown)
                 for(var i = 1; i < sortedslots.length; i++) {
                     for(var j = 0; j < sortedslots[i]['slots'].length; j++) {
                         reset:
