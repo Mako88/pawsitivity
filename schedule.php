@@ -114,6 +114,9 @@ $_SESSION['Hours'] = $hours;
                 if(!empty($_SESSION['info']['services'])) {
                     $servicelist = $_SESSION['info']['services'];
                 }
+                else {
+                    $servicelist = Array();
+                }
             }
             
             $stmt = $database->query("SELECT * FROM Services");
@@ -322,6 +325,9 @@ $_SESSION['Hours'] = $hours;
         if(!empty($_POST['services']) && is_array($_POST['services'])) {
             $_SESSION['info']['services'] = $_POST['services'];
         }
+        else {
+            $_SESSION['info']['services'] = NULL;
+        }
         
         if(!empty($_POST['groomer'])) {
             $now = time();
@@ -385,9 +391,6 @@ $_SESSION['Hours'] = $hours;
             $events[$key]['Size'] = $size['Size'];
         }
         
-        // Calculate time for current pet
-        $totaltime = 0;
-        
         if($_SESSION['info']['package'] == 2 || $_SESSION['info']['package'] == 4) {
             $groomtime = $_SESSION['info']['Time']['Groom']['GroomTime'];
             $bathtime = $_SESSION['info']['Time']['Groom']['BathTime'];
@@ -417,15 +420,7 @@ $_SESSION['Hours'] = $hours;
             }
         }        
         
-        $totaltime = ceil(($bathtime + $groomtime)/15)*15;
         
-        if(empty($totaltime)) {
-            echo "<p>We're sorry, but the total time is zero.</p>";
-            goto finish;
-        }
-        
-        // Round total time, but not individual times
-        $_SESSION['info']['TotalTime'] = $totaltime;
         $_SESSION['info']['BathTime'] = $bathtime;
         $_SESSION['info']['GroomTime'] = $groomtime;
         
@@ -471,7 +466,6 @@ $_SESSION['Hours'] = $hours;
             
             var events = <?php echo json_encode($events); ?>;
             var bathtime = <?php echo ceil($bathtime/15)*15; ?>;
-            var totaltime = <?php echo $totaltime; ?>;
             var slottime = <?php echo $slottime; ?>;
             var groomers = <?php echo json_encode($groomers); ?>;
             var tiers = <?php echo $tiers['Tiers']; ?>;
@@ -1360,6 +1354,26 @@ $_SESSION['Hours'] = $hours;
                 $stmt->execute(); 
             }
         }
+        
+        $stmt = $database->query("SELECT Tiers FROM Globals");
+        $tiers = $stmt->fetch();
+        
+        $tiers = json_decode($tiers['Tiers'], true);
+        
+        $stmt = $database->prepare("SELECT Tier FROM Users WHERE ID = :ID");
+        $stmt->bindValue(':ID', $_SESSION['info']['groomer']);
+        $stmt->execute();
+        $tier = $stmt->fetch();
+        
+        $tier = $tier['Tier'];
+        
+        $_SESSION['info']['GroomTime'] += $tiers[$tier][$_SESSION['info']['Size']];
+        
+        if($_SESSION['info']['GroomTime'] == 0) {
+            $_SESSION['info']['GroomTime'] = 15;
+        }
+        
+        $_SESSION['info']['TotalTime'] = ceil(($_SESSION['info']['BathTime'] + $_SESSION['info']['GroomTime'])/15)*15;
         
         $_SESSION['page'] = null;
         $stmt = $database->prepare('INSERT INTO Scheduling (PetID, StartTime, GroomTime, BathTime, TotalTime, GroomerID, Recurring, RecInterval, EndDate, Package, Services, Price) VALUES (:PetID, :StartTime, :GroomTime, :BathTime, :TotalTime, :GroomerID, :Recurring, :RecInterval, :EndDate, :Package, :Services, :Price)');
