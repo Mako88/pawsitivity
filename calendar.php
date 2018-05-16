@@ -82,7 +82,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
             return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ '<br />' +'$2');
         }
         
-        var oldevents = <?php echo json_encode($events); ?>;
+        var oldevents = <?php echo json_encode($events, JSON_NUMERIC_CHECK); ?>;
         
         var pets = <?php echo json_encode($pets); ?>;
         
