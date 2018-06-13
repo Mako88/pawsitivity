@@ -200,8 +200,6 @@ $_SESSION['Hours'] = $hours;
                 var bathers = <?php echo json_encode($bathers); ?>;
                 var prevgroomer = "<?php echo (!empty($_POST['groomer']) ? $_POST['groomer'] : $prevgroomer); ?>";
                 var preferredgroomer = "<?php echo $pet['PreferredGroomer'] ?>";
-                console.log(prevgroomer);
-                console.log(preferredgroomer);
 
                 
                 for(var i = 0; i < services.length; i++) {
