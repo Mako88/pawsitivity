@@ -1,22 +1,23 @@
 schedule.php:
 	Don't allow users to schedule if Missed field is 1, tell them to call / inform receptionist.
-    Disable groom services when bath selected
     If groom price or time is 0, disable groom packages for clients (not employees)
     Don't allow clicking next if no date is set
     Add error if someone skips to page 2 but doesn't have permission to schedule.
-    Don't allow end dates before start dates
     Improve performance of DisableDay sort
-    - Automatically prefer bathers if scheduling bath dog
+    - Add notes for the dog when scheduling on the package page
+    ~ Underneath Signature Package, add checkbox for extra neatening with price box
+    ~ Warn if client has missed when scheduling (Have reset button which adds date and fee [half of the missed appointment's package cost] to that day's notes, and removes missed flag from client)
+    ~ Add missed flag to event which was missed
     
     
 calendar.php:
     - Different colors in month and day view for bath-only and groom-only
-    ~ Add check in/out button on popup (edit status in database)
-    ~ Add missed button on popup. When button is pushed, delete that event and set Missed flag.
+    ~ Add check in/out button next to edit button (edit status in database)
+    ~ Add missed button on popup. When button is pushed, set Missed flag.
     - Add a "disable day" checkbox to prevent a day from having any more scheduled
-    - Add notes on a dog for the day in popup
-    Add delete button?
+    - Add notes on a dog for the day in popup: editable
     - Break price down into package and services on popup
+    ~ Add delete button with "Are you sure?" to popup
     
 	
 search.php:
@@ -33,20 +34,29 @@ newclient.php/viewclient.php:
     If visited is 0, display initial password
     - Allow deleting clients
     Add cancel button
+    ~ Add red "Missed" next to appointments they missed
     
 
 newuser.php:
 	- Add viewuser.php to allow editing a user
+    
 
+viewbreed.php:
+    - Add price to list table
+
+
+services
+    ~ Add short description field that shows on viewservices list
 	
 Misc:
 	Add bath/groom tracking using Status field
 	Validate all forms with Jquery
 	Give error if setup hasn't been run yet/redirect to setup page
     Redirect to global settings page after setup
-	Find timeclock software (with the ability to print/email reports)
 	Figure out text/email reminders with scheduling
-    - Automatically remove events the age from global settings
-    - Prevent infinite redirect when user doesn't have permission to access page
+    Automatically remove events the age from global settings
+    Prevent infinite redirect when user doesn't have permission to access page
     - Add daily backups
     Create script to reset everyone's passwords 1-time.
+    ~ Remove groups from breeds
+    ~ Remove pets and clients lists from menu
