@@ -55,11 +55,11 @@ if(!empty($_GET['id'])) {
             (!empty($_POST['Weight'])) ? $stmt->bindValue(':Weight', $_POST['Weight']) : $stmt->bindValue(':Weight', NULL);
             (!empty($_POST['Coloring'])) ? $stmt->bindValue(':Coloring', $_POST['Coloring']) : $stmt->bindValue(':Coloring', NULL);
             (!empty($_POST['Vet'])) ? $stmt->bindValue(':Vet', $_POST['Vet']) : $stmt->bindValue(':Vet', NULL);
-            (is_array($_POST['Vaccines2'])) ? $stmt->bindValue(':Vaccines2', json_encode($_POST['Vaccines2'])) : $stmt->bindValue(':Vaccines2', NULL);
+            (is_array($_POST['Vaccines2'])) ? $stmt->bindValue(':Vaccines2', json_encode($_POST['Vaccines2'], JSON_NUMERIC_CHECK)) : $stmt->bindValue(':Vaccines2', NULL);
             (!empty($_POST['Notes'])) ? $stmt->bindValue(':Notes', $_POST['Notes']) : $stmt->bindValue(':Notes', NULL);
             (!empty($_POST['Info'])) ? $stmt->bindValue(':Info', $_POST['Info']) : $stmt->bindValue(':Info', NULL);
             (!empty($_POST['DogOfMonth'])) ? $stmt->bindValue(':DogOfMonth', $_POST['DogOfMonth']) : $stmt->bindValue(':DogOfMonth', NULL);
-            (is_array($_POST['Time'])) ? $stmt->bindValue(':Time', json_encode($_POST['Time'])) : $stmt->bindValue(':Time', NULL);
+            (is_array($_POST['Time'])) ? $stmt->bindValue(':Time', json_encode($_POST['Time'], JSON_NUMERIC_CHECK)) : $stmt->bindValue(':Time', NULL);
             $stmt->bindValue(':PreferredGroomer', $_POST['PreferredGroomer']);
             $stmt->bindValue(':TwoPeople', $two);
             $stmt->bindValue(':ID', $_GET['id']);

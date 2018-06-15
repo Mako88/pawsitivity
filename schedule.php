@@ -196,10 +196,10 @@ $_SESSION['Hours'] = $hours;
                 var price = 0;
                 var groom = <?php echo $_SESSION['info']['GroomPrice']; ?>;
                 var bath = <?php echo $_SESSION['info']['BathPrice']; ?>;
-                var services = <?php echo json_encode($services); ?>;
+                var services = <?php echo json_encode($services, JSON_NUMERIC_CHECK); ?>;
                 var size = "<?php echo $_SESSION['info']['Size'] ?>";
-                var groomers = <?php echo json_encode($groomers); ?>;
-                var bathers = <?php echo json_encode($bathers); ?>;
+                var groomers = <?php echo json_encode($groomers, JSON_NUMERIC_CHECK); ?>;
+                var bathers = <?php echo json_encode($bathers, JSON_NUMERIC_CHECK); ?>;
                 var prevgroomer = "<?php echo (!empty($_POST['groomer']) ? $_POST['groomer'] : $prevgroomer); ?>";
                 var preferredgroomer = "<?php echo $pet['PreferredGroomer'] ?>";
 
@@ -473,10 +473,10 @@ $_SESSION['Hours'] = $hours;
     <script>
         $(function() {
             
-            var events = <?php echo json_encode($events); ?>;
+            var events = <?php echo json_encode($events, JSON_NUMERIC_CHECK); ?>;
             var bathtime = <?php echo ceil($bathtime/15)*15; ?>;
             var slottime = <?php echo $slottime; ?>;
-            var groomers = <?php echo json_encode($groomers); ?>;
+            var groomers = <?php echo json_encode($groomers, JSON_NUMERIC_CHECK); ?>;
             var tiers = <?php echo $tiers['Tiers']; ?>;
             var size = "<?php echo $_SESSION['info']['Size']; ?>";
             var prevstart = <?php echo $prevstart ?>;
@@ -1361,7 +1361,7 @@ $_SESSION['Hours'] = $hours;
         $stmt->bindValue(':Package', $_SESSION['info']['package']);
         $stmt->bindValue(':Price', $_SESSION['info']['Price']);
         $stmt->bindValue(':Notes', $_SESSION['info']['notes']);
-        (!empty($_SESSION['info']['services']) ? $stmt->bindValue(':Services', json_encode($_SESSION['info']['services'])) : $stmt->bindValue(':Services', NULL));
+        (!empty($_SESSION['info']['services']) ? $stmt->bindValue(':Services', json_encode($_SESSION['info']['services'], JSON_NUMERIC_CHECK)) : $stmt->bindValue(':Services', NULL));
         if(!$stmt->execute()) {
             echo '<p class="error">An error occured! Save this and show it to John:</p>';
             print_r($stmt->errorInfo());

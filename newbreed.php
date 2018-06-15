@@ -28,7 +28,7 @@ if(!empty($_POST['Name']) && isset($_POST['Group']) && !empty($_POST['Size']) &&
         $stmt->bindValue(':Name', $_POST['Name']);
         $stmt->bindValue(':Group', $_POST['Group']);
         $stmt->bindValue(':Size', $_POST['Size']);
-        $stmt->bindValue(':Time', json_encode($_POST['Time']));
+        $stmt->bindValue(':Time', json_encode($_POST['Time'], JSON_NUMERIC_CHECK));
         $stmt->bindValue(':GroomPrice', $_POST['GroomPrice']);
         $stmt->bindValue(':BathPrice', $_POST['BathPrice']);
         $stmt->execute();

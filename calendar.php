@@ -54,7 +54,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                 $serv = $stmt->fetch();
                 array_push($services, $serv);
             }
-            $events[$key]['Services'] = json_encode($services);
+            $events[$key]['Services'] = json_encode($services, JSON_NUMERIC_CHECK);
         }
         $stmt = $database->prepare("SELECT Name FROM Users WHERE ID = :ID");
         $stmt->bindValue(":ID", $event['GroomerID']);
@@ -85,9 +85,9 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
         
         var oldevents = <?php echo json_encode($events, JSON_NUMERIC_CHECK); ?>;
         
-        var pets = <?php echo json_encode($pets); ?>;
+        var pets = <?php echo json_encode($pets, JSON_NUMERIC_CHECK); ?>;
         
-        var clients = <?php echo json_encode($clients); ?>;
+        var clients = <?php echo json_encode($clients, JSON_NUMERIC_CHECK); ?>;
         
         var objects = Array();
                 

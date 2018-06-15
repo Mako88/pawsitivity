@@ -41,7 +41,7 @@ if(!empty($_POST['timezone']) && !empty($_POST['eventsage']) && !empty($_POST['s
         $stmt->bindValue(':EventsAge', $_POST['eventsage']);
         $stmt->bindValue(':SigUpcharge', $_POST['sigupcharge']);
         $stmt->bindValue(':SigPrice', $_POST['sigprice']);
-        $stmt->bindValue(':Tiers', json_encode($_POST['tiers']));
+        $stmt->bindValue(':Tiers', json_encode($_POST['tiers'], JSON_NUMERIC_CHECK));
         $stmt->bindValue(':Hours', json_encode($_POST['hours'], JSON_NUMERIC_CHECK));
         $stmt->execute();
         echo "<p>Global Settings Set!</p>";

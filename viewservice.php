@@ -35,8 +35,8 @@ if(!empty($_GET['id'])) {
                 $stmt->bindValue(':Name', $_POST['name']);
                 $stmt->bindValue(':Description', $_POST['description']);
                 $stmt->bindValue(':Type', $_POST['type']);
-                $stmt->bindValue(':Time', json_encode($_POST['time']));
-                $stmt->bindValue(':Price', json_encode($_POST['price']));
+                $stmt->bindValue(':Time', json_encode($_POST['time'], JSON_NUMERIC_CHECK));
+                $stmt->bindValue(':Price', json_encode($_POST['price'], JSON_NUMERIC_CHECK));
                 $stmt->bindValue(':ID', $id);
                 $stmt->execute();
                 

@@ -58,11 +58,11 @@ else if(!empty($_POST)) {
         (!empty($_POST['Weight'])) ? $stmt->bindValue(':Weight', $_POST['Weight']) : $stmt->bindValue(':Weight', NULL);
         (!empty($_POST['Coloring'])) ? $stmt->bindValue(':Coloring', $_POST['Coloring']) : $stmt->bindValue(':Coloring', NULL);        
         (!empty($_POST['Vet'])) ? $stmt->bindValue(':Vet', $_POST['Vet']) : $stmt->bindValue(':Vet', NULL);        
-        (is_array($_POST['Vaccines2'])) ? $stmt->bindValue(':Vaccines2', json_encode($_POST['Vaccines2'])) : $stmt->bindValue(':Vaccines2', NULL);
+        (is_array($_POST['Vaccines2'])) ? $stmt->bindValue(':Vaccines2', json_encode($_POST['Vaccines2'], JSON_NUMERIC_CHECK)) : $stmt->bindValue(':Vaccines2', NULL);
         (!empty($_POST['Notes'])) ? $stmt->bindValue(':Notes', $_POST['Notes']) : $stmt->bindValue(':Notes', NULL);
         (!empty($_POST['Info'])) ? $stmt->bindValue(':Info', $_POST['Info']) : $stmt->bindValue(':Info', NULL);
         ($dom != false) ? $stmt->bindValue(':DogOfMonth', $dom) : $stmt->bindValue(':DogOfMonth', NULL);
-        (is_array($_POST['Time'])) ? $stmt->bindValue(':Time', json_encode($_POST['Time'])) : $stmt->bindValue(':Time', NULL);
+        (is_array($_POST['Time'])) ? $stmt->bindValue(':Time', json_encode($_POST['Time']), JSON_NUMERIC_CHECK) : $stmt->bindValue(':Time', NULL);
         $stmt->bindValue(':TwoPeople', $two);
         $stmt->bindValue(':PreferredGroomer', $_POST['PreferredGroomer']);
         $stmt->bindValue(':OwnedBy', $_GET['id']);
@@ -145,7 +145,7 @@ else {
 
 <script>
 $(function() {
-    var prices = <?php echo json_encode($prices); ?>;
+    var prices = <?php echo json_encode($prices, JSON_NUMERIC_CHECK); ?>;
     
     $('#Breed').change(function() {
         var id = $(this).val();

@@ -138,7 +138,7 @@ include "include/menu.php";
 <script>
     
 // Set open and close times for each day of the week
-var openclose = <?php echo json_encode($hours); ?>;
+var openclose = <?php echo json_encode($hours, JSON_NUMERIC_CHECK); ?>;
 var timezone = "UTC";
     
 var timeslots = Array();
@@ -156,8 +156,8 @@ for(var i = 0; i < 7; i++) {
 
 moment.tz.setDefault("UTC");
     
-var events = <?php echo json_encode($events); ?>;
-var employees = <?php echo json_encode($employees); ?>;
+var events = <?php echo json_encode($events, JSON_NUMERIC_CHECK); ?>;
+var employees = <?php echo json_encode($employees, JSON_NUMERIC_CHECK); ?>;
 var defaultdate = "<?php echo $defaultdate; ?>";
 
 function updateTable() {
