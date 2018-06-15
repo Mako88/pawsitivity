@@ -52,7 +52,9 @@ include "include/menu.php";
                     $stmt->bindValue(':Groomer', $employee['ID']);
                     $stmt->bindValue(':Time1', intval($_POST['timestamp']) + ($i * 86400));
                     $stmt->bindValue(':Time2', intval($_POST['timestamp']) + ($i * 86400) + 86399);
-                    $stmt->execute();
+                    if(!$stmt->execute()) {
+                        print_r($stmt->errorInfo());
+                    }
                     if($hours[$i]['open'] == "closed" || $hours[$i]['close'] == "closed") {
                         continue;
                     }
@@ -64,7 +66,9 @@ include "include/menu.php";
                         $stmt->bindValue(':GroomTime', $length);
                         $stmt->bindValue(':TotalTime', $length);
                         $stmt->bindValue(':GroomerID', $employee['ID']);
-                        $stmt->execute();
+                        if(!$stmt->execute()) {
+                            print_r($stmt->errorInfo());
+                        }
                     }
                     else {
                         if($_POST['schedule'][$employee['ID']][$i]['open'] - $hours[$i]['open'] != 0) {
@@ -75,7 +79,9 @@ include "include/menu.php";
                             $stmt->bindValue(':GroomTime', $length);
                             $stmt->bindValue(':TotalTime', $length);
                             $stmt->bindValue(':GroomerID', $employee['ID']);
-                            $stmt->execute();
+                            if(!$stmt->execute()) {
+                                print_r($stmt->errorInfo());
+                            }
                         }
                         if($hours[$i]['close'] - $_POST['schedule'][$employee['ID']][$i]['close'] != 0) {
                             $timestamp = intval($_POST['timestamp']) + ($i * 86400) + ($_POST['schedule'][$employee['ID']][$i]['close']*60);
@@ -85,7 +91,9 @@ include "include/menu.php";
                             $stmt->bindValue(':GroomTime', $length);
                             $stmt->bindValue(':TotalTime', $length);
                             $stmt->bindValue(':GroomerID', $employee['ID']);
-                            $stmt->execute();
+                            if(!$stmt->execute()) {
+                                print_r($stmt->errorInfo());
+                            }
                         }
                     }
                 }
