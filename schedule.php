@@ -1082,22 +1082,24 @@ $_SESSION['Hours'] = $hours;
                         $events = $stmt->fetchAll();
                         
                         // Check if making this recurring will conflict with anything. $i is the timestamp of each reccurance
-                        for($i = $_SESSION['info']['timestamp'] + $_SESSION['info']['RecInterval']*604800; $i < $_SESSION['info']['EndDate']; $i += $_SESSION['info']['RecInterval']*604800) {
+                        for($i = $_SESSION['info']['timestamp'] + $_SESSION['info']['BathTime']*60 + $_SESSION['info']['RecInterval']*604800; $i < $_SESSION['info']['EndDate']; $i += $_SESSION['info']['RecInterval']*604800) {
                             foreach($events as $event) {
+                                $eventstart = $event['StartTime'] + $event['BathTime']*60;
+                                $eventend = $eventstart + $event['GroomTime']*60;
                                 if($event['Recurring'] != 1) {
-                                    // Check if the current recurrance is between the start and end of each non-recurring event
-                                    if(($i >= $event['StartTime'] && $i < $event['StartTime'] + $event['GroomTime'] * 60) || ($i + $_SESSION['info']['GroomTime'] * 60 > $event['StartTime'] && $i + $_SESSION['info']['GroomTime'] * 60 <= $event['StartTime'] + $event['GroomTime'] * 60)) {
-                                        $finalevent = $i - $_SESSION['info']['RecInterval']*604800; // Make the last instance the one before it conflicted
+                                    // Check if the current recurrance starts or ends between the start and end of each non-recurring event
+                                    if(($i >= $eventstart && $i < $eventend) || ($i + $_SESSION['info']['GroomTime']*60 > $eventstart && $i + $_SESSION['info']['GroomTime']*60 <= $eventend)) {
+                                        $finalevent = $i - $_SESSION['info']['BathTime']*60 - $_SESSION['info']['RecInterval']*604800; // Make the last instance the one before it conflicted
                                         break 2;
                                     }
                                 }
                                 else {
                                     // For recurring events, check every recurrence of what we're scheduling with every recurrence of each scheduled event
-                                    for($k = $event['StartTime']; $k < $event['EndDate']; $k += $event['RecInterval']*604800) {
+                                    for($k = $event['StartTime'] + $event['BathTime']*60; $k < $event['EndDate']; $k += $event['RecInterval']*604800) {
                                         
                                         // Check if the current recurrance of our event ($i) overlaps with the current recurrance of the stored event ($k)
                                         if(($i >= $k && $i < $k + $event['GroomTime'] * 60) || ($i + $_SESSION['info']['GroomTime'] * 60 > $k && $i + $_SESSION['info']['GroomTime'] * 60 <= $k + $event['GroomTime'] * 60)) {
-                                            $finalevent = $i - $_SESSION['info']['RecInterval']*604800; // Make the last instance the one before it conflicted
+                                            $finalevent = $i - $_SESSION['info']['BathTime']*60 - $_SESSION['info']['RecInterval']*604800; // Make the last instance the one before it conflicted
                                             break 3;
                                         }
                                     }
