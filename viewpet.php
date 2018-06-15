@@ -326,77 +326,20 @@ if(!empty($_GET['id'])) {
         }
         else {
             $stmt = $database->query("SELECT Name, ID FROM Users WHERE Access = 2");
-            $groomers = $stmt->fetchAll(); ?>
+            $groomers = $stmt->fetchAll();
+            $stmt = $database->query("SELECT ID, Name FROM Breeds ORDER BY Name");
+            $breeds = $stmt->fetchAll(); ?>
             <h2>Editing Pet <?php echo $pet['ID']; ?></h2>
             <form class="infoform" action="viewpet.php?id=<?php echo $pet['ID']; ?>" method="post" enctype="multipart/form-data">
                 <input type="hidden" name="MAX_FILE_SIZE" value="10485760" />
                 <label for="Name">Name: </label><input type="text" name="Name" id="Name" value="<?php echo $pet['Name']; ?>"><br />
                 <label for="Breed">Breed: </label>
                 <select name="Breed" id="Breed">
-                    <optgroup label="Toy Breeds:">
-                        <?php
-                            $stmt = $database->query("SELECT ID, Name FROM Breeds WHERE BreedGroup = 0 ORDER BY Name");
-                            foreach($stmt->fetchAll() as $breed) {
-                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['Breed']) ? 'selected' : '') . '>' . $breed['Name'] . '</option>';
-                            }
-                        ?>
-                    </optgroup>
-                    <optgroup label="Designer Breeds:">
-                        <?php
-                            $stmt = $database->query("SELECT ID, Name FROM Breeds WHERE BreedGroup = 1 ORDER BY Name");
-                            foreach($stmt->fetchAll() as $breed) {
-                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['Breed']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
-                            }
-                        ?>
-                    </optgroup>
-                    <optgroup label="Terriers:">
-                        <?php
-                            $stmt = $database->query("SELECT ID, Name FROM Breeds WHERE BreedGroup = 2 ORDER BY Name");
-                            foreach($stmt->fetchAll() as $breed) {
-                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['Breed']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
-                            }
-                        ?>
-                    </optgroup>
-                    <optgroup label="Non-Sporting:">
-                        <?php
-                            $stmt = $database->query("SELECT ID, Name FROM Breeds WHERE BreedGroup = 3 ORDER BY Name");
-                            foreach($stmt->fetchAll() as $breed) {
-                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['Breed']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
-                            }
-                        ?>
-                    </optgroup>
-                    <optgroup label="Sporting:">
-                        <?php
-                            $stmt = $database->query("SELECT ID, Name FROM Breeds WHERE BreedGroup = 4 ORDER BY Name");
-                            foreach($stmt->fetchAll() as $breed) {
-                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['Breed']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
-                            }
-                        ?>
-                    </optgroup>
-                    <optgroup label="Hound Group:">
-                        <?php
-                            $stmt = $database->query("SELECT ID, Name FROM Breeds WHERE BreedGroup = 5 ORDER BY Name");
-                            foreach($stmt->fetchAll() as $breed) {
-                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['Breed']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
-                            }
-                        ?>
-                    </optgroup>
-                    <optgroup label="Herding Group:">
-                        <?php
-                            $stmt = $database->query("SELECT ID, Name FROM Breeds WHERE BreedGroup = 6 ORDER BY Name");
-                            foreach($stmt->fetchAll() as $breed) {
-                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['Breed']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
-                            }
-                        ?>
-                    </optgroup>
-                    <optgroup label="Working Group:">
-                        <?php
-                            $stmt = $database->query("SELECT ID, Name FROM Breeds WHERE BreedGroup = 7 ORDER BY Name");
-                            foreach($stmt->fetchAll() as $breed) {
-                                echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['Breed']) ? ' selected' : '') . '>' . $breed['Name'] . '</option>';
-                            }
-                        ?>
-                    </optgroup>
+                    <?php
+                        foreach($breeds as $breed) {
+                            echo '<option value="' . $breed['ID'] . '"' . (($breed['ID'] == $pet['Breed']) ? 'selected' : '') . '>' . $breed['Name'] . '</option>';
+                        }
+                    ?>
                 </select><br />
                 <label for="Age">Age: </label><input type="text" name="Age" id="Age" value="<?php echo date("Y") - intval($pet['Age']); ?>"><br />
                 <label for="Weight">Weight: </label><input type="text" name="Weight" id="Weight" value="<?php echo $pet['Weight']; ?>"><br />

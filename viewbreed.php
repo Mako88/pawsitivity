@@ -179,41 +179,14 @@ if(!empty($_GET['id'])) {
 }
 else {
 listall:
-    $stmt = $database->query("SELECT * FROM Breeds ORDER BY BreedGroup, Name");
+    $stmt = $database->query("SELECT * FROM Breeds ORDER BY Name");
     $breeds = $stmt->fetchAll();
     if(!empty($breeds)) {
-        echo '<table class="longlist"><tr><th>Name</th><th>Group</th><th>Size</th></tr>';
+        echo '<table class="longlist"><tr><th>Name</th><th>Size</th><th>Bath Time</th><th>Groom Time</th><th>Base Price</th></tr>';
         foreach($breeds as $breed) {
+            $breed['Time'] = json_decode($breed['Time'], true);
             echo '<tr style="cursor: pointer;" onclick="window.document.location=\'viewbreed.php?id=' . $breed['ID'] . '\'">';
             echo '<td>' . $breed['Name'] . '</td>';
-            echo '<td>';
-            switch($breed['BreedGroup']) {
-                case 0:
-                    echo 'Toy Breeds';
-                    break;
-                case 1:
-                    echo 'Designer Breeds';
-                    break;
-                case 2:
-                    echo 'Terriers';
-                    break;
-                case 3:
-                    echo 'Non-Sporting';
-                    break;
-                case 4:
-                    echo 'Sporting';
-                    break;
-                case 5:
-                    echo 'Hound Group';
-                    break;
-                case 6:
-                    echo 'Herding Group';
-                    break;
-                case 7:
-                    echo 'Working Group';
-                    break;
-            }
-            echo '</td>';
             echo '<td>';
             switch($breed['Size']) {
                 case 'P':
@@ -233,6 +206,9 @@ listall:
                     break;
             }
             echo '</td>';
+            echo '<td>Bath: ' . $breed['Time']['Bath']['BathTime'] . '<br />Finish: ' . $breed['Time']['Bath']['GroomTime'] . '</td>';
+            echo '<td>Bath: ' . $breed['Time']['Groom']['BathTime'] . '<br />Haircut: ' . $breed['Time']['Groom']['GroomTime'] . '</td>';
+            echo '<td>Bath Price: &#36;' . $breed['BathPrice'] . '<br />Groom Price: &#36;' . $breed['GroomPrice'] . '</td>';
         }
         echo '</table>';
     }

@@ -78,6 +78,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
 <script>
     $(document).ready(function() {
         
+        
         function nl2br(str) {       
             return (str + '').replace(/([^>\r\n]?)(\r\n|\n\r|\r|\n)/g, '$1'+ '<br />' +'$2');
         }
@@ -138,7 +139,9 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                 recurring: events[i]['Recurring'],
                 recinterval: events[i]['RecInterval'],
                 enddate: events[i]['EndDate'],
-                price: events[i]['Price']
+                price: events[i]['Price'],
+                eventnotes: events[i]['Notes'],
+                color: (events[i]['Package'] == 1 ? '#28932c' : '#3a87ad')
             };
             
             
@@ -327,9 +330,22 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                     event.nameLink = links[0];
                     event.ownerLink = links[1];
                     
-                    element.children().last().append('<div style="display: none" id="' + event.url + '">Pet Name: ' + event.nameLink + '<br />Groomer: ' + event.groomerName + '<br />Warnings: ' + nl2br(event.warnings) + '<br />Notes: ' + nl2br(event.notes) + '<br />Price: ' + '&#36;' + event.price + '<br />' + ((event.TwoPeople == 1) ? 'Requires two people<br />' : '<br />') + services + 'Owner: ' + event.ownerLink + '<br />Phone: ' + event.phone + '</div>');
+                    element.children().last().append('<div style="display: none" id="' + event.url + '">Pet Name: ' + event.nameLink + '<br />Groomer: ' + event.groomerName + '<br />Warnings: ' + nl2br(event.warnings) + '<br />Pet Notes: ' + nl2br(event.notes) + '<br />Price: ' + '&#36;' + event.price + '<br />' + ((event.TwoPeople == 1) ? 'Requires two people<br />' : '<br />') + services + '<br />' + 'Owner: ' + event.ownerLink + '<br />Phone: ' + event.phone + '<br /><br />Appointment Notes:<br /><textarea id="note-' + event.id + '">' + (event.eventnotes != null ? event.eventnotes : 'None') + '</textarea><br /><button type="submit" class="save" id="save-' + event.id + '">Save Notes</button></div>');
                 }
             }
+        });
+        
+        $("body").on('click', '.save', function() {
+            var element = $(this).attr("id");
+            var id = element.split("-");
+            id = id[1];
+            var note = $("#note-" + id).val();
+            $.ajax({
+                type: "POST",
+                cache: false,
+                url: 'updatenotes.php',
+                data: {id:id, note:note}
+            });
         });
 
     });

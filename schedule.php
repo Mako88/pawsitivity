@@ -184,7 +184,9 @@ $_SESSION['Hours'] = $hours;
                     echo '<option value="NULL">Any</option>';
                     echo '</select><br />';
                 }
-                echo '<div id="price"></div>';
+                echo '<div id="price"></div><br />';
+                echo '<h3>Appointment Notes:</h3>';
+                echo '<textarea name="notes">' . (!empty($prevevent['Notes']) ? $prevevent['Notes'] : '') . '</textarea>';
                 echo '<input type="hidden" name="price" id="price2" />';
                 echo '<input type="submit" value="Next" />';
                 echo '</form>'; ?>
@@ -324,6 +326,13 @@ $_SESSION['Hours'] = $hours;
         }
         else {
             $_SESSION['info']['services'] = NULL;
+        }
+        
+        if(!empty($_POST['notes'])) {
+            $_SESSION['info']['notes'] = $_POST['notes'];
+        }
+        else {
+            $_SESSION['info']['notes'] = NULL;
         }
         
         if(!empty($_POST['groomer'])) {
@@ -1337,7 +1346,7 @@ $_SESSION['Hours'] = $hours;
         $_SESSION['info']['TotalTime'] = ceil(($_SESSION['info']['BathTime'] + $_SESSION['info']['GroomTime'])/15)*15;
         
         $_SESSION['page'] = null;
-        $stmt = $database->prepare('INSERT INTO Scheduling (PetID, StartTime, GroomTime, BathTime, TotalTime, GroomerID, Recurring, RecInterval, EndDate, Package, Services, Price) VALUES (:PetID, :StartTime, :GroomTime, :BathTime, :TotalTime, :GroomerID, :Recurring, :RecInterval, :EndDate, :Package, :Services, :Price)');
+        $stmt = $database->prepare('INSERT INTO Scheduling (PetID, StartTime, GroomTime, BathTime, TotalTime, GroomerID, Recurring, RecInterval, EndDate, Package, Services, Price, Notes) VALUES (:PetID, :StartTime, :GroomTime, :BathTime, :TotalTime, :GroomerID, :Recurring, :RecInterval, :EndDate, :Package, :Services, :Price, :Notes)');
         $stmt->bindValue(':PetID', $_SESSION['info']['pet']);
         $stmt->bindValue(':StartTime', $_SESSION['info']['timestamp']);
         $stmt->bindValue(':GroomTime', $_SESSION['info']['GroomTime']);
@@ -1349,18 +1358,24 @@ $_SESSION['Hours'] = $hours;
         $stmt->bindValue(':EndDate', $_SESSION['info']['EndDate']);
         $stmt->bindValue(':Package', $_SESSION['info']['package']);
         $stmt->bindValue(':Price', $_SESSION['info']['Price']);
+        $stmt->bindValue(':Notes', $_SESSION['info']['notes']);
         (!empty($_SESSION['info']['services']) ? $stmt->bindValue(':Services', json_encode($_SESSION['info']['services'])) : $stmt->bindValue(':Services', NULL));
-        $stmt->execute();
-        
-        if(empty($_POST['setgroomer'])) {
-            $stmt = $database->prepare('UPDATE Pets SET PreferredGroomer = :Groomer WHERE ID = :ID');
-            $stmt->bindValue(':Groomer', $_SESSION['info']['groomer']);
-            $stmt->bindValue(':ID', $_SESSION['info']['pet']);
-            $stmt->execute();
+        if(!$stmt->execute()) {
+            echo '<p class="error">An error occured! Save this and show it to John:</p>';
+            print_r($stmt->errorInfo());
+            echo '<p class="error">Your pet was NOT scheduled!!</p>';
         }
+        else {
         
-        echo "<p>Your pet has been scheduled. Thanks!</p>";
-        goto finish;
+            if(empty($_POST['setgroomer'])) {
+                $stmt = $database->prepare('UPDATE Pets SET PreferredGroomer = :Groomer WHERE ID = :ID');
+                $stmt->bindValue(':Groomer', $_SESSION['info']['groomer']);
+                $stmt->bindValue(':ID', $_SESSION['info']['pet']);
+                $stmt->execute();
+            }
+
+            echo "<p>Your pet has been scheduled. Thanks!</p>";
+        }
     }
     
     finish:
