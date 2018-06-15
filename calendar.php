@@ -141,7 +141,7 @@ $_SESSION['Timezone'] = $timezone['Timezone'];
                 enddate: events[i]['EndDate'],
                 price: events[i]['Price'],
                 eventnotes: events[i]['Notes'],
-                color: (events[i]['Package'] == 1 ? '#28932c' : '#3a87ad')
+                color: (events[i]['Package'] == 1 ? '#3a87ad' : '#28932c')
             };
             
             
