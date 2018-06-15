@@ -1,23 +1,26 @@
+Bugs:
+    ? Employee scheduling not working (when?)
+    ? Not showing services on calendar
+
+
 schedule.php:
 	Don't allow users to schedule if Missed field is 1, tell them to call / inform receptionist.
     If groom price or time is 0, disable groom packages for clients (not employees)
     Don't allow clicking next if no date is set
     Add error if someone skips to page 2 but doesn't have permission to schedule.
-    Improve performance of DisableDay sort
-    - Add notes for the dog when scheduling on the package page
     ~ Underneath Signature Package, add checkbox for extra neatening with price box
     ~ Warn if client has missed when scheduling (Have reset button which adds date and fee [half of the missed appointment's package cost] to that day's notes, and removes missed flag from client)
     ~ Add missed flag to event which was missed
+    Add "warning" if the week the dog is scheduled is the dog's birthday
     
     
 calendar.php:
-    - Different colors in month and day view for bath-only and groom-only
     ~ Add check in/out button next to edit button (edit status in database)
     ~ Add missed button on popup. When button is pushed, set Missed flag.
     - Add a "disable day" checkbox to prevent a day from having any more scheduled
-    - Add notes on a dog for the day in popup: editable
     - Break price down into package and services on popup
     ~ Add delete button with "Are you sure?" to popup
+    ? Add note if it's the dog's birthday this week
     
 	
 search.php:
@@ -27,6 +30,8 @@ search.php:
 newpet.php/viewpet.php:
     - Show popup box when clicking on a past appointment to view info
     Add cancel button
+    Show dog birthdate with age beside it
+    ?~ Add "delete all future appointments" option (just recurring?)
 	
 	
 newclient.php/viewclient.php:
@@ -39,10 +44,6 @@ newclient.php/viewclient.php:
 
 newuser.php:
 	- Add viewuser.php to allow editing a user
-    
-
-viewbreed.php:
-    - Add price to list table
 
 
 services
@@ -58,5 +59,5 @@ Misc:
     Prevent infinite redirect when user doesn't have permission to access page
     - Add daily backups
     Create script to reset everyone's passwords 1-time.
-    ~ Remove groups from breeds
     ~ Remove pets and clients lists from menu
+    ~ Allow changing "sort by" by clicking on headings in each list view page
