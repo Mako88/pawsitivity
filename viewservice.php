@@ -150,8 +150,9 @@ else {
     $stmt = $database->query("SELECT * FROM Services ORDER BY Type, Name");
     $services = $stmt->fetchAll();
     if(!empty($services)) {
-        echo '<table class="longlist"><tr><th>Name</th><th>Type</th><th>Description</th></tr>';
+        echo '<table class="longlist"><tr><th>Name</th><th>Type</th><th>Price</th></tr>';
         foreach($services as $service) {
+            $service['Price'] = json_decode($service['Price'], true);
             echo '<tr style="cursor: pointer;" onclick="window.document.location=\'viewservice.php?id=' . $service['ID'] . '\'">';
             echo '<td>' . $service['Name'] . '</td>';
             echo '<td>';
@@ -167,8 +168,14 @@ else {
                     break;
             }
             echo $type;
-            echo '</td>';
-            echo '<td>' . substr($service['Description'], 0, 50) . '...</td></tr>';
+            echo '</td>'; ?>
+            <td>
+                Petite: <?php echo '$' . $service['Price']['P']; ?><br />
+                Small: <?php echo '$' . $service['Price']['S']; ?><br />
+                Medium: <?php echo '$' . $service['Price']['M']; ?><br />
+                Large: <?php echo '$' . $service['Price']['L']; ?><br />
+                Extra-Large: <?php echo '$' . $service['Price']['XL']; ?><br />
+            </td></tr> <?php
         }
         echo '</table>';
     }
